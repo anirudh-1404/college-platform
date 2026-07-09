@@ -66,6 +66,7 @@
   --animate-float-slow: float-slow 6s ease-in-out infinite;
   --animate-float-mid: float-mid 5s ease-in-out infinite;
   --animate-float-fast: float-fast 4s ease-in-out infinite;
+  --animate-slide-in: slide-in 0.3s ease-out;
 
   @keyframes float-slow {
     0%, 100% { transform: translateY(0px); }
@@ -78,5 +79,9 @@
   @keyframes float-fast {
     0%, 100% { transform: translateY(0px); }
     50% { transform: translateY(-6px); }
+  }
+  @keyframes slide-in {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
   }
 }

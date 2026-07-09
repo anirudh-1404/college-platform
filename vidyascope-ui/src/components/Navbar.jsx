@@ -69,7 +69,7 @@ const Navbar = () => {
           </div>
 
           {/* Right Action Buttons */}
-          <div className="hidden sm:flex items-center gap-4">
+          <div className="hidden lg:flex items-center gap-4">
             <button 
               aria-label="Search"
               className="p-2.5 rounded-xl text-text-secondary hover:text-brand-primary hover:bg-brand-accent transition-all duration-200"
