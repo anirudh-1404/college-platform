@@ -4,6 +4,7 @@ import { Search, MapPin, ArrowRight } from 'lucide-react'
 const SearchBar = ({ onSearch }) => {
   const [query, setQuery] = useState('')
   const [location, setLocation] = useState('all')
+  const [isFocused, setIsFocused] = useState(false)
 
   const handleSubmit = (e) => {
     e.preventDefault()
@@ -17,15 +18,21 @@ const SearchBar = ({ onSearch }) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="w-full bg-white p-2 sm:p-3 rounded-2xl sm:rounded-3xl border border-border-color shadow-premium hover:shadow-card hover:border-brand-primary/20 transition-all duration-300 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 md:gap-0"
+      className={`w-full bg-white p-2 sm:p-3 rounded-2xl sm:rounded-3xl border transition-all duration-300 flex flex-col md:flex-row items-stretch md:items-center gap-2.5 md:gap-0 ${
+        isFocused
+          ? 'border-brand-primary shadow-glow'
+          : 'border-border-color shadow-premium hover:shadow-card hover:border-brand-primary/20'
+      }`}
     >
       {/* Search Input Area */}
       <div className="flex-1 flex items-center gap-3 px-3 sm:px-4 py-2 sm:py-3">
-        <Search className="h-5.5 w-5.5 text-text-light flex-shrink-0" />
+        <Search className={`h-5.5 w-5.5 flex-shrink-0 transition-colors duration-200 ${isFocused ? 'text-brand-primary' : 'text-text-light'}`} />
         <input
           type="text"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
           placeholder="Search colleges, exams, courses, or career guides..."
           className="w-full text-text-primary placeholder:text-text-light font-medium text-sm sm:text-base outline-none bg-transparent"
         />

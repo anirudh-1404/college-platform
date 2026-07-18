@@ -27,21 +27,30 @@ const Hero = () => {
           {/* Left Column: Heading, Search & Tags */}
           <div className="lg:col-span-6 flex flex-col items-start text-left z-20">
             {/* Banner Pill */}
-            {/* <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-accent border border-brand-primary/15 text-xs sm:text-sm font-bold text-brand-primary mb-6 animate-pulse">
-              <span className="flex h-2 w-2 rounded-full bg-brand-primary" />
-              <span>AI-Powered Admissions Compass 2026</span>
+            {/* <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-accent/60 border border-brand-primary/10 text-xs sm:text-sm font-bold text-brand-primary mb-6 transition-all duration-300 hover:bg-brand-accent hover:border-brand-primary/20 cursor-pointer">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
+              </span>
+              <span className="font-semibold text-text-secondary tracking-wide">AI-Powered Admissions Compass 2026</span>
             </div> */}
 
             {/* Main Headline */}
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.12] sm:leading-[1.1] lg:leading-[1.08] mb-6">
-              Find Your Perfect College &{' '}
-              <span className="relative inline-block">
-                <span className="relative z-10 bg-gradient-to-r from-brand-primary via-[#9333EA] to-brand-primary-hover bg-clip-text text-transparent">
-                  Career Path
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.12] sm:leading-[1.1] lg:leading-[1.08] mb-6">
+              Discover the Right{' '}
+              <span className="relative inline-block px-1">
+                <span className="relative z-10 bg-gradient-to-r from-brand-primary via-[#9333EA] to-brand-primary-hover bg-clip-text text-transparent font-black">
+                  College.
                 </span>
-                <span className="absolute bottom-1 left-0 w-full h-2.5 bg-brand-accent -z-0 rounded" />
+                <span className="absolute bottom-1 left-0 w-full h-2.5 bg-brand-accent -z-0 rounded-lg transform -skew-x-6" />
               </span>{' '}
-              with VidyaScope
+              Build Your{' '}
+              <span className="relative inline-block px-1">
+                <span className="relative z-10 bg-gradient-to-r from-brand-primary via-[#9333EA] to-brand-primary-hover bg-clip-text text-transparent font-black">
+                  Better Tomorrow.
+                </span>
+                <span className="absolute bottom-1 left-0 w-full h-2.5 bg-brand-accent -z-0 rounded-lg transform -skew-x-6" />
+              </span>
             </h1>
 
             {/* Subheading / Description */}
@@ -60,15 +69,17 @@ const Hero = () => {
             </div>
 
             {/* Quick Core Benefits / Trust Indicators */}
-            <div className="flex flex-wrap gap-x-6 gap-y-3 pt-2 border-t border-slate-100 w-full max-w-2xl">
+            <div className="flex flex-wrap items-center gap-x-8 gap-y-3 pt-6 border-t border-slate-100 w-full max-w-2xl">
               {[
                 '100% Free AI Recommendations',
                 'Verified Placements Reports',
                 'Direct College Counseling',
               ].map((benefit) => (
-                <div key={benefit} className="flex items-center gap-2">
-                  <CheckCircle2 className="h-4.5 w-4.5 text-brand-primary flex-shrink-0" />
-                  <span className="text-xs sm:text-sm font-semibold text-text-secondary">
+                <div key={benefit} className="flex items-center gap-2.5 group/benefit">
+                  <div className="flex items-center justify-center w-5 h-5 rounded-full bg-brand-accent text-brand-primary group-hover/benefit:bg-brand-primary group-hover/benefit:text-white transition-all duration-300">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                  </div>
+                  <span className="text-xs sm:text-sm font-semibold text-text-secondary group-hover/benefit:text-text-primary transition-colors duration-200">
                     {benefit}
                   </span>
                 </div>

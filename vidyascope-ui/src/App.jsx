@@ -2,6 +2,9 @@ import React from 'react'
 import Navbar from './components/Navbar'
 import Hero from './components/Hero'
 import FeaturePanel from './components/FeaturePanel'
+import ExploreByGoal from './components/ExploreByGoal'
+import TopColleges from './components/TopColleges'
+import Footer from './components/Footer'
 
 const App = () => {
   return (
@@ -10,6 +13,9 @@ const App = () => {
       <main>
         <Hero />
         <FeaturePanel />
+        <ExploreByGoal />
+        <TopColleges />
+        <Footer />
       </main>
     </div>
   )
