@@ -2,7 +2,7 @@ import React from 'react'
 import SearchBar from './SearchBar'
 import TrendingTags from './TrendingTags'
 import { PlacementCard, FitScoreCard, ScholarshipCard } from './HeroFeatureCards'
-import heroRightImage from '../assets/hero_section_right_image.jpeg'
+import heroRightImage from '../assets/college-student-homepage.jpg'
 import { CheckCircle2 } from 'lucide-react'
 
 const Hero = () => {

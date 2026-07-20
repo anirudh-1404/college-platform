@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react'
 import { Menu, X, Search, GraduationCap, Compass, HelpCircle, BookOpen, Award, ChevronDown } from 'lucide-react'
+import logoImg from '../assets/vidyascope_logo.png'
 
-const Navbar = () => {
+const Navbar = ({ onNavigate, currentPage = 'home' }) => {
   const [isOpen, setIsOpen] = useState(false)
   const [isScrolled, setIsScrolled] = useState(false)
   const [activeDropdown, setActiveDropdown] = useState(null)
@@ -38,32 +39,42 @@ const Navbar = () => {
         <div className="flex items-center justify-between h-20">
           
           {/* Logo Section */}
-          <div className="flex-shrink-0 flex items-center gap-2">
-            <a href="/" className="flex items-center gap-2.5 group">
-              <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-[#9333EA] shadow-card group-hover:scale-105 transition-all duration-300">
-                <GraduationCap className="h-6 w-6 text-text-on-dark" />
-                <div className="absolute inset-0 rounded-xl bg-brand-primary opacity-0 group-hover:opacity-20 blur transition-all duration-300" />
-              </div>
-              <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-primary to-brand-primary-hover bg-clip-text text-transparent">
-                VidyaScope
-              </span>
-            </a>
+          <div className="flex-shrink-0 flex items-center">
+            <button
+              onClick={() => onNavigate && onNavigate('home')}
+              className="flex items-center group cursor-pointer text-left focus:outline-none"
+            >
+              <img
+                src={logoImg}
+                alt="VidyaScope Logo"
+                className="h-14 sm:h-16 max-h-16 w-auto object-contain hover:scale-105 transition-transform duration-300"
+              />
+            </button>
           </div>
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
               const Icon = link.icon
+              const isCollegesActive = link.name === 'Colleges' && currentPage === 'colleges'
               return (
-                <a
+                <button
                   key={link.name}
-                  href={link.href}
-                  className="relative group py-2 text-sm font-semibold text-text-secondary hover:text-brand-primary transition-colors duration-200 flex items-center gap-1.5"
+                  onClick={() => {
+                    if (link.name === 'Colleges' && onNavigate) {
+                      onNavigate('colleges')
+                    } else if (onNavigate) {
+                      onNavigate('home')
+                    }
+                  }}
+                  className={`relative group py-2 text-sm font-semibold transition-colors duration-200 flex items-center gap-1.5 cursor-pointer ${
+                    isCollegesActive ? 'text-brand-primary font-bold' : 'text-text-secondary hover:text-brand-primary'
+                  }`}
                 >
-                  <Icon className="h-4 w-4 text-text-light group-hover:text-brand-primary transition-colors duration-200" />
+                  <Icon className={`h-4 w-4 transition-colors duration-200 ${isCollegesActive ? 'text-brand-primary' : 'text-text-light group-hover:text-brand-primary'}`} />
                   <span>{link.name}</span>
-                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-brand-primary transition-all duration-300 group-hover:w-full" />
-                </a>
+                  <span className={`absolute bottom-0 left-0 h-0.5 bg-brand-primary transition-all duration-300 ${isCollegesActive ? 'w-full' : 'w-0 group-hover:w-full'}`} />
+                </button>
               )
             })}
           </div>
@@ -115,13 +126,12 @@ const Navbar = () => {
           <div className="relative w-full max-w-sm bg-white h-full shadow-premium flex flex-col justify-between py-6 px-6 z-50 transform transition-transform duration-300 ease-out animate-slide-in">
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-border-color">
-                <div className="flex items-center gap-2">
-                  <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-brand-primary shadow-card">
-                    <GraduationCap className="h-5.5 w-5.5 text-text-on-dark" />
-                  </div>
-                  <span className="text-xl font-bold tracking-tight bg-gradient-to-r from-brand-primary to-brand-primary-hover bg-clip-text text-transparent">
-                    VidyaScope
-                  </span>
+                <div className="flex items-center">
+                  <img
+                    src={logoImg}
+                    alt="VidyaScope Logo"
+                    className="h-12 sm:h-14 w-auto object-contain"
+                  />
                 </div>
                 <button
                   onClick={() => setIsOpen(false)}

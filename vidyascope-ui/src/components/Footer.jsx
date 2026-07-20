@@ -1,6 +1,7 @@
 import React from 'react'
 import CounselingBanner from './CounselingBanner'
 import { GraduationCap, Mail, Phone, MapPin, Heart } from 'lucide-react'
+import logoImg from '../assets/vidyascope_logo.png'
 
 const FacebookIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -85,21 +86,20 @@ const Footer = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12">
 
             {/* Column 1: Brand & Socials (Span 4) */}
-            <div className="lg:col-span-4 flex flex-col items-start gap-5">
-              <a href="/" className="flex items-center gap-2.5 group">
-                <div className="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-brand-primary to-[#9333EA] shadow-card group-hover:scale-105 transition-all duration-300">
-                  <GraduationCap className="h-6 w-6 text-text-on-dark" />
-                </div>
-                <span className="text-2xl font-extrabold tracking-tight bg-gradient-to-r from-brand-primary to-brand-primary-hover bg-clip-text text-transparent font-serif">
-                  VidyaScope
-                </span>
+            <div className="lg:col-span-4 flex flex-col items-center text-center gap-5">
+              <a href="/" className="flex items-center justify-center group focus:outline-none">
+                <img
+                  src={logoImg}
+                  alt="VidyaScope Logo"
+                  className="h-16 sm:h-20 lg:h-22 w-auto max-w-[260px] object-contain hover:scale-105 transition-transform duration-300"
+                />
               </a>
               <p className="text-sm font-medium leading-relaxed max-w-sm text-text-on-dark-muted">
                 Empowering students to discover the right college, compare options, and map successful career paths with AI-driven recommendations and authentic insights.
               </p>
 
               {/* Social Media Handles */}
-              <div className="flex items-center gap-3 mt-2">
+              <div className="flex items-center justify-center gap-3 mt-2">
                 {socials.map((social) => {
                   const Icon = social.icon
                   return (
