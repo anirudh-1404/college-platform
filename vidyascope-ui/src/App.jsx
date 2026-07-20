@@ -8,7 +8,7 @@ import Footer from './components/Footer'
 import CollegeListingPage from './pages/CollegeListingPage'
 
 const App = () => {
-  const [currentPage, setCurrentPage] = useState('colleges')
+  const [currentPage, setCurrentPage] = useState('home')
 
   return (
     <div className="min-h-screen bg-white text-text-primary selection:bg-brand-accent selection:text-brand-primary">
