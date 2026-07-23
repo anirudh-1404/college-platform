@@ -6,7 +6,7 @@ import SortBar from '../components/SortBar'
 import CollegeCard from '../components/CollegeCard'
 import CompareTray from '../components/CompareTray'
 
-const CollegeListingPage = ({ onNavigateHome }) => {
+const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', onNavigateBack }) => {
   // Page State
   const [viewMode, setViewMode] = useState('list')
   const [sortBy, setSortBy] = useState('popularity')
@@ -16,7 +16,7 @@ const CollegeListingPage = ({ onNavigateHome }) => {
   // Filter State
   const [filters, setFilters] = useState({
     locations: [],
-    maxFees: 25,
+    maxFees: selectedStream === 'management' ? 30 : 25,
     minPackage: 0,
     ownerships: [],
     minRating: 0,
@@ -77,6 +77,9 @@ const CollegeListingPage = ({ onNavigateHome }) => {
   // Compute Filtered and Sorted Colleges
   const filteredColleges = useMemo(() => {
     return collegesData.filter((college) => {
+      // Stream Match Check
+      if (college.stream !== selectedStream) return false
+
       // Location Filter
       if (filters.locations.length > 0) {
         const matchesLoc = filters.locations.some(
@@ -116,7 +119,7 @@ const CollegeListingPage = ({ onNavigateHome }) => {
 
       return true
     })
-  }, [filters])
+  }, [filters, selectedStream])
 
   // Sorting
   const sortedColleges = useMemo(() => {
@@ -142,14 +145,42 @@ const CollegeListingPage = ({ onNavigateHome }) => {
     filters.ownerships.forEach((own) => chips.push({ label: own, type: 'ownerships', value: own }))
     filters.exams.forEach((ex) => chips.push({ label: ex, type: 'exams', value: ex }))
     filters.facilities.forEach((fac) => chips.push({ label: fac, type: 'facilities', value: fac }))
-    if (filters.maxFees < 25) chips.push({ label: `Max Fees: ₹${filters.maxFees}L`, type: 'maxFees', value: filters.maxFees })
+    const defaultMaxFee = selectedStream === 'management' ? 30 : 25
+    if (filters.maxFees < defaultMaxFee) chips.push({ label: `Max Fees: ₹${filters.maxFees}L`, type: 'maxFees', value: filters.maxFees })
     if (filters.minPackage > 0) chips.push({ label: `Min Pkg: ₹${filters.minPackage}LPA`, type: 'minPackage', value: filters.minPackage })
     if (filters.minRating > 0) chips.push({ label: `${filters.minRating}+ Rating`, type: 'minRating', value: filters.minRating })
     return chips
-  }, [filters])
+  }, [filters, selectedStream])
+
+  const streamInfo = useMemo(() => {
+    switch (selectedStream) {
+      case 'management':
+        return {
+          title: 'Management & MBA Colleges',
+          breadcrumb: 'Management Colleges',
+          countLabel: '2,850+ Colleges Available',
+          subtitle: 'Compare premium business schools (IIMs, XLRI) by placements ROI, entrance exam cutoffs, and corporate networks.',
+        }
+      case 'medical':
+        return {
+          title: 'Medical & MBBS Colleges',
+          breadcrumb: 'Medical Colleges',
+          countLabel: '1,450+ Colleges Available',
+          subtitle: 'Browse leading medical institutes and clinical training hospitals across India by NEET cutoffs and residency programs.',
+        }
+      case 'engineering':
+      default:
+        return {
+          title: 'Engineering Colleges in India',
+          breadcrumb: 'Engineering Colleges',
+          countLabel: '4,120+ Colleges Available',
+          subtitle: 'Explore and compare top B.Tech & Engineering institutes across India by NIRF rankings, placement records, entrance exams, and fee structures.',
+        }
+    }
+  }, [selectedStream])
 
   return (
-    <div className="min-h-screen bg-slate-50/60 ">
+    <div className="min-h-screen bg-slate-50/60 pb-28">
       {/* Container Wrapper */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
 
@@ -163,21 +194,28 @@ const CollegeListingPage = ({ onNavigateHome }) => {
             <span>Home</span>
           </button>
           <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
-          <span className="text-text-primary font-bold">Engineering Colleges</span>
+          <button
+            onClick={onNavigateBack}
+            className="hover:text-brand-primary transition-colors cursor-pointer"
+          >
+            Explore Domains
+          </button>
+          <ChevronRight className="h-3.5 w-3.5 text-slate-400" />
+          <span className="text-text-primary font-bold">{streamInfo.breadcrumb}</span>
         </nav>
 
         {/* Page Heading & Header Details */}
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text-primary tracking-tight">
-              Engineering Colleges in India
+              {streamInfo.title}
             </h1>
             <span className="text-xs sm:text-sm font-bold text-brand-primary bg-brand-accent px-3 py-1 rounded-full border border-brand-primary/10 self-start sm:self-auto">
-              1,248 Colleges Available
+              {streamInfo.countLabel}
             </span>
           </div>
           <p className="text-xs sm:text-sm md:text-base text-text-secondary font-medium mt-2 leading-relaxed max-w-3xl">
-            Explore and compare top B.Tech & Engineering institutes across India by NIRF rankings, placement records, entrance exams, and fee structures.
+            {streamInfo.subtitle}
           </p>
         </div>
 

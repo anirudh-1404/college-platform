@@ -1,8 +1,7 @@
 import React from 'react'
 import SearchBar from './SearchBar'
 import TrendingTags from './TrendingTags'
-import { PlacementCard, FitScoreCard, ScholarshipCard } from './HeroFeatureCards'
-import heroRightImage from '../assets/college-student-homepage.jpg'
+import heroRightImage from '../assets/college-student-homepage.png'
 import { CheckCircle2 } from 'lucide-react'
 
 const Hero = () => {
@@ -88,10 +87,10 @@ const Hero = () => {
           </div>
 
           {/* Right Column: Hero Image & Floating Cards */}
+          {/* Right Column: Hero Image Container */}
           <div className="lg:col-span-5 lg:col-start-8 flex justify-center lg:justify-end relative mt-12 lg:mt-0 z-10">
             <div className="relative w-full max-w-[420px] lg:max-w-[440px]">
-
-              {/* Main Image Container - border, bg, shadow, and overlay removed as requested */}
+              {/* Main Image Container */}
               <div className="relative rounded-[2.2rem] overflow-hidden group">
                 <img
                   src={heroRightImage}
@@ -99,11 +98,6 @@ const Hero = () => {
                   className="w-full h-auto object-cover aspect-[4/5] object-center group-hover:scale-[1.02] transition-transform duration-700 ease-out"
                 />
               </div>
-
-              {/* Floating Overlay Info Cards */}
-              <PlacementCard />
-              <FitScoreCard />
-              <ScholarshipCard />
             </div>
           </div>
 

@@ -56,13 +56,13 @@ const Navbar = ({ onNavigate, currentPage = 'home' }) => {
           <div className="hidden lg:flex items-center gap-8">
             {navLinks.map((link) => {
               const Icon = link.icon
-              const isCollegesActive = link.name === 'Colleges' && currentPage === 'colleges'
+              const isCollegesActive = link.name === 'Colleges' && (currentPage === 'colleges-categories' || currentPage === 'colleges-listing')
               return (
                 <button
                   key={link.name}
                   onClick={() => {
                     if (link.name === 'Colleges' && onNavigate) {
-                      onNavigate('colleges')
+                      onNavigate('colleges-categories')
                     } else if (onNavigate) {
                       onNavigate('home')
                     }
@@ -146,16 +146,27 @@ const Navbar = ({ onNavigate, currentPage = 'home' }) => {
               <div className="mt-8 flex flex-col gap-5">
                 {navLinks.map((link) => {
                   const Icon = link.icon
+                  const isCollegesActive = link.name === 'Colleges' && (currentPage === 'colleges-categories' || currentPage === 'colleges-listing')
                   return (
-                    <a
+                    <button
                       key={link.name}
-                      href={link.href}
-                      onClick={() => setIsOpen(false)}
-                      className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold text-text-secondary hover:text-brand-primary hover:bg-brand-accent transition-all duration-200"
+                      onClick={() => {
+                        setIsOpen(false)
+                        if (link.name === 'Colleges' && onNavigate) {
+                          onNavigate('colleges-categories')
+                        } else if (onNavigate) {
+                          onNavigate('home')
+                        }
+                      }}
+                      className={`flex items-center gap-3.5 px-4 py-3.5 rounded-xl text-base font-semibold transition-all duration-200 w-full text-left cursor-pointer ${
+                        isCollegesActive
+                          ? 'text-brand-primary bg-brand-accent font-bold'
+                          : 'text-text-secondary hover:text-brand-primary hover:bg-brand-accent'
+                      }`}
                     >
-                      <Icon className="h-5 w-5 text-text-light group-hover:text-brand-primary" />
+                      <Icon className={`h-5 w-5 ${isCollegesActive ? 'text-brand-primary' : 'text-text-light'}`} />
                       <span>{link.name}</span>
-                    </a>
+                    </button>
                   )
                 })}
               </div>
