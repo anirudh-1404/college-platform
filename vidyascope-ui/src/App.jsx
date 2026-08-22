@@ -114,7 +114,10 @@ const App = () => {
         {/* HOMEPAGE VIEW */}
         {currentPage === 'home' && (
           <>
-            <Hero onNavigateListing={handleHeroSearch} />
+            <Hero
+              onNavigateListing={handleHeroSearch}
+              onOpenCounseling={() => setIsCounselingModalOpen(true)}
+            />
             <FeaturePanel />
             <ExploreByGoal onSelectCategory={handleSelectCategory} />
             <TopColleges

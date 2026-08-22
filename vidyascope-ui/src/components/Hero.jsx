@@ -1,18 +1,8 @@
 import React from 'react'
-import SearchBar from './SearchBar'
-import TrendingTags from './TrendingTags'
 import heroRightImage from '../assets/college-student-homepage.png'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, ArrowRight, Sparkles } from 'lucide-react'
 
-const Hero = ({ onNavigateListing }) => {
-  const handleSearch = (searchData) => {
-    onNavigateListing && onNavigateListing(searchData)
-  }
-
-  const handleTagClick = (tag) => {
-    onNavigateListing && onNavigateListing({ query: tag.label })
-  }
-
+const Hero = ({ onNavigateListing, onOpenCounseling }) => {
   return (
     <section className="relative overflow-hidden bg-gradient-to-b from-[#FAF5FF] via-white to-white pt-8 pb-24 lg:pt-16 lg:pb-32">
 
@@ -23,7 +13,7 @@ const Hero = ({ onNavigateListing }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
 
-          {/* Left Column: Heading, Search & Tags */}
+          {/* Left Column: Heading & CTAs */}
           <div className="lg:col-span-6 flex flex-col items-start text-left z-20">
             {/* Main Headline */}
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.12] sm:leading-[1.1] lg:leading-[1.08] mb-6">
@@ -48,14 +38,23 @@ const Hero = ({ onNavigateListing }) => {
               Explore 25,000+ Colleges, 500+ Exams, and find your dream career path with personalized AI-powered counseling and authentic insights.
             </p>
 
-            {/* Search Bar Wrapper */}
-            <div className="w-full mb-5 max-w-3xl">
-              <SearchBar onSearch={handleSearch} />
-            </div>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-4 mb-8 w-full">
+              <button
+                onClick={() => onNavigateListing && onNavigateListing()}
+                className="px-7 py-4 rounded-xl bg-brand-primary text-white font-semibold text-base shadow-lg hover:shadow-xl hover:bg-brand-primary-hover transform hover:-translate-y-0.5 transition-all duration-200 flex items-center gap-2 group cursor-pointer"
+              >
+                <span>Explore 25,000+ Colleges</span>
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </button>
 
-            {/* Trending Tags */}
-            <div className="w-full mb-8">
-              <TrendingTags onTagClick={handleTagClick} />
+              <button
+                onClick={() => onOpenCounseling && onOpenCounseling()}
+                className="px-7 py-4 rounded-xl bg-purple-50 text-brand-primary hover:bg-purple-100 font-semibold text-base transition-all duration-200 flex items-center gap-2 border border-purple-200/60 cursor-pointer"
+              >
+                <Sparkles className="w-5 h-5 text-purple-600" />
+                <span>Free AI Counseling</span>
+              </button>
             </div>
 
             {/* Quick Core Benefits / Trust Indicators */}
