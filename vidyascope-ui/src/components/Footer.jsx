@@ -83,11 +83,11 @@ const Footer = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* 5-Column Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-8 pb-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 pb-12">
 
             {/* Column 1: Brand & Socials (Span 4) */}
-            <div className="lg:col-span-4 flex flex-col items-center text-center gap-5">
-              <a href="/" className="flex items-center justify-center group focus:outline-none">
+            <div className="lg:col-span-4 flex flex-col items-start text-left gap-5">
+              <a href="/" className="flex items-center justify-start group focus:outline-none">
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
@@ -99,7 +99,7 @@ const Footer = () => {
               </p>
 
               {/* Social Media Handles */}
-              <div className="flex items-center justify-center gap-3 mt-2">
+              <div className="flex items-center justify-start gap-3 mt-2">
                 {socials.map((social) => {
                   const Icon = social.icon
                   return (
@@ -119,16 +119,16 @@ const Footer = () => {
             </div>
 
             {/* Column 2: Explore (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
+            <div className="lg:col-span-2 flex flex-col items-start gap-4">
               <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
                 Explore
               </h4>
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col items-start gap-3">
                 {exploreLinks.map((link) => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200"
+                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
                     >
                       {link.name}
                     </a>
@@ -138,16 +138,16 @@ const Footer = () => {
             </div>
 
             {/* Column 3: Resources (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
+            <div className="lg:col-span-2 flex flex-col items-start gap-4">
               <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
                 Resources
               </h4>
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col items-start gap-3">
                 {resourceLinks.map((link) => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200"
+                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
                     >
                       {link.name}
                     </a>
@@ -157,16 +157,16 @@ const Footer = () => {
             </div>
 
             {/* Column 4: Company (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
+            <div className="lg:col-span-2 flex flex-col items-start gap-4">
               <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
                 Company
               </h4>
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col items-start gap-3">
                 {companyLinks.map((link) => (
                   <li key={link.name}>
                     <a
                       href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200"
+                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
                     >
                       {link.name}
                     </a>
@@ -176,20 +176,20 @@ const Footer = () => {
             </div>
 
             {/* Column 5: Contact Details (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col gap-4">
-              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
+            <div className="lg:col-span-2 flex flex-col items-start gap-4">
+              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif text-left">
                 Contact Us
               </h4>
-              <ul className="flex flex-col gap-3.5">
+              <ul className="flex flex-col items-start gap-3.5 w-full">
                 {/* <li className="flex items-start gap-2.5 text-sm font-medium leading-relaxed">
                   <MapPin className="h-5 w-5 text-brand-primary flex-shrink-0 mt-0.5" />
                   <span>4th Floor, Tech Hub, Sector 62, Noida, UP - 201301</span>
                 </li> */}
-                <li className="flex items-center gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200">
+                <li className="flex items-center justify-start gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200 w-full lg:w-auto">
                   <Phone className="h-4.5 w-4.5 text-brand-primary flex-shrink-0" />
                   <a href="tel:+9118001234567">+91 1800 123 4567</a>
                 </li>
-                <li className="flex items-center gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200">
+                <li className="flex items-center justify-start gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200 w-full lg:w-auto">
                   <Mail className="h-4.5 w-4.5 text-brand-primary flex-shrink-0" />
                   <a href="mailto:info@vidyascope.com">info@vidyascope.com</a>
                 </li>
