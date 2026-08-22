@@ -16,6 +16,7 @@ import CollegeListingPage from './pages/CollegeListingPage'
 import CollegeDetailPage from './pages/CollegeDetailPage'
 import CollegeComparePage from './pages/CollegeComparePage'
 import CourseGuidePage from './pages/CourseGuidePage'
+import CareerGuidePage from './pages/CareerGuidePage'
 import CounselingPage from './pages/CounselingPage'
 
 const App = () => {
@@ -191,6 +192,15 @@ const App = () => {
             onNavigateHome={() => setCurrentPage('home')}
             onSelectCollege={handleSelectCollege}
             onOpenCounseling={() => setIsCounselingModalOpen(true)}
+          />
+        )}
+
+        {/* CAREER GUIDANCE PAGE */}
+        {currentPage === 'career-guide' && (
+          <CareerGuidePage
+            onNavigateHome={() => setCurrentPage('home')}
+            onOpenCounseling={() => setIsCounselingModalOpen(true)}
+            onNavigateColleges={() => setCurrentPage('colleges-listing')}
           />
         )}
 

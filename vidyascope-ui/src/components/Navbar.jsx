@@ -20,9 +20,8 @@ const Navbar = ({ onNavigate, currentPage = 'home', onOpenCounseling }) => {
 
   const navLinks = [
     { name: 'Colleges', target: 'colleges-categories', icon: GraduationCap },
-    { name: 'Exams', target: 'course-guide', icon: Compass },
     { name: 'Courses', target: 'course-guide', icon: BookOpen },
-    { name: 'Career Guide', target: 'course-guide', icon: HelpCircle },
+    { name: 'Career Guide', target: 'career-guide', icon: HelpCircle },
     { name: 'Counseling', target: 'counseling', icon: Award },
   ]
 
