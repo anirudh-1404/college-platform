@@ -1,0 +1,32 @@
+export const blogsData = [
+  {
+    id: 'josaa-counseling-guide-2025',
+    title: 'JoSAA 2025 Counseling Step-by-Step Strategy & Seat Matrix',
+    category: 'Engineering Admissions',
+    readTime: '6 min read',
+    date: 'Aug 18, 2026',
+    author: 'VidyaScope Editorial Team',
+    image: 'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=600&h=380&q=80',
+    summary: 'Master choice filling for IITs, NITs, and IIITs. Learn how to freeze, float, and slide options without risking seat allocation.',
+  },
+  {
+    id: 'cat-vs-xat-preparation-roadmap',
+    title: 'CAT vs XAT 2025: Exam Pattern Differences & Sectional Cutoffs',
+    category: 'Management Guide',
+    readTime: '8 min read',
+    date: 'Aug 12, 2026',
+    author: 'Neha Saxena (Senior Counselor)',
+    image: 'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=600&h=380&q=80',
+    summary: 'A detailed comparative analysis of CAT Data Interpretation vs XAT Decision Making sections, along with recommended target percentile scores.',
+  },
+  {
+    id: 'neet-medical-college-roi-calculator',
+    title: 'Private Medical Colleges Fee Breakdown: Hidden Hostels & Bond Costs',
+    category: 'Medical Insights',
+    readTime: '5 min read',
+    date: 'Aug 05, 2026',
+    author: 'Dr. Vivek Menon',
+    image: 'https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?auto=format&fit=crop&w=600&h=380&q=80',
+    summary: 'Uncover hidden bond clauses, security deposits, and clinical material charges across top private and deemed medical institutions in India.',
+  },
+]

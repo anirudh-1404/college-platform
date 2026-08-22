@@ -1,7 +1,7 @@
 import React from 'react'
-import { MapPin, Star, Award, TrendingUp, Check, ArrowRight } from 'lucide-react'
+import { MapPin, Star, Award, TrendingUp, Check, ArrowRight, Heart } from 'lucide-react'
 
-const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare }) => {
+const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare, onSelectCollege, isShortlisted = false, onToggleShortlist }) => {
   const isGrid = viewMode === 'grid'
 
   return (
@@ -12,9 +12,10 @@ const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare }
     >
       {/* Image Container */}
       <div
-        className={`relative overflow-hidden bg-slate-100 flex-shrink-0 ${
+        className={`relative overflow-hidden bg-slate-100 flex-shrink-0 cursor-pointer ${
           isGrid ? 'w-full h-48' : 'w-full md:w-64 h-48 md:h-auto'
         }`}
+        onClick={() => onSelectCollege && onSelectCollege(college.id)}
       >
         <img
           src={college.image}
@@ -31,6 +32,22 @@ const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare }
             {college.ownership}
           </span>
         </div>
+
+        {/* Shortlist Bookmark Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            onToggleShortlist && onToggleShortlist(college.id)
+          }}
+          className={`absolute top-3 right-3 p-2 rounded-full backdrop-blur-md transition-all cursor-pointer z-10 ${
+            isShortlisted
+              ? 'bg-rose-500 text-white'
+              : 'bg-slate-900/40 text-white hover:bg-rose-500 hover:text-white'
+          }`}
+          title="Shortlist College"
+        >
+          <Heart className={`h-4 w-4 ${isShortlisted ? 'fill-white' : ''}`} />
+        </button>
       </div>
 
       {/* Main Details Body */}
@@ -39,7 +56,10 @@ const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare }
           {/* Header Row: Title & Rating */}
           <div className="flex items-start justify-between gap-3">
             <div>
-              <h3 className="font-serif text-lg sm:text-xl font-bold text-text-primary group-hover:text-brand-primary transition-colors duration-200">
+              <h3
+                onClick={() => onSelectCollege && onSelectCollege(college.id)}
+                className="font-serif text-lg sm:text-xl font-bold text-text-primary group-hover:text-brand-primary transition-colors duration-200 cursor-pointer"
+              >
                 {college.name}
               </h3>
               <p className="flex items-center gap-1 text-xs sm:text-sm font-semibold text-text-light mt-1">
@@ -116,14 +136,17 @@ const CollegeCard = ({ college, viewMode = 'list', isCompared, onToggleCompare }
             <input
               type="checkbox"
               checked={isCompared}
-              onChange={() => onToggleCompare(college)}
+              onChange={() => onToggleCompare && onToggleCompare(college)}
               className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary accent-brand-primary cursor-pointer"
             />
             <span>Add to Compare</span>
           </label>
 
           {/* View Details CTA Button */}
-          <button className="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-text-on-dark font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-card hover:shadow-premium transition-all duration-300 group/btn cursor-pointer">
+          <button
+            onClick={() => onSelectCollege && onSelectCollege(college.id)}
+            className="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-text-on-dark font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-card hover:shadow-premium transition-all duration-300 group/btn cursor-pointer"
+          >
             <span>View Details</span>
             <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform duration-200" />
           </button>

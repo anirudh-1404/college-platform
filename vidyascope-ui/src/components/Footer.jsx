@@ -1,7 +1,7 @@
 import React from 'react'
 import CounselingBanner from './CounselingBanner'
 import { GraduationCap, Mail, Phone, MapPin, Heart } from 'lucide-react'
-import logoImg from '../assets/vidyascope_logo.png'
+import logoImg from '../assets/logo.png'
 
 const FacebookIcon = (props) => (
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" {...props}>

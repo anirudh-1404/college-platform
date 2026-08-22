@@ -6,12 +6,24 @@ import SortBar from '../components/SortBar'
 import CollegeCard from '../components/CollegeCard'
 import CompareTray from '../components/CompareTray'
 
-const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', onNavigateBack }) => {
+const CollegeListingPage = ({
+  onNavigateHome,
+  selectedStream = 'engineering',
+  onNavigateBack,
+  onSelectCollege,
+  compareList = [],
+  onToggleCompare,
+  onClearCompare,
+  onNavigateCompare,
+  shortlistedIds = [],
+  onToggleShortlist,
+  initialSearchQuery = ''
+}) => {
   // Page State
   const [viewMode, setViewMode] = useState('list')
   const [sortBy, setSortBy] = useState('popularity')
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
-  const [selectedColleges, setSelectedColleges] = useState([])
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
 
   // Filter State
   const [filters, setFilters] = useState({
@@ -33,6 +45,7 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
   }
 
   const handleResetFilters = () => {
+    setSearchQuery('')
     setFilters({
       locations: [],
       maxFees: 25,
@@ -45,7 +58,9 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
   }
 
   const handleRemoveChip = (type, value) => {
-    if (type === 'locations' || type === 'ownerships' || type === 'exams' || type === 'facilities') {
+    if (type === 'searchQuery') {
+      setSearchQuery('')
+    } else if (type === 'locations' || type === 'ownerships' || type === 'exams' || type === 'facilities') {
       setFilters((prev) => ({
         ...prev,
         [type]: (prev[type] || []).filter((item) => item !== value),
@@ -59,26 +74,19 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
     }
   }
 
-  const handleToggleCompare = (college) => {
-    setSelectedColleges((prev) => {
-      const exists = prev.some((item) => item.id === college.id)
-      if (exists) {
-        return prev.filter((item) => item.id !== college.id)
-      } else {
-        if (prev.length >= 4) {
-          alert('You can compare a maximum of 4 colleges at a time.')
-          return prev
-        }
-        return [...prev, college]
-      }
-    })
-  }
-
   // Compute Filtered and Sorted Colleges
   const filteredColleges = useMemo(() => {
     return collegesData.filter((college) => {
-      // Stream Match Check
-      if (college.stream !== selectedStream) return false
+      // Search Query Filter
+      if (searchQuery.trim() !== '') {
+        const queryLower = searchQuery.toLowerCase()
+        const matchesName = college.name.toLowerCase().includes(queryLower) || college.shortName.toLowerCase().includes(queryLower)
+        const matchesCity = college.city.toLowerCase().includes(queryLower) || college.state.toLowerCase().includes(queryLower)
+        if (!matchesName && !matchesCity) return false
+      } else {
+        // Stream Match Check (if search query is empty)
+        if (college.stream !== selectedStream) return false
+      }
 
       // Location Filter
       if (filters.locations.length > 0) {
@@ -119,7 +127,7 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
 
       return true
     })
-  }, [filters, selectedStream])
+  }, [filters, selectedStream, searchQuery])
 
   // Sorting
   const sortedColleges = useMemo(() => {
@@ -141,6 +149,9 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
   // Active Filter Chips
   const activeFilterChips = useMemo(() => {
     const chips = []
+    if (searchQuery.trim() !== '') {
+      chips.push({ label: `Search: "${searchQuery}"`, type: 'searchQuery', value: searchQuery })
+    }
     filters.locations.forEach((loc) => chips.push({ label: loc, type: 'locations', value: loc }))
     filters.ownerships.forEach((own) => chips.push({ label: own, type: 'ownerships', value: own }))
     filters.exams.forEach((ex) => chips.push({ label: ex, type: 'exams', value: ex }))
@@ -150,7 +161,7 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
     if (filters.minPackage > 0) chips.push({ label: `Min Pkg: ₹${filters.minPackage}LPA`, type: 'minPackage', value: filters.minPackage })
     if (filters.minRating > 0) chips.push({ label: `${filters.minRating}+ Rating`, type: 'minRating', value: filters.minRating })
     return chips
-  }, [filters, selectedStream])
+  }, [filters, selectedStream, searchQuery])
 
   const streamInfo = useMemo(() => {
     switch (selectedStream) {
@@ -204,19 +215,31 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
           <span className="text-text-primary font-bold">{streamInfo.breadcrumb}</span>
         </nav>
 
-        {/* Page Heading & Header Details */}
-        <div className="mb-8">
+        {/* Page Heading & Search Input Bar */}
+        <div className="mb-8 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
             <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text-primary tracking-tight">
-              {streamInfo.title}
+              {searchQuery ? `Search Results for "${searchQuery}"` : streamInfo.title}
             </h1>
             <span className="text-xs sm:text-sm font-bold text-brand-primary bg-brand-accent px-3 py-1 rounded-full border border-brand-primary/10 self-start sm:self-auto">
-              {streamInfo.countLabel}
+              {sortedColleges.length} Colleges Found
             </span>
           </div>
-          <p className="text-xs sm:text-sm md:text-base text-text-secondary font-medium mt-2 leading-relaxed max-w-3xl">
+          <p className="text-xs sm:text-sm md:text-base text-text-secondary font-medium leading-relaxed max-w-3xl">
             {streamInfo.subtitle}
           </p>
+
+          {/* Direct Search Bar in Page Header */}
+          <div className="relative max-w-xl">
+            <input
+              type="text"
+              placeholder="Search college by name, city, or state..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-11 pr-4 py-3 rounded-2xl bg-white border border-border-color focus:border-brand-primary focus:ring-2 focus:ring-brand-accent outline-none text-sm shadow-sm"
+            />
+            <Search className="h-5 w-5 text-text-light absolute left-3.5 top-3.5" />
+          </div>
         </div>
 
         {/* Main Two-Column Layout */}
@@ -261,8 +284,11 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
                     key={college.id}
                     college={college}
                     viewMode={viewMode}
-                    isCompared={selectedColleges.some((item) => item.id === college.id)}
-                    onToggleCompare={handleToggleCompare}
+                    isCompared={compareList.some((item) => item.id === college.id)}
+                    onToggleCompare={onToggleCompare}
+                    onSelectCollege={onSelectCollege}
+                    isShortlisted={shortlistedIds.includes(college.id)}
+                    onToggleShortlist={onToggleShortlist}
                   />
                 ))}
               </div>
@@ -273,7 +299,7 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
                   <Search className="h-8 w-8" />
                 </div>
                 <h3 className="font-serif text-xl font-bold text-text-primary">
-                  No Colleges Found Matching Your Filters
+                  No Colleges Found Matching Your Search
                 </h3>
                 <p className="text-sm text-text-secondary font-medium max-w-md">
                   Try broadening your search by clearing location, package, or exam filters.
@@ -295,14 +321,12 @@ const CollegeListingPage = ({ onNavigateHome, selectedStream = 'engineering', on
 
       {/* Sticky Bottom Compare Tray */}
       <CompareTray
-        selectedColleges={selectedColleges}
+        selectedColleges={compareList}
         onRemoveCollege={(id) =>
-          setSelectedColleges((prev) => prev.filter((item) => item.id !== id))
+          onToggleCompare && onToggleCompare(collegesData.find((c) => c.id === id))
         }
-        onClearAll={() => setSelectedColleges([])}
-        onCompareNow={() => {
-          alert(`Comparing ${selectedColleges.map((c) => c.shortName).join(' vs ')}`)
-        }}
+        onClearAll={onClearCompare}
+        onCompareNow={onNavigateCompare}
       />
     </div>
   )

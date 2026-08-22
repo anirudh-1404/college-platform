@@ -4,13 +4,13 @@ import TrendingTags from './TrendingTags'
 import heroRightImage from '../assets/college-student-homepage.png'
 import { CheckCircle2 } from 'lucide-react'
 
-const Hero = () => {
+const Hero = ({ onNavigateListing }) => {
   const handleSearch = (searchData) => {
-    console.log('Hero Search triggered:', searchData)
+    onNavigateListing && onNavigateListing(searchData)
   }
 
   const handleTagClick = (tag) => {
-    console.log('Hero Tag Clicked:', tag)
+    onNavigateListing && onNavigateListing({ query: tag.label })
   }
 
   return (
@@ -25,15 +25,6 @@ const Hero = () => {
 
           {/* Left Column: Heading, Search & Tags */}
           <div className="lg:col-span-6 flex flex-col items-start text-left z-20">
-            {/* Banner Pill */}
-            {/* <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-brand-accent/60 border border-brand-primary/10 text-xs sm:text-sm font-bold text-brand-primary mb-6 transition-all duration-300 hover:bg-brand-accent hover:border-brand-primary/20 cursor-pointer">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-primary opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-brand-primary"></span>
-              </span>
-              <span className="font-semibold text-text-secondary tracking-wide">AI-Powered Admissions Compass 2026</span>
-            </div> */}
-
             {/* Main Headline */}
             <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-text-primary leading-[1.12] sm:leading-[1.1] lg:leading-[1.08] mb-6">
               Discover the Right{' '}
@@ -86,12 +77,11 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* Right Column: Hero Image & Floating Cards */}
           {/* Right Column: Hero Image Container */}
           <div className="lg:col-span-5 lg:col-start-8 flex justify-center lg:justify-end relative mt-12 lg:mt-0 z-10">
             <div className="relative w-full max-w-[420px] lg:max-w-[440px]">
               {/* Main Image Container */}
-              <div className="relative rounded-[2.2rem] overflow-hidden group">
+              <div className="relative rounded-[2.2rem] overflow-hidden group shadow-premium">
                 <img
                   src={heroRightImage}
                   alt="Student exploring educational goals on VidyaScope"
