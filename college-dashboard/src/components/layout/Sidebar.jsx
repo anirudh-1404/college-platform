@@ -1,4 +1,5 @@
 import React from 'react'
+import logoImg from '../../assets/logo.png'
 import {
   LayoutDashboard,
   Building2,
@@ -87,26 +88,20 @@ const Sidebar = ({ activeTab, onSelectTab, collegeName, onPreviewPublic, isMobil
       >
         {/* Brand Header */}
         <div>
-          <div className="h-16 px-5 border-b border-border-color flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-brand-primary text-white flex items-center justify-center font-serif font-extrabold text-base shadow-xs">
-                V
-              </div>
-              <div>
-                <span className="font-serif text-base font-bold text-text-primary block leading-tight">
-                  VidyaScope
-                </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-brand-primary block">
-                  Institutional CMS
-                </span>
-              </div>
+          <div className="h-16 px-4 border-b border-border-color flex items-center justify-between">
+            <div className="flex items-center">
+              <img
+                src={logoImg}
+                alt="VidyaScope Logo"
+                className="h-12 w-auto object-contain"
+              />
             </div>
 
             {/* Mobile Close Button */}
             {isMobileOpen && (
               <button
                 onClick={onCloseMobile}
-                className="lg:hidden p-1 text-text-light hover:text-text-primary"
+                className="lg:hidden p-1 text-text-light hover:text-text-primary cursor-pointer"
               >
                 ✕
               </button>
