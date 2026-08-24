@@ -27,8 +27,8 @@
   --color-border-dark-hover: #334155;
 
   /* Shadows */
-  --shadow-premium: 0 20px 40px -15px rgba(124, 58, 237, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 4px 20px -2px rgba(124, 58, 237, 0.08), 0 2px 8px -1px rgba(124, 58, 237, 0.04);
+  --shadow-premium: 0 10px 30px -10px rgba(124, 58, 237, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 4px -1px rgba(15, 23, 42, 0.04);
   --shadow-glow: 0 0 25px -5px rgba(124, 58, 237, 0.35);
   --shadow-dark-panel: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
@@ -62,60 +62,9 @@
   --shadow-card: var(--shadow-card);
   --shadow-glow: var(--shadow-glow);
   --shadow-dark-panel: var(--shadow-dark-panel);
-
-  /* Modern Float Animations for Cards */
-  --animate-float-slow: float-slow 6s ease-in-out infinite;
-  --animate-float-mid: float-mid 5s ease-in-out infinite;
-  --animate-float-fast: float-fast 4s ease-in-out infinite;
-  --animate-slide-in: slide-in 0.3s ease-out;
-
-  @keyframes float-slow {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-12px);
-    }
-  }
-
-  @keyframes float-mid {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-8px);
-    }
-  }
-
-  @keyframes float-fast {
-
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-
-    50% {
-      transform: translateY(-6px);
-    }
-  }
-
-  @keyframes slide-in {
-    from {
-      transform: translateX(100%);
-    }
-
-    to {
-      transform: translateX(0);
-    }
-  }
 }
 
+/* Typography Headings */
 h1,
 h2,
 h3,
@@ -123,6 +72,217 @@ h4,
 h5,
 h6 {
   font-family: var(--font-serif);
+}
+
+/* Smooth Page & Component Transitions */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes popIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-pop-in {
+  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ========================================================================= */
+/* CLEAN & SMOOTH STATIONARY BUTTON SYSTEM (No Upar Uthna / No Movement)     */
+/* ========================================================================= */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  border-radius: 0.75rem; /* rounded-xl (12px) */
+  outline: none;
+  text-decoration: none;
+  transition: background-color 220ms ease-out,
+              color 220ms ease-out,
+              border-color 220ms ease-out,
+              box-shadow 220ms ease-out,
+              opacity 150ms ease-out;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  opacity: 0.88;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.45rem 0.9rem;
+  font-size: 0.75rem; /* 12px */
+  border-radius: 0.55rem;
+}
+
+.btn-md {
+  padding: 0.65rem 1.35rem;
+  font-size: 0.8125rem; /* 13px */
+  border-radius: 0.75rem;
+}
+
+.btn-lg {
+  padding: 0.85rem 1.75rem;
+  font-size: 0.875rem; /* 14px */
+  border-radius: 0.875rem;
+}
+
+/* 1. Primary Solid Purple: Smooth Darken on Hover (Stationary) */
+.btn-primary {
+  background-color: var(--color-brand-primary);
+  color: #FFFFFF;
+  border: 1px solid var(--color-brand-primary);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: var(--color-brand-primary-hover);
+    border-color: var(--color-brand-primary-hover);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px -1px rgba(124, 58, 237, 0.25);
+  }
+}
+
+/* 2. Secondary White Surface: Smooth Tint on Hover (Stationary) */
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-color);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background-color: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--color-text-primary);
+    box-shadow: 0 2px 6px -1px rgba(15, 23, 42, 0.06);
+  }
+}
+
+/* 3. Outline Button (Stationary) */
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-outline:hover {
+    background-color: var(--color-brand-accent);
+    border-color: rgba(124, 58, 237, 0.35);
+    color: var(--color-brand-primary);
+  }
+}
+
+/* 4. Accent Light Purple Button (Stationary) */
+.btn-accent {
+  background-color: var(--color-brand-accent);
+  color: var(--color-brand-primary);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-accent:hover {
+    background-color: var(--color-brand-primary);
+    color: #FFFFFF;
+    border-color: var(--color-brand-primary);
+  }
+}
+
+/* 5. Ghost Transparent Button (Stationary) */
+.btn-ghost {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid transparent;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-ghost:hover {
+    background-color: #F1F5F9;
+    color: var(--color-text-primary);
+  }
+}
+
+/* 6. Subtle Link Text CTA */
+.btn-text {
+  background-color: transparent;
+  color: var(--color-brand-primary);
+  font-weight: 700;
+  padding: 0;
+  border: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-text:hover {
+    color: var(--color-brand-primary-hover);
+  }
+}
+
+/* Card Hover Micro-Lift */
+.card-hover-lift {
+  transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-card);
+  }
 }
 
 /* Minimal Thin Custom Scrollbar */

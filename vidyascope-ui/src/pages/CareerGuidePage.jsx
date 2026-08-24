@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import {
-  ChevronRight, Home, Compass, Target, TrendingUp, Award,
-  Sparkles, CheckCircle2, ArrowRight, Lightbulb, Users, ShieldCheck, Briefcase
+  ChevronRight, Home, Compass, ArrowRight,
+  CheckCircle2, Briefcase, GraduationCap
 } from 'lucide-react'
 
 const careerStreams = [
@@ -10,87 +10,91 @@ const careerStreams = [
     title: 'Engineering & Technology',
     icon: '💻',
     subtitle: 'Software, AI, Robotics, Data & Core Engineering',
-    description: 'Ideal for analytical thinkers interested in problem solving, coding, building systems, and innovation.',
+    description: 'Ideal for analytical thinkers interested in problem-solving, software architecture, algorithm design, and core hardware systems.',
     topPaths: [
-      { role: 'AI & Data Scientist', demand: 'Very High', avgSalary: '₹12 - ₹35 LPA', keySkills: ['Python', 'ML', 'Mathematics'] },
-      { role: 'Full Stack Engineer', demand: 'High', avgSalary: '₹8 - ₹24 LPA', keySkills: ['JavaScript', 'React', 'Node.js'] },
-      { role: 'Cybersecurity Specialist', demand: 'High', avgSalary: '₹10 - ₹28 LPA', keySkills: ['Network Security', 'Ethical Hacking'] },
-    ]
+      { role: 'AI & Machine Learning Engineer', demand: 'Very High', avgSalary: '₹14 - ₹35 LPA', keySkills: ['Python', 'PyTorch / TF', 'Mathematics & Stats'] },
+      { role: 'Software Development Engineer (SDE)', demand: 'Very High', avgSalary: '₹10 - ₹28 LPA', keySkills: ['Data Structures', 'System Design', 'JavaScript / Go'] },
+      { role: 'VLSI & Semiconductor Engineer', demand: 'High', avgSalary: '₹12 - ₹30 LPA', keySkills: ['Verilog', 'Micro-architecture', 'FPGA'] },
+    ],
   },
   {
-    id: 'management-commerce',
-    title: 'Management & Business',
+    id: 'management-business',
+    title: 'Management & Business Strategy',
     icon: '📊',
-    subtitle: 'Finance, Marketing, Consulting, Analytics & HR',
-    description: 'Great for leaders, communicators, and strategists focused on business growth, markets, and finance.',
+    subtitle: 'Finance, Marketing, Strategy, Analytics & HR',
+    description: 'Suited for strategic leaders, communicators, and analysts focused on corporate finance, consulting, product management, and operations.',
     topPaths: [
-      { role: 'Financial Analyst / Investment Manager', demand: 'High', avgSalary: '₹10 - ₹30 LPA', keySkills: ['Financial Modeling', 'Excel', 'Valuation'] },
-      { role: 'Product Manager', demand: 'Very High', avgSalary: '₹14 - ₹35 LPA', keySkills: ['Product Strategy', 'UX', 'Agile'] },
-      { role: 'Digital Marketing Strategist', demand: 'High', avgSalary: '₹6 - ₹18 LPA', keySkills: ['SEO', 'Analytics', 'Campaigns'] },
-    ]
+      { role: 'Management Consultant', demand: 'Very High', avgSalary: '₹18 - ₹36 LPA', keySkills: ['Problem Structuring', 'Business Modeling', 'Case Analysis'] },
+      { role: 'Investment Banker / Private Equity', demand: 'High', avgSalary: '₹20 - ₹40 LPA', keySkills: ['Financial Valuation', 'M&A', 'Financial Modeling'] },
+      { role: 'Product Manager', demand: 'Very High', avgSalary: '₹16 - ₹32 LPA', keySkills: ['Product Strategy', 'UX Research', 'Agile Roadmaps'] },
+    ],
   },
   {
     id: 'medical-healthcare',
-    title: 'Medical & Healthcare',
+    title: 'Medical & Clinical Sciences',
     icon: '🩺',
-    subtitle: 'Medicine, Biotechnology, Pharmacy & Diagnostics',
-    description: 'For compassionate students passionate about science, human biology, research, and saving lives.',
+    subtitle: 'Clinical Medicine, Surgery, Diagnostics & Pharma',
+    description: 'For dedicated science students passionate about human biology, diagnostics, clinical surgery, and saving lives.',
     topPaths: [
-      { role: 'Doctor (MBBS + Specialization)', demand: 'Very High', avgSalary: '₹12 - ₹40 LPA', keySkills: ['Clinical Skills', 'Diagnostics', 'Patient Care'] },
-      { role: 'Biotech & Pharma Researcher', demand: 'High', avgSalary: '₹7 - ₹20 LPA', keySkills: ['Genomics', 'Lab Research', 'Clinical Trials'] },
-      { role: 'Healthcare Administrator', demand: 'Moderate', avgSalary: '₹8 - ₹22 LPA', keySkills: ['Hospital Mgmt', 'Operations'] },
-    ]
+      { role: 'Clinical Doctor (MBBS + MD/MS)', demand: 'Very High', avgSalary: '₹14 - ₹40 LPA', keySkills: ['Clinical Diagnostics', 'Patient Care', 'Surgical Protocols'] },
+      { role: 'Biomedical & Pharma Researcher', demand: 'High', avgSalary: '₹8 - ₹22 LPA', keySkills: ['Clinical Trials', 'Genomics', 'Drug Formulation'] },
+      { role: 'Hospital Administrator', demand: 'Moderate', avgSalary: '₹10 - ₹24 LPA', keySkills: ['Healthcare Ops', 'NABH Standards', 'Health Tech'] },
+    ],
   },
   {
-    id: 'design-creativity',
-    title: 'Design, Media & Architecture',
-    icon: '🎨',
-    subtitle: 'UI/UX, Industrial Design, Animation & Media',
-    description: 'Suited for creative visionaries skilled in visual arts, digital media, user experience, and spatial design.',
+    id: 'law-judiciary',
+    title: 'Legal Studies & Corporate Law',
+    icon: '⚖️',
+    subtitle: 'Corporate Advisory, Litigation, Policy & Intellectual Property',
+    description: 'For articulate thinkers with strong reasoning, argumentation, research, and interest in commercial contracts or judiciary.',
     topPaths: [
-      { role: 'UI/UX Product Designer', demand: 'Very High', avgSalary: '₹8 - ₹25 LPA', keySkills: ['Figma', 'User Research', 'Wireframing'] },
-      { role: 'Architect', demand: 'Moderate', avgSalary: '₹6 - ₹20 LPA', keySkills: ['AutoCAD', '3D Modeling', 'Building Design'] },
-      { role: 'Game & 3D Animator', demand: 'High', avgSalary: '₹7 - ₹22 LPA', keySkills: ['Blender', 'Maya', 'Concept Art'] },
-    ]
-  }
+      { role: 'Corporate Legal Counsel', demand: 'High', avgSalary: '₹12 - ₹30 LPA', keySkills: ['Contract Drafting', 'M&A Due Diligence', 'Corporate Governance'] },
+      { role: 'Litigation & Dispute Specialist', demand: 'High', avgSalary: '₹8 - ₹25 LPA', keySkills: ['Court Craft', 'Legal Drafting', 'Cross Examination'] },
+      { role: 'IP & Patent Attorney', demand: 'High', avgSalary: '₹10 - ₹26 LPA', keySkills: ['Patent Search', 'Trademark Law', 'Tech Licensing'] },
+    ],
+  },
 ]
 
 const guidanceSteps = [
   {
     num: '01',
-    title: 'Self Assessment',
-    desc: 'Identify your core interests, personality traits, and natural aptitude across technical, analytical, or creative domains.'
+    title: 'Aptitude & Interest Alignment',
+    desc: 'Identify whether your core strengths lie in mathematical logic, commercial strategy, biological sciences, or legal reasoning.',
   },
   {
     num: '02',
-    title: 'Degree & Stream Selection',
-    desc: 'Map your goals to top-recognized undergraduate programs (B.Tech, MBA, MBBS, B.Des, BBA) with high market demand.'
+    title: 'Degree & Program Mapping',
+    desc: 'Select established national degree programs (B.Tech, MBA, MBBS, BA-LLB) with recognized accreditation and strong placement records.',
   },
   {
     num: '03',
-    title: 'Entrance Exam Strategy',
-    desc: 'Understand qualifying exam patterns (JEE, NEET, CAT, CUET) and cutoffs for premier government and private institutes.'
+    title: 'Entrance Examination Strategy',
+    desc: 'Focus preparation on qualifying gateways (JEE, CAT, NEET, CLAT, BITSAT) and understand realistic historical rank cutoffs.',
   },
   {
     num: '04',
-    title: 'Skill & Career Roadmap',
-    desc: 'Build a step-by-step career path with industry certifications, internships, and placement assistance.'
-  }
+    title: 'Institutional ROI & Fit Evaluation',
+    desc: 'Compare total expenses against verified starting salary packages to ensure high return on educational investment.',
+  },
 ]
 
 const CareerGuidePage = ({ onNavigateHome, onOpenCounseling, onNavigateColleges }) => {
   const [activeStreamId, setActiveStreamId] = useState('engineering-tech')
 
-  const activeStream = careerStreams.find((s) => s.id === activeStreamId) || careerStreams[0]
+  const activeStream =
+    careerStreams.find((s) => s.id === activeStreamId) || careerStreams[0]
 
   return (
-    <div className="min-h-screen bg-slate-50/60 pb-28">
+    <div className="min-h-screen bg-slate-50/50 pb-24">
       
-      {/* Breadcrumb Navigation Bar */}
+      {/* Breadcrumb Navigation */}
       <div className="bg-white border-b border-border-color py-3">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <nav className="flex items-center gap-2 text-xs font-semibold text-text-light">
-            <button onClick={onNavigateHome} className="hover:text-brand-primary cursor-pointer flex items-center gap-1">
+            <button
+              onClick={onNavigateHome}
+              className="hover:text-brand-primary cursor-pointer flex items-center gap-1"
+            >
               <Home className="h-3.5 w-3.5" />
               <span>Home</span>
             </button>
@@ -100,63 +104,57 @@ const CareerGuidePage = ({ onNavigateHome, onOpenCounseling, onNavigateColleges 
         </div>
       </div>
 
-      {/* Hero Header Section */}
-      <div className="bg-white border-b border-border-color py-10 lg:py-14 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-brand-primary/5 rounded-full blur-3xl -z-10" />
-
+      {/* Page Hero Header */}
+      <div className="bg-white border-b border-border-color py-8 sm:py-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-accent text-brand-primary text-xs font-bold uppercase tracking-wider mb-4">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-accent text-brand-primary text-xs font-bold uppercase tracking-wider mb-2.5">
               <Compass className="h-3.5 w-3.5" />
-              <span>Career Roadmap & Counseling</span>
+              <span>Educational Roadmaps</span>
             </div>
             
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text-primary leading-tight">
-              Choose the Right Career Path with Confidence
+            <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary">
+              Plan Your Career Path with Clarity
             </h1>
             
-            <p className="text-sm sm:text-base text-text-secondary font-medium mt-3 leading-relaxed">
-              Explore high-growth career options, salary expectations, required skills, and step-by-step guidance tailored for your future.
+            <p className="text-xs sm:text-sm text-text-secondary mt-2 leading-relaxed">
+              Explore industry salary expectations, required core skills, and decision steps across high-growth professional fields.
             </p>
 
-            <div className="mt-6 flex flex-wrap items-center gap-4">
+            <div className="mt-5 flex flex-wrap items-center gap-3">
               <button
                 onClick={onOpenCounseling}
-                className="px-6 py-3.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold text-sm transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold text-xs transition-colors cursor-pointer shadow-xs"
               >
-                <Sparkles className="w-4 h-4" />
-                <span>Get Free 1-on-1 AI Counseling</span>
+                Book Free Career Advisory
               </button>
 
               <button
                 onClick={onNavigateColleges}
-                className="px-6 py-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-text-primary font-semibold text-sm transition-all duration-200 cursor-pointer"
+                className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-text-primary font-semibold text-xs transition-colors cursor-pointer"
               >
-                Explore Top Colleges
+                Explore Matching Colleges
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
-
-        {/* Stream & Career Path Explorer */}
-        <div className="bg-white border border-border-color rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
+      {/* Main Explorer Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        
+        {/* Stream Selector & Roles */}
+        <div className="bg-white border border-border-color rounded-xl p-6 space-y-5">
           <div>
-            <span className="text-xs font-bold text-brand-primary bg-brand-accent px-3 py-1 rounded-full uppercase tracking-wider">
-              Interactive Explorer
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-text-primary mt-2">
-              Explore High-Growth Career Streams
+            <h2 className="font-serif text-xl font-bold text-text-primary">
+              High-Growth Professional Streams
             </h2>
-            <p className="text-xs sm:text-sm text-text-secondary mt-1">
-              Select a domain below to see top job roles, required skills, and average starting packages.
+            <p className="text-xs text-text-secondary mt-0.5">
+              Select a domain below to see in-demand roles, key required skillsets, and average salary benchmarks.
             </p>
           </div>
 
-          {/* Stream Selector Tabs */}
+          {/* Stream Selector Buttons */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {careerStreams.map((stream) => {
               const isSelected = activeStreamId === stream.id
@@ -164,14 +162,14 @@ const CareerGuidePage = ({ onNavigateHome, onOpenCounseling, onNavigateColleges 
                 <button
                   key={stream.id}
                   onClick={() => setActiveStreamId(stream.id)}
-                  className={`p-4 rounded-2xl text-left border transition-all duration-200 cursor-pointer ${
+                  className={`p-4 rounded-xl text-left border transition-colors cursor-pointer flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-brand-primary text-white border-brand-primary shadow-md'
+                      ? 'bg-brand-primary text-white border-brand-primary'
                       : 'bg-slate-50 border-border-color hover:bg-slate-100 text-text-primary'
                   }`}
                 >
-                  <div className="text-2xl mb-1">{stream.icon}</div>
-                  <h3 className="font-serif text-sm font-bold">{stream.title}</h3>
+                  <span className="text-xl mb-1">{stream.icon}</span>
+                  <h3 className="font-serif text-sm font-bold leading-snug">{stream.title}</h3>
                   <p className={`text-[11px] mt-1 line-clamp-1 ${isSelected ? 'text-purple-100' : 'text-text-light'}`}>
                     {stream.subtitle}
                   </p>
@@ -181,43 +179,49 @@ const CareerGuidePage = ({ onNavigateHome, onOpenCounseling, onNavigateColleges 
           </div>
 
           {/* Active Stream Details */}
-          <div className="p-6 rounded-2xl bg-slate-50 border border-border-color space-y-6 mt-4">
+          <div className="p-5 rounded-xl bg-slate-50 border border-border-color space-y-4">
             <div>
-              <h3 className="font-serif text-xl font-bold text-text-primary flex items-center gap-2">
+              <h3 className="font-serif text-base font-bold text-text-primary flex items-center gap-2">
                 <span>{activeStream.icon}</span>
                 <span>{activeStream.title} Overview</span>
               </h3>
-              <p className="text-xs sm:text-sm text-text-secondary mt-2 leading-relaxed">
+              <p className="text-xs text-text-secondary mt-1 leading-relaxed">
                 {activeStream.description}
               </p>
             </div>
 
-            {/* Top Career Roles Cards */}
-            <div className="space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-text-light">
-                Top In-Demand Roles & Salary Packages
+            {/* Roles Grid */}
+            <div>
+              <h4 className="text-[11px] font-bold uppercase tracking-wider text-text-light mb-3">
+                In-Demand Roles & Salary Benchmarks
               </h4>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
                 {activeStream.topPaths.map((path, idx) => (
-                  <div key={idx} className="bg-white p-5 rounded-xl border border-border-color space-y-3 shadow-xs">
-                    <div className="flex items-start justify-between gap-2">
-                      <h5 className="font-serif text-sm font-bold text-text-primary">{path.role}</h5>
-                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 whitespace-nowrap">
+                  <div
+                    key={idx}
+                    className="bg-white p-4 rounded-xl border border-border-color space-y-2.5 shadow-xs"
+                  >
+                    <div className="flex items-start justify-between gap-1">
+                      <h5 className="font-serif text-xs font-bold text-text-primary">{path.role}</h5>
+                      <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">
                         {path.demand} Demand
                       </span>
                     </div>
 
-                    <div className="pt-2 border-t border-slate-100">
-                      <p className="text-[10px] text-text-light uppercase font-bold">Avg Package</p>
-                      <p className="text-sm font-extrabold text-emerald-600">{path.avgSalary}</p>
+                    <div className="pt-1.5 border-t border-slate-100">
+                      <p className="text-[10px] text-text-light font-semibold uppercase">Expected Package</p>
+                      <p className="text-xs font-bold text-emerald-600">{path.avgSalary}</p>
                     </div>
 
                     <div>
-                      <p className="text-[10px] text-text-light uppercase font-bold mb-1">Key Skills</p>
+                      <p className="text-[10px] text-text-light font-semibold uppercase mb-1">Core Skills</p>
                       <div className="flex flex-wrap gap-1">
                         {path.keySkills.map((skill, sIdx) => (
-                          <span key={sIdx} className="text-[10px] bg-slate-100 text-text-secondary font-medium px-2 py-0.5 rounded">
+                          <span
+                            key={sIdx}
+                            className="text-[10px] bg-slate-100 text-text-secondary font-medium px-2 py-0.5 rounded"
+                          >
                             {skill}
                           </span>
                         ))}
@@ -230,52 +234,31 @@ const CareerGuidePage = ({ onNavigateHome, onOpenCounseling, onNavigateColleges 
           </div>
         </div>
 
-        {/* 4-Step Career Decision Roadmap */}
-        <div className="bg-white border border-border-color rounded-3xl p-6 sm:p-8 shadow-sm space-y-8">
+        {/* 4-Step Decision Framework */}
+        <div className="bg-white border border-border-color rounded-xl p-6 space-y-5">
           <div>
-            <span className="text-xs font-bold text-brand-primary bg-brand-accent px-3 py-1 rounded-full uppercase tracking-wider">
-              Step-by-Step Blueprint
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-text-primary mt-2">
-              How to Plan Your Career Goal
+            <h2 className="font-serif text-xl font-bold text-text-primary">
+              4-Step Career Decision Framework
             </h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              Structured approach to evaluate your aptitude, entrance gateways, and long-term placement returns.
+            </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {guidanceSteps.map((step) => (
-              <div key={step.num} className="p-6 rounded-2xl border border-border-color bg-slate-50/70 relative space-y-3">
-                <span className="text-2xl font-black text-brand-primary/30 font-serif">
+              <div
+                key={step.num}
+                className="p-4 rounded-xl border border-border-color bg-slate-50/60 space-y-2"
+              >
+                <span className="text-lg font-bold text-brand-primary font-serif">
                   {step.num}
                 </span>
-                <h3 className="font-serif text-base font-bold text-text-primary">{step.title}</h3>
+                <h3 className="font-serif text-sm font-bold text-text-primary">{step.title}</h3>
                 <p className="text-xs text-text-secondary leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* 1-on-1 Counseling Banner */}
-        <div className="bg-gradient-to-r from-brand-primary via-[#9333EA] to-purple-800 rounded-3xl p-8 sm:p-10 text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-glow">
-          <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full text-xs font-semibold">
-              <Sparkles className="w-3.5 h-3.5 text-brand-accent" />
-              <span>Confused About Which Stream to Pick?</span>
-            </div>
-            <h3 className="font-serif text-2xl sm:text-3xl font-extrabold">
-              Talk to an Expert Career Advisor Today
-            </h3>
-            <p className="text-xs sm:text-sm text-purple-100 max-w-xl">
-              Get customized advice based on your marks, interests, budget, and desired placement outcomes. 100% Free & Confidential.
-            </p>
-          </div>
-
-          <button
-            onClick={onOpenCounseling}
-            className="px-7 py-4 rounded-xl bg-white text-slate-900 font-bold text-sm hover:bg-slate-100 transition-all duration-200 shadow-xl cursor-pointer whitespace-nowrap flex items-center gap-2"
-          >
-            <span>Book Free Session</span>
-            <ArrowRight className="w-4 h-4 text-brand-primary" />
-          </button>
         </div>
 
       </div>

@@ -1,6 +1,6 @@
 import React from 'react'
 import CounselingBanner from './CounselingBanner'
-import { GraduationCap, Mail, Phone, MapPin, Heart } from 'lucide-react'
+import { Mail, Phone, Heart } from 'lucide-react'
 import logoImg from '../assets/logo.png'
 
 const FacebookIcon = (props) => (
@@ -38,29 +38,21 @@ const YoutubeIcon = (props) => (
   </svg>
 )
 
-const Footer = () => {
+const Footer = ({ onNavigate, onOpenCounseling }) => {
   const exploreLinks = [
-    { name: 'Colleges in India', href: '#colleges' },
-    { name: 'Popular Exams', href: '#exams' },
-    { name: 'Career Library', href: '#careers' },
-    { name: 'Top Courses', href: '#courses' },
-    { name: 'Scholarships', href: '#scholarships' },
+    { name: 'Engineering Colleges', target: 'colleges-listing', stream: 'engineering' },
+    { name: 'Management Colleges', target: 'colleges-listing', stream: 'management' },
+    { name: 'Medical Colleges', target: 'colleges-listing', stream: 'medical' },
+    { name: 'Academic Courses', target: 'courses' },
+    { name: 'Entrance Exams', target: 'exams' },
   ]
 
   const resourceLinks = [
-    { name: 'Compare Colleges', href: '#compare' },
-    { name: 'ROI Calculator', href: '#roi' },
-    { name: 'Admission Predictor', href: '#predictor' },
-    { name: 'Student Blogs', href: '#blogs' },
-    { name: 'Help Center', href: '#help' },
-  ]
-
-  const companyLinks = [
-    { name: 'About Us', href: '#about' },
-    { name: 'Careers', href: '#careers' },
-    { name: 'Contact Us', href: '#contact' },
-    { name: 'Privacy Policy', href: '#privacy' },
-    { name: 'Terms of Service', href: '#terms' },
+    { name: 'Compare Colleges', target: 'compare' },
+    { name: 'Saved Colleges', target: 'shortlist' },
+    { name: 'Career Roadmaps', target: 'career-guide' },
+    { name: '1-on-1 Counseling', target: 'counseling' },
+    { name: 'Explore by Stream', target: 'colleges-categories' },
   ]
 
   const socials = [
@@ -73,33 +65,36 @@ const Footer = () => {
 
   return (
     <footer className="relative w-full">
-      {/* Part 1: Counseling CTA Banner (sitting on a clean transition layout) */}
+      {/* Top Banner */}
       <div className="bg-white">
-        <CounselingBanner />
+        <CounselingBanner onOpenCounseling={onOpenCounseling} />
       </div>
 
-      {/* Part 2: Main Dark Navy Footer */}
-      <div className="bg-navy-panel border-t border-border-dark text-text-on-dark-muted pt-16 pb-8">
+      {/* Main Dark Navy Footer */}
+      <div className="bg-navy-panel border-t border-border-dark text-text-on-dark-muted pt-14 pb-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-          {/* 5-Column Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 pb-12">
+          {/* 4-Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-8 pb-10">
 
-            {/* Column 1: Brand & Socials (Span 4) */}
-            <div className="lg:col-span-4 flex flex-col items-start text-left gap-5">
-              <a href="/" className="flex items-center justify-start group focus:outline-none">
+            {/* Column 1: Brand & Bio (Span 5) */}
+            <div className="lg:col-span-5 flex flex-col items-start gap-4">
+              <button
+                onClick={() => onNavigate && onNavigate('home')}
+                className="flex items-center group focus:outline-none cursor-pointer"
+              >
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
-                  className="h-16 sm:h-20 lg:h-22 w-auto max-w-[260px] object-contain hover:scale-105 transition-transform duration-300"
+                  className="h-12 w-auto object-contain hover:opacity-90 transition-opacity"
                 />
-              </a>
-              <p className="text-sm font-medium leading-relaxed max-w-sm text-text-on-dark-muted">
-                Empowering students to discover the right college, compare options, and map successful career paths with AI-driven recommendations and authentic insights.
+              </button>
+              <p className="text-xs sm:text-sm font-medium leading-relaxed max-w-sm text-slate-400">
+                VidyaScope is India's dedicated college discovery platform empowering students to explore verified cutoffs, authentic placement records, and transparent fee calculators.
               </p>
 
-              {/* Social Media Handles */}
-              <div className="flex items-center justify-start gap-3 mt-2">
+              {/* Social Handles */}
+              <div className="flex items-center gap-2.5 mt-1">
                 {socials.map((social) => {
                   const Icon = social.icon
                   return (
@@ -109,9 +104,9 @@ const Footer = () => {
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={social.name}
-                      className="flex items-center justify-center w-9 h-9 rounded-xl border border-border-dark bg-navy-card/50 text-text-on-dark-muted hover:text-brand-primary hover:bg-brand-accent hover:border-brand-primary/20 hover:scale-110 active:scale-95 transition-all duration-300"
+                      className="flex items-center justify-center w-8 h-8 rounded-lg border border-border-dark bg-navy-card text-slate-400 hover:text-white hover:border-brand-primary/40 transition-colors"
                     >
-                      <Icon className="h-4.5 w-4.5" />
+                      <Icon className="h-4 w-4" />
                     </a>
                   )
                 })}
@@ -119,93 +114,80 @@ const Footer = () => {
             </div>
 
             {/* Column 2: Explore (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col items-start gap-4">
-              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
+            <div className="lg:col-span-2 flex flex-col items-start gap-3">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider font-serif">
                 Explore
               </h4>
-              <ul className="flex flex-col items-start gap-3">
+              <ul className="flex flex-col items-start gap-2.5">
                 {exploreLinks.map((link) => (
                   <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
+                    <button
+                      onClick={() => onNavigate && onNavigate(link.target)}
+                      className="text-xs font-medium text-slate-400 hover:text-white transition-colors cursor-pointer text-left"
                     >
                       {link.name}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
             </div>
 
             {/* Column 3: Resources (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col items-start gap-4">
-              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
-                Resources
+            <div className="lg:col-span-2 flex flex-col items-start gap-3">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider font-serif">
+                Decision Tools
               </h4>
-              <ul className="flex flex-col items-start gap-3">
+              <ul className="flex flex-col items-start gap-2.5">
                 {resourceLinks.map((link) => (
                   <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
+                    <button
+                      onClick={() => onNavigate && onNavigate(link.target)}
+                      className="text-xs font-medium text-slate-400 hover:text-white transition-colors cursor-pointer text-left"
                     >
                       {link.name}
-                    </a>
+                    </button>
                   </li>
                 ))}
               </ul>
             </div>
 
-            {/* Column 4: Company (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col items-start gap-4">
-              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif">
-                Company
+            {/* Column 4: Contact (Span 3) */}
+            <div className="lg:col-span-3 flex flex-col items-start gap-3">
+              <h4 className="text-xs font-bold text-white uppercase tracking-wider font-serif">
+                Student Helpline
               </h4>
-              <ul className="flex flex-col items-start gap-3">
-                {companyLinks.map((link) => (
-                  <li key={link.name}>
-                    <a
-                      href={link.href}
-                      className="text-sm font-semibold text-text-on-dark-muted hover:text-brand-primary transition-colors duration-200 text-left"
-                    >
-                      {link.name}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Column 5: Contact Details (Span 2) */}
-            <div className="lg:col-span-2 flex flex-col items-start gap-4">
-              <h4 className="text-sm font-bold text-text-on-dark uppercase tracking-wider font-serif text-left">
-                Contact Us
-              </h4>
-              <ul className="flex flex-col items-start gap-3.5 w-full">
-                {/* <li className="flex items-start gap-2.5 text-sm font-medium leading-relaxed">
-                  <MapPin className="h-5 w-5 text-brand-primary flex-shrink-0 mt-0.5" />
-                  <span>4th Floor, Tech Hub, Sector 62, Noida, UP - 201301</span>
-                </li> */}
-                <li className="flex items-center justify-start gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200 w-full lg:w-auto">
-                  <Phone className="h-4.5 w-4.5 text-brand-primary flex-shrink-0" />
-                  <a href="tel:+9118001234567">+91 1800 123 4567</a>
+              <ul className="flex flex-col items-start gap-3 w-full text-xs">
+                <li className="flex items-center gap-2.5 text-slate-400">
+                  <Phone className="h-4 w-4 text-brand-primary flex-shrink-0" />
+                  <a href="tel:+9118001234567" className="hover:text-white transition-colors">
+                    1800 123 4567 (Toll-Free, 9am - 7pm)
+                  </a>
                 </li>
-                <li className="flex items-center justify-start gap-2.5 text-sm font-semibold hover:text-brand-primary transition-colors duration-200 w-full lg:w-auto">
-                  <Mail className="h-4.5 w-4.5 text-brand-primary flex-shrink-0" />
-                  <a href="mailto:info@vidyascope.com">info@vidyascope.com</a>
+                <li className="flex items-center gap-2.5 text-slate-400">
+                  <Mail className="h-4 w-4 text-brand-primary flex-shrink-0" />
+                  <a href="mailto:admissions@vidyascope.com" className="hover:text-white transition-colors">
+                    admissions@vidyascope.com
+                  </a>
                 </li>
               </ul>
+              <div className="mt-2 pt-3 border-t border-border-dark/80 w-full">
+                <button
+                  onClick={() => onNavigate && onNavigate('counseling')}
+                  className="w-full py-2.5 rounded-lg bg-brand-primary/20 hover:bg-brand-primary/30 text-brand-primary border border-brand-primary/30 font-semibold text-xs transition-colors cursor-pointer"
+                >
+                  Request Call Back
+                </button>
+              </div>
             </div>
 
           </div>
 
           {/* Copyright Strip */}
-          <div className="border-t border-border-dark/60 mt-8 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-xs sm:text-sm font-semibold text-text-on-dark-muted/80">
-              © 2026 VidyaScope. All rights reserved.
-            </p>
-            <p className="text-xs sm:text-sm font-semibold text-text-on-dark-muted/80 flex items-center gap-1.5 hover:text-brand-primary transition-colors duration-200 cursor-pointer">
-              <span>Made for Students</span>
-              <Heart className="h-4 w-4 fill-brand-primary text-brand-primary animate-pulse" />
+          <div className="border-t border-border-dark/60 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+            <p>© 2026 VidyaScope. Phase 1 Production Platform.</p>
+            <p className="flex items-center gap-1.5">
+              <span>Designed for Indian students</span>
+              <Heart className="h-3.5 w-3.5 text-brand-primary fill-brand-primary" />
             </p>
           </div>
 
