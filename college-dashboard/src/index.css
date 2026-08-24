@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;700;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  /* Centralized Purple Theme */
+  --color-brand-primary: #7C3AED;
+  --color-brand-primary-hover: #6D28D9;
+  --color-brand-accent: #F5F3FF;
+
+  /* Navy / Dark Theme Components */
+  --color-navy-dark: #090D1A;
+  --color-navy-panel: #0D1326;
+  --color-navy-card: #151D33;
+  --color-navy-card-hover: #1E294B;
+
+  /* Text Colors */
+  --color-text-primary: #0F172A;
+  --color-text-secondary: #475569;
+  --color-text-light: #94A3B8;
+  --color-text-on-dark: #F8FAFC;
+  --color-text-on-dark-muted: #94A3B8;
+
+  /* Border Colors */
+  --color-border-color: #E2E8F0;
+  --color-border-dark: #1E293B;
+  --color-border-dark-hover: #334155;
+
+  /* Shadows */
+  --shadow-premium: 0 10px 30px -10px rgba(124, 58, 237, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 4px -1px rgba(15, 23, 42, 0.04);
+  --shadow-glow: 0 0 25px -5px rgba(124, 58, 237, 0.35);
+  --shadow-dark-panel: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+@theme {
+  /* Font Family Override */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  --font-serif: 'Frank Ruhl Libre', Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* Theme color mapping to CSS variables */
+  --color-brand-primary: var(--color-brand-primary);
+  --color-brand-primary-hover: var(--color-brand-primary-hover);
+  --color-brand-accent: var(--color-brand-accent);
+
+  --color-navy-dark: var(--color-navy-dark);
+  --color-navy-panel: var(--color-navy-panel);
+  --color-navy-card: var(--color-navy-card);
+  --color-navy-card-hover: var(--color-navy-card-hover);
+
+  --color-text-primary: var(--color-text-primary);
+  --color-text-secondary: var(--color-text-secondary);
+  --color-text-light: var(--color-text-light);
+  --color-text-on-dark: var(--color-text-on-dark);
+  --color-text-on-dark-muted: var(--color-text-on-dark-muted);
+
+  --color-border-color: var(--color-border-color);
+  --color-border-dark: var(--color-border-dark);
+  --color-border-dark-hover: var(--color-border-dark-hover);
+
+  --shadow-premium: var(--shadow-premium);
+  --shadow-card: var(--shadow-card);
+  --shadow-glow: var(--shadow-glow);
+  --shadow-dark-panel: var(--shadow-dark-panel);
+}
+
+/* Typography Headings */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-serif);
+}
+
+/* Smooth Page Transitions */
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Clean Dashboard Button System */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+  border-radius: 0.65rem; /* rounded-xl */
+  outline: none;
+  text-decoration: none;
+  transition: background-color 200ms ease-out,
+              color 200ms ease-out,
+              border-color 200ms ease-out,
+              box-shadow 200ms ease-out,
+              opacity 150ms ease-out;
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--color-brand-primary);
+  outline-offset: 2px;
+}
+
+.btn:active {
+  opacity: 0.88;
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Button Sizes */
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 0.75rem; /* 12px */
+  border-radius: 0.5rem;
+}
+
+.btn-md {
+  padding: 0.55rem 1.15rem;
+  font-size: 0.8125rem; /* 13px */
+  border-radius: 0.65rem;
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem; /* 14px */
+  border-radius: 0.75rem;
+}
+
+/* 1. Primary Solid Purple */
+.btn-primary {
+  background-color: var(--color-brand-primary);
+  color: #FFFFFF;
+  border: 1px solid var(--color-brand-primary);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-primary:hover {
+    background-color: var(--color-brand-primary-hover);
+    border-color: var(--color-brand-primary-hover);
+    color: #FFFFFF;
+    box-shadow: 0 2px 8px -1px rgba(124, 58, 237, 0.25);
+  }
+}
+
+/* 2. Secondary Surface White */
+.btn-secondary {
+  background-color: #FFFFFF;
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border-color);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-secondary:hover {
+    background-color: #F8FAFC;
+    border-color: #CBD5E1;
+    color: var(--color-text-primary);
+  }
+}
+
+/* 3. Outline Button */
+.btn-outline {
+  background-color: transparent;
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-outline:hover {
+    background-color: var(--color-brand-accent);
+    border-color: rgba(124, 58, 237, 0.35);
+    color: var(--color-brand-primary);
+  }
+}
+
+/* 4. Accent Light Purple Button */
+.btn-accent {
+  background-color: var(--color-brand-accent);
+  color: var(--color-brand-primary);
+  border: 1px solid rgba(124, 58, 237, 0.18);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-accent:hover {
+    background-color: var(--color-brand-primary);
+    color: #FFFFFF;
+    border-color: var(--color-brand-primary);
+  }
+}
+
+/* 5. Danger Red Button */
+.btn-danger {
+  background-color: #FEF2F2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .btn-danger:hover {
+    background-color: #DC2626;
+    color: #FFFFFF;
+    border-color: #DC2626;
+  }
+}
+
+/* Minimal Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #CBD5E1 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
