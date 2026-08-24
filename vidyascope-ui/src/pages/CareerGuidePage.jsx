@@ -469,31 +469,6 @@ const CareerGuidePage = ({
                 </div>
               </div>
 
-              {/* 5. Need Help? Free Counseling Banner */}
-              <div className="bg-navy-dark text-white p-6 sm:p-8 rounded-2xl border border-border-dark flex flex-col md:flex-row items-center justify-between gap-6">
-                <div className="text-center md:text-left space-y-1.5">
-                  <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-brand-primary bg-brand-primary/15 px-2.5 py-0.5 rounded-full border border-brand-primary/25">
-                    <PhoneCall className="h-3 w-3" />
-                    <span>1-on-1 Guidance</span>
-                  </div>
-                  <h3 className="font-serif text-xl sm:text-2xl font-bold text-white">
-                    Need Help Deciding Your Stream or Degree?
-                  </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 max-w-xl">
-                    Connect with our experienced admission advisors for personalized stream selection, course evaluation, and college shortlisting.
-                  </p>
-                </div>
-
-                <div className="flex-shrink-0">
-                  <button
-                    onClick={onOpenCounseling}
-                    className="btn btn-primary btn-md"
-                  >
-                    <span>Book Free Counseling Call</span>
-                  </button>
-                </div>
-              </div>
-
             </div>
           </motion.div>
         ) : (
