@@ -104,12 +104,17 @@ const App = () => {
   return (
     <div className="min-h-screen bg-white text-text-primary selection:bg-brand-accent selection:text-brand-primary flex flex-col justify-between">
       
-      {/* Centralized Top Navbar */}
+      {/* Centralized Top Navbar with Search Integration */}
       <Navbar
         onNavigate={handleNavigate}
         currentPage={currentPage}
         onOpenCounseling={() => setIsCounselingModalOpen(true)}
         shortlistedCount={shortlistedIds.length}
+        onSelectCollege={handleSelectCollege}
+        onSelectCourse={() => setCurrentPage('courses')}
+        onSelectExam={() => setCurrentPage('exams')}
+        onSelectCareer={() => setCurrentPage('career-guide')}
+        onNavigateListing={handleHeroSearch}
       />
 
       {/* Main Content Router View */}
