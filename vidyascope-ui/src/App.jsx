@@ -237,7 +237,15 @@ const App = () => {
             <CareerGuidePage
               onNavigateHome={() => setCurrentPage('home')}
               onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              onNavigateColleges={() => setCurrentPage('colleges-listing')}
+              onNavigateColleges={(filter) => {
+                if (filter && filter.stream) {
+                  setSelectedStream(filter.stream)
+                }
+                setCurrentPage('colleges-listing')
+              }}
+              onNavigateCourses={() => setCurrentPage('courses')}
+              onNavigateExams={() => setCurrentPage('exams')}
+              onSelectCollege={handleSelectCollege}
             />
           )}
 
