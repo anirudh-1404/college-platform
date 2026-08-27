@@ -10,6 +10,7 @@ import {
   X,
   Search,
   Heart,
+  Sparkles,
 } from 'lucide-react'
 import logoImg from '../assets/logo.png'
 import SearchPanel from './SearchPanel'
@@ -47,26 +48,27 @@ const Navbar = ({
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full bg-white/95 backdrop-blur-md border-b border-border-color shadow-xs">
+      <header className="sticky top-0 z-40 w-full bg-white/90 backdrop-blur-md border-b border-border-color shadow-xs transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-16 sm:h-18">
             
             {/* Brand Logo */}
             <div className="flex-shrink-0 flex items-center">
               <button
                 onClick={() => onNavigate && onNavigate('home')}
                 className="flex items-center gap-2 group focus:outline-none cursor-pointer"
+                title="VidyaScope Home"
               >
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
-                  className="h-16 sm:h-20 w-auto object-contain transition-transform group-hover:scale-102"
+                  className="h-9 sm:h-10 w-auto object-contain transition-opacity group-hover:opacity-90"
                 />
               </button>
             </div>
 
             {/* Desktop Navigation Links */}
-            <div className="hidden lg:flex items-center gap-7">
+            <nav className="hidden lg:flex items-center gap-1.5 bg-slate-50/80 p-1 rounded-xl border border-slate-200/70">
               {navLinks.map((link) => {
                 const Icon = link.icon
                 const isActive =
@@ -82,68 +84,61 @@ const Navbar = ({
                   <button
                     key={link.name}
                     onClick={() => onNavigate && onNavigate(link.target)}
-                    className={`relative py-2 text-sm font-semibold transition-colors duration-200 flex items-center gap-1.5 cursor-pointer ${
+                    className={`relative px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 flex items-center gap-1.5 cursor-pointer ${
                       isActive
-                        ? 'text-brand-primary font-bold'
-                        : 'text-text-secondary hover:text-brand-primary'
+                        ? 'text-brand-primary bg-white shadow-2xs font-bold'
+                        : 'text-text-secondary hover:text-text-primary hover:bg-white/60'
                     }`}
                   >
                     <Icon
-                      className={`h-4 w-4 transition-colors ${
+                      className={`h-3.5 w-3.5 transition-colors ${
                         isActive ? 'text-brand-primary' : 'text-text-light'
                       }`}
                     />
                     <span>{link.name}</span>
-                    {isActive && (
-                      <motion.span
-                        layoutId="navbar-indicator"
-                        className="absolute bottom-0 left-0 w-full h-0.5 bg-brand-primary rounded-full"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
                   </button>
                 )
               })}
-            </div>
+            </nav>
 
             {/* Right Action Buttons */}
-            <div className="hidden lg:flex items-center gap-3">
-              {/* Search Toggle Button */}
+            <div className="hidden lg:flex items-center gap-2.5">
+              {/* Quick Search Button */}
               <button
                 onClick={handleToggleSearch}
                 aria-label="Search"
-                className={`btn btn-sm p-2.5 rounded-xl cursor-pointer transition-colors ${
-                  isSearchOpen
-                    ? 'bg-brand-accent text-brand-primary border border-brand-primary/30 font-bold'
-                    : 'bg-slate-100 text-text-secondary hover:text-brand-primary hover:bg-slate-200/80 border border-slate-200'
-                }`}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200/80 text-text-secondary hover:text-text-primary text-xs transition-colors cursor-pointer"
                 title="Search Colleges, Courses & Exams"
               >
-                <Search className="h-4.5 w-4.5" />
+                <Search className="h-3.5 w-3.5 text-text-light" />
+                <span className="text-text-light">Search...</span>
+                <kbd className="hidden xl:inline-block px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[10px] font-mono text-slate-400 font-semibold shadow-2xs">
+                  ⌘K
+                </kbd>
               </button>
 
-              {/* Polished Saved Colleges Button with Dedicated Background */}
+              {/* Saved Colleges Button */}
               <button
                 onClick={() => onNavigate && onNavigate('shortlist')}
-                className={`btn btn-sm rounded-xl cursor-pointer flex items-center gap-2 px-3.5 py-2 transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
                   currentPage === 'shortlist'
-                    ? 'bg-rose-100 border border-rose-300 text-rose-800 font-bold shadow-xs'
+                    ? 'bg-rose-50 border-rose-200 text-rose-700 font-bold'
                     : shortlistedCount > 0
-                    ? 'bg-rose-50 hover:bg-rose-100/90 border border-rose-200 text-rose-700 font-bold shadow-xs'
-                    : 'bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-text-secondary hover:text-rose-600 font-semibold'
+                    ? 'bg-white border-slate-200 text-text-secondary hover:text-rose-600 hover:border-rose-200'
+                    : 'bg-white border-slate-200 text-text-secondary hover:text-text-primary'
                 }`}
                 title="Saved Colleges"
               >
                 <Heart
-                  className={`h-4 w-4 transition-transform group-hover:scale-110 ${
+                  className={`h-3.5 w-3.5 transition-colors ${
                     shortlistedCount > 0
                       ? 'text-rose-500 fill-rose-500'
-                      : 'text-slate-400'
+                      : 'text-text-light'
                   }`}
                 />
-                <span className="text-xs">Saved</span>
+                <span>Saved</span>
                 {shortlistedCount > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold shadow-2xs">
+                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[10px] font-bold">
                     {shortlistedCount}
                   </span>
                 )}
@@ -152,9 +147,10 @@ const Navbar = ({
               {/* Free Counseling CTA */}
               <button
                 onClick={onOpenCounseling}
-                className="btn btn-primary btn-md cursor-pointer"
+                className="btn btn-primary btn-sm text-xs font-bold cursor-pointer"
               >
-                <span>Get Free Counseling</span>
+                <Sparkles className="h-3.5 w-3.5" />
+                <span>Free Counseling</span>
               </button>
             </div>
 
@@ -163,21 +159,21 @@ const Navbar = ({
               <button
                 onClick={handleToggleSearch}
                 aria-label="Search"
-                className="p-2 rounded-xl bg-slate-100 text-text-secondary hover:text-brand-primary transition-colors cursor-pointer"
+                className="p-2 rounded-lg bg-slate-50 text-text-secondary hover:text-brand-primary border border-slate-200 cursor-pointer"
               >
-                <Search className="h-4.5 w-4.5" />
+                <Search className="h-4 w-4" />
               </button>
 
               <button
                 onClick={() => onNavigate && onNavigate('shortlist')}
                 aria-label="Shortlist"
-                className={`relative p-2 rounded-xl border transition-colors cursor-pointer ${
+                className={`relative p-2 rounded-lg border transition-colors cursor-pointer ${
                   shortlistedCount > 0
                     ? 'bg-rose-50 border-rose-200 text-rose-600'
-                    : 'bg-slate-100 border-slate-200 text-text-secondary'
+                    : 'bg-slate-50 border-slate-200 text-text-secondary'
                 }`}
               >
-                <Heart className={`h-4.5 w-4.5 ${shortlistedCount > 0 ? 'text-rose-500 fill-rose-500' : ''}`} />
+                <Heart className={`h-4 w-4 ${shortlistedCount > 0 ? 'text-rose-500 fill-rose-500' : ''}`} />
                 {shortlistedCount > 0 && (
                   <span className="absolute -top-1 -right-1 px-1.5 py-0.2 rounded-full bg-rose-500 text-white text-[9px] font-bold">
                     {shortlistedCount}
@@ -187,13 +183,13 @@ const Navbar = ({
 
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="p-2 rounded-xl text-text-secondary hover:text-brand-primary hover:bg-slate-100 transition-colors cursor-pointer"
+                className="p-2 rounded-lg text-text-secondary hover:text-brand-primary hover:bg-slate-100 transition-colors cursor-pointer"
                 aria-label="Toggle menu"
               >
                 {isMobileMenuOpen ? (
-                  <X className="h-6 w-6" />
+                  <X className="h-5 w-5" />
                 ) : (
-                  <Menu className="h-6 w-6" />
+                  <Menu className="h-5 w-5" />
                 )}
               </button>
             </div>
@@ -221,7 +217,7 @@ const Navbar = ({
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-40 lg:hidden"
+                className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs z-40 lg:hidden"
               />
 
               <motion.div
@@ -233,9 +229,7 @@ const Navbar = ({
               >
                 <div>
                   <div className="flex items-center justify-between pb-4 border-b border-border-color mb-6">
-                    <span className="font-serif text-lg font-bold text-text-primary">
-                      VidyaScope Menu
-                    </span>
+                    <img src={logoImg} alt="VidyaScope" className="h-8 w-auto object-contain" />
                     <button
                       onClick={() => setIsMobileMenuOpen(false)}
                       className="p-1.5 rounded-lg text-text-secondary hover:bg-slate-100"
@@ -244,7 +238,7 @@ const Navbar = ({
                     </button>
                   </div>
 
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-1.5">
                     {navLinks.map((link) => {
                       const Icon = link.icon
                       const isActive = currentPage === link.target
@@ -253,13 +247,13 @@ const Navbar = ({
                         <button
                           key={link.name}
                           onClick={() => handleMobileNavClick(link.target)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors text-left ${
+                          className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-colors text-left ${
                             isActive
                               ? 'bg-brand-accent text-brand-primary font-bold'
                               : 'text-text-secondary hover:bg-slate-50 hover:text-brand-primary'
                           }`}
                         >
-                          <Icon className="h-4.5 w-4.5 text-brand-primary" />
+                          <Icon className="h-4 w-4 text-brand-primary" />
                           <span>{link.name}</span>
                         </button>
                       )
@@ -273,9 +267,10 @@ const Navbar = ({
                       setIsMobileMenuOpen(false)
                       onOpenCounseling && onOpenCounseling()
                     }}
-                    className="btn btn-primary btn-md w-full"
+                    className="btn btn-primary btn-md w-full text-xs font-bold"
                   >
-                    Get Free Counseling
+                    <Sparkles className="h-4 w-4" />
+                    <span>Get Free Counseling</span>
                   </button>
                 </div>
               </motion.div>

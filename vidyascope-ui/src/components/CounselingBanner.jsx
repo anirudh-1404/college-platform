@@ -38,15 +38,15 @@ const CounselingBanner = ({ onOpenCounseling }) => {
           </div>
         </div>
 
-        {/* Right Column: CTA Action with standardized .btn-secondary */}
+        {/* Right Column: CTA Action */}
         <div className="flex-shrink-0 w-full sm:w-auto">
           <button
             onClick={onOpenCounseling}
-            className="btn btn-secondary btn-lg w-full sm:w-auto group"
+            className="btn btn-secondary btn-lg w-full sm:w-auto text-xs font-bold shadow-sm cursor-pointer"
           >
             <MessageSquare className="h-4 w-4 text-brand-primary" />
-            <span className="text-brand-primary font-bold">Get Free Counseling</span>
-            <ArrowRight className="h-4 w-4 text-brand-primary group-hover:translate-x-0.5 transition-transform" />
+            <span>Get Free Counseling</span>
+            <ArrowRight className="h-4 w-4 text-brand-primary" />
           </button>
         </div>
 

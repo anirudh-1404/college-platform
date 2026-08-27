@@ -1,75 +1,21 @@
 import React from 'react'
-import logoImg from '../../assets/logo.png'
 import {
-  LayoutDashboard,
-  Building2,
-  FileText,
-  MapPin,
-  BookOpen,
-  Compass,
-  IndianRupee,
-  Sparkles,
-  Home,
-  Image as ImageIcon,
-  TrendingUp,
-  Award,
-  GraduationCap,
-  HelpCircle,
-  Settings,
-  LogOut,
   ExternalLink,
   ChevronRight,
-  ShieldCheck,
+  LogOut,
 } from 'lucide-react'
+import logoImg from '../../assets/logo.png'
+import { ONBOARDING_STEPS } from '../../data/collegeModel'
 
-export const navSections = [
-  {
-    group: 'Overview',
-    items: [
-      { id: 'dashboard', label: 'Dashboard Home', icon: LayoutDashboard },
-    ],
-  },
-  {
-    group: 'College Information',
-    items: [
-      { id: 'profile', label: 'College Profile', icon: Building2 },
-      { id: 'about', label: 'About College', icon: FileText },
-      { id: 'contact', label: 'Contact & Location', icon: MapPin },
-    ],
-  },
-  {
-    group: 'Academics',
-    items: [
-      { id: 'courses', label: 'Courses & Programs', icon: BookOpen },
-      { id: 'admissions', label: 'Admissions', icon: Compass },
-      { id: 'fees', label: 'Fees Structure', icon: IndianRupee },
-    ],
-  },
-  {
-    group: 'Campus Life',
-    items: [
-      { id: 'facilities', label: 'Facilities', icon: Sparkles },
-      { id: 'hostels', label: 'Hostel & Living', icon: Home },
-      { id: 'gallery', label: 'Campus Gallery', icon: ImageIcon },
-    ],
-  },
-  {
-    group: 'Performance & Aid',
-    items: [
-      { id: 'placements', label: 'Placements', icon: TrendingUp },
-      { id: 'rankings', label: 'Rankings & NIRF', icon: Award },
-      { id: 'scholarships', label: 'Scholarships', icon: GraduationCap },
-    ],
-  },
-  {
-    group: 'Content & Help',
-    items: [
-      { id: 'faqs', label: 'FAQs Management', icon: HelpCircle },
-    ],
-  },
-]
-
-const Sidebar = ({ activeTab, onSelectTab, collegeName, onPreviewPublic, isMobileOpen, onCloseMobile }) => {
+const Sidebar = ({
+  activeStep,
+  onSelectStep,
+  collegeData,
+  onPreviewPublic,
+  onLogout,
+  isMobileOpen,
+  onCloseMobile,
+}) => {
   return (
     <>
       {/* Mobile Backdrop */}
@@ -86,20 +32,21 @@ const Sidebar = ({ activeTab, onSelectTab, collegeName, onPreviewPublic, isMobil
           isMobileOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'
         }`}
       >
-        {/* Brand Header */}
         <div>
+          {/* Brand Header */}
           <div className="h-16 px-4 border-b border-border-color flex items-center justify-between">
             <div className="flex items-center">
               <img
                 src={logoImg}
                 alt="VidyaScope Logo"
-                className="h-12 w-auto object-contain"
+                className="h-10 w-auto object-contain"
               />
             </div>
 
             {/* Mobile Close Button */}
             {isMobileOpen && (
               <button
+                type="button"
                 onClick={onCloseMobile}
                 className="lg:hidden p-1 text-text-light hover:text-text-primary cursor-pointer"
               >
@@ -109,62 +56,74 @@ const Sidebar = ({ activeTab, onSelectTab, collegeName, onPreviewPublic, isMobil
           </div>
 
           {/* College Quick Identity */}
-          <div className="p-4 border-b border-border-color bg-slate-50/60 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-white border border-border-color flex items-center justify-center font-bold text-brand-primary text-xs shadow-2xs flex-shrink-0">
-              IITB
+          <div className="p-3.5 border-b border-border-color bg-slate-50/70 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-white border border-border-color overflow-hidden flex items-center justify-center font-bold text-brand-primary text-xs shadow-2xs flex-shrink-0">
+              {collegeData?.logo ? (
+                <img src={collegeData.logo} alt="Logo" className="w-full h-full object-cover" />
+              ) : (
+                (collegeData?.shortName || 'COL').substring(0, 4)
+              )}
             </div>
-            <div className="overflow-hidden">
+            <div className="overflow-hidden min-w-0">
               <h3 className="font-serif text-xs font-bold text-text-primary truncate">
-                {collegeName || 'IIT Bombay'}
+                {collegeData?.shortName || collegeData?.name || 'My College'}
               </h3>
               <span className="text-[10px] text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.2 rounded inline-block">
-                Verified Portal
+                Institutional Portal
               </span>
             </div>
           </div>
 
-          {/* Navigation Items (Scrollable) */}
-          <div className="p-3 space-y-4 max-h-[calc(100vh-240px)] overflow-y-auto custom-scrollbar">
-            {navSections.map((sec) => (
-              <div key={sec.group} className="space-y-1">
-                <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-text-light block">
-                  {sec.group}
-                </span>
-                {sec.items.map((item) => {
-                  const Icon = item.icon
-                  const isActive = activeTab === item.id
+          {/* Navigation Step Items (Scrollable) */}
+          <div className="p-3 space-y-1 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar">
+            <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-text-light block mb-2">
+              Profile Management Sections
+            </span>
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => {
-                        onSelectTab(item.id)
-                        if (onCloseMobile) onCloseMobile()
-                      }}
-                      className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold transition-colors cursor-pointer text-left ${
-                        isActive
-                          ? 'bg-brand-primary text-white font-bold shadow-xs'
-                          : 'text-text-secondary hover:bg-slate-100 hover:text-text-primary'
+            {ONBOARDING_STEPS.map((step) => {
+              const Icon = step.icon
+              const isActive = activeStep === step.id
+
+              return (
+                <button
+                  key={step.id}
+                  type="button"
+                  onClick={() => {
+                    onSelectStep(step.id)
+                    if (onCloseMobile) onCloseMobile()
+                  }}
+                  className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer text-left ${
+                    isActive
+                      ? 'bg-brand-primary text-white font-bold shadow-xs'
+                      : 'text-text-secondary hover:bg-slate-100 hover:text-text-primary'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-text-light'}`} />
+                    <span className="truncate">{step.label}</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
+                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-text-light'
                       }`}
                     >
-                      <div className="flex items-center gap-2.5">
-                        <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-text-light'}`} />
-                        <span>{item.label}</span>
-                      </div>
-                      {isActive && <ChevronRight className="h-3.5 w-3.5 text-white" />}
-                    </button>
-                  )
-                })}
-              </div>
-            ))}
+                      {step.id}
+                    </span>
+                    {isActive && <ChevronRight className="h-3.5 w-3.5 text-white" />}
+                  </div>
+                </button>
+              )
+            })}
           </div>
         </div>
 
-        {/* Footer Actions (Settings & Public Preview) */}
+        {/* Footer Actions (Public Preview & Logout) */}
         <div className="p-3 border-t border-border-color space-y-1.5 bg-slate-50/50">
           <button
+            type="button"
             onClick={onPreviewPublic}
-            className="w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-semibold text-brand-primary hover:bg-brand-accent transition-colors cursor-pointer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-brand-primary hover:bg-brand-accent transition-colors cursor-pointer"
           >
             <div className="flex items-center gap-2">
               <ExternalLink className="h-3.5 w-3.5" />
@@ -176,11 +135,12 @@ const Sidebar = ({ activeTab, onSelectTab, collegeName, onPreviewPublic, isMobil
           </button>
 
           <button
-            onClick={() => alert('Institution Settings modal (Mock UI)')}
-            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-text-secondary hover:bg-slate-100 transition-colors cursor-pointer"
+            type="button"
+            onClick={onLogout}
+            className="w-full flex items-center gap-2.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
           >
-            <Settings className="h-3.5 w-3.5 text-text-light" />
-            <span>Portal Settings</span>
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Sign Out</span>
           </button>
         </div>
       </aside>

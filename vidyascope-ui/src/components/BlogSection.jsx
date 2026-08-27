@@ -1,21 +1,24 @@
 import React from 'react'
-import { BookOpen, Clock, ArrowRight } from 'lucide-react'
+import { Clock, ArrowRight } from 'lucide-react'
 import { blogsData } from '../data/blogsData'
 
 const BlogSection = ({ onNavigate }) => {
   return (
-    <section className="py-14 bg-slate-50/40 border-b border-border-color">
+    <section className="py-14 sm:py-18 bg-slate-50/50 border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
           <div>
-            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">
+            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-brand-accent px-2.5 py-0.5 rounded-md">
               Admissions Insights
             </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-1">
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-2">
               Latest Guidance & Strategy Articles
             </h2>
+            <p className="text-xs sm:text-sm text-text-secondary mt-1 max-w-xl">
+              In-depth research on counseling rounds, rank vs college predictions, and career roadmaps.
+            </p>
           </div>
           <button
             onClick={() => onNavigate && onNavigate('career-guide')}
@@ -27,12 +30,12 @@ const BlogSection = ({ onNavigate }) => {
         </div>
 
         {/* Blog Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
           {blogsData.map((post) => (
             <article
               key={post.id}
               onClick={() => onNavigate && onNavigate('career-guide')}
-              className="bg-white border border-border-color rounded-xl overflow-hidden hover:border-brand-primary/30 card-hover-lift cursor-pointer flex flex-col justify-between group"
+              className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="relative overflow-hidden aspect-[16/9] bg-slate-100">
@@ -41,7 +44,7 @@ const BlogSection = ({ onNavigate }) => {
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
-                  <span className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-xs text-brand-primary text-[10px] font-bold px-2 py-0.5 rounded uppercase">
+                  <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-brand-primary text-[10px] font-bold px-2 py-0.5 rounded-md uppercase shadow-2xs">
                     {post.category}
                   </span>
                 </div>
@@ -68,7 +71,7 @@ const BlogSection = ({ onNavigate }) => {
               <div className="p-5 pt-0">
                 <span className="text-xs font-bold text-brand-primary flex items-center gap-1">
                   <span>Read Guide</span>
-                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+                  <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </div>
             </article>

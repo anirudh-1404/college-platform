@@ -86,15 +86,15 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
-                  className="h-12 w-auto object-contain hover:opacity-90 transition-opacity"
+                  className="h-10 w-auto object-contain hover:opacity-90 transition-opacity"
                 />
               </button>
               <p className="text-xs sm:text-sm font-medium leading-relaxed max-w-sm text-slate-400">
-                VidyaScope is India's dedicated college discovery platform empowering students to explore verified cutoffs, authentic placement records, and transparent fee calculators.
+                VidyaScope is India&apos;s dedicated college discovery platform empowering students to explore verified cutoffs, authentic placement records, and transparent fee calculators.
               </p>
 
               {/* Social Handles */}
-              <div className="flex items-center gap-2.5 mt-1">
+              <div className="flex items-center gap-2 mt-1">
                 {socials.map((social) => {
                   const Icon = social.icon
                   return (
@@ -156,15 +156,15 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
               <h4 className="text-xs font-bold text-white uppercase tracking-wider font-serif">
                 Student Helpline
               </h4>
-              <ul className="flex flex-col items-start gap-3 w-full text-xs">
-                <li className="flex items-center gap-2.5 text-slate-400">
-                  <Phone className="h-4 w-4 text-brand-primary flex-shrink-0" />
+              <ul className="flex flex-col items-start gap-2.5 w-full text-xs">
+                <li className="flex items-center gap-2 text-slate-400">
+                  <Phone className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
                   <a href="tel:+9118001234567" className="hover:text-white transition-colors">
-                    1800 123 4567 (Toll-Free, 9am - 7pm)
+                    1800 123 4567 (Toll-Free)
                   </a>
                 </li>
-                <li className="flex items-center gap-2.5 text-slate-400">
-                  <Mail className="h-4 w-4 text-brand-primary flex-shrink-0" />
+                <li className="flex items-center gap-2 text-slate-400">
+                  <Mail className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
                   <a href="mailto:admissions@vidyascope.com" className="hover:text-white transition-colors">
                     admissions@vidyascope.com
                   </a>
@@ -173,7 +173,7 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
               <div className="mt-2 pt-3 border-t border-border-dark/80 w-full">
                 <button
                   onClick={() => onNavigate && onNavigate('counseling')}
-                  className="w-full py-2.5 rounded-lg bg-brand-primary/20 hover:bg-brand-primary/30 text-brand-primary border border-brand-primary/30 font-semibold text-xs transition-colors cursor-pointer"
+                  className="w-full py-2 rounded-lg bg-brand-primary/20 hover:bg-brand-primary/30 text-brand-primary border border-brand-primary/30 font-semibold text-xs transition-colors cursor-pointer"
                 >
                   Request Call Back
                 </button>
@@ -184,7 +184,7 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
 
           {/* Copyright Strip */}
           <div className="border-t border-border-dark/60 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
-            <p>© 2026 VidyaScope. Phase 1 Production Platform.</p>
+            <p>© 2026 VidyaScope. Transparent College Discovery Platform.</p>
             <p className="flex items-center gap-1.5">
               <span>Designed for Indian students</span>
               <Heart className="h-3.5 w-3.5 text-brand-primary fill-brand-primary" />

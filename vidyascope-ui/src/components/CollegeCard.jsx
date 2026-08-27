@@ -15,56 +15,55 @@ const CollegeCard = ({
 
   return (
     <motion.div
-      whileHover={{ y: -4 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-      className={`bg-white border border-border-color rounded-xl overflow-hidden hover:border-brand-primary/40 hover:shadow-lg transition-shadow flex ${
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+      className={`bg-white border border-slate-200/90 rounded-2xl overflow-hidden hover:border-brand-primary/40 hover:shadow-card-hover transition-all flex ${
         isGrid ? 'flex-col' : 'flex-col sm:flex-row'
       }`}
     >
       {/* Thumbnail Section */}
       <div
         className={`relative overflow-hidden bg-slate-100 flex-shrink-0 cursor-pointer group ${
-          isGrid ? 'w-full h-44' : 'w-full sm:w-60 h-44 sm:h-auto'
+          isGrid ? 'w-full h-48' : 'w-full sm:w-64 h-48 sm:h-auto'
         }`}
         onClick={() => onSelectCollege && onSelectCollege(college.id)}
       >
         <img
           src={college.image}
           alt={college.name}
-          className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500 ease-out"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
         />
 
         {/* Badges */}
-        <div className="absolute top-2.5 left-2.5 flex items-center gap-1.5 z-10">
-          <span className="px-2 py-0.5 rounded-md bg-slate-900/80 text-white text-[10px] font-bold uppercase">
+        <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10">
+          <span className="px-2 py-0.5 rounded-md bg-slate-900/85 text-white text-[10px] font-bold uppercase backdrop-blur-xs">
             NIRF #{college.nirfRank}
           </span>
-          <span className="px-2 py-0.5 rounded-md bg-white/95 text-text-primary text-[10px] font-bold uppercase shadow-xs">
+          <span className="px-2 py-0.5 rounded-md bg-white/95 text-text-primary text-[10px] font-bold uppercase shadow-2xs">
             {college.ownership}
           </span>
         </div>
 
-        {/* Shortlist Button with heart pop */}
-        <motion.button
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.85 }}
+        {/* Shortlist Button */}
+        <button
+          type="button"
           onClick={(e) => {
             e.stopPropagation()
             onToggleShortlist && onToggleShortlist(college.id)
           }}
-          className={`absolute top-2.5 right-2.5 p-1.5 rounded-lg transition-colors z-10 cursor-pointer ${
+          className={`absolute top-3 right-3 p-2 rounded-xl transition-all z-10 cursor-pointer ${
             isShortlisted
               ? 'bg-rose-500 text-white shadow-sm'
-              : 'bg-slate-900/40 text-white hover:bg-rose-500 hover:text-white'
+              : 'bg-slate-900/40 text-white hover:bg-rose-500 hover:text-white backdrop-blur-xs'
           }`}
           title={isShortlisted ? 'Remove from Saved' : 'Save College'}
         >
           <Heart className={`h-4 w-4 ${isShortlisted ? 'fill-white' : ''}`} />
-        </motion.button>
+        </button>
       </div>
 
       {/* Content Body */}
-      <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between gap-3.5">
+      <div className="flex-1 p-5 flex flex-col justify-between gap-3.5">
         <div>
           {/* Header Row */}
           <div className="flex items-start justify-between gap-2">
@@ -75,7 +74,7 @@ const CollegeCard = ({
               >
                 {college.name}
               </h3>
-              <p className="flex items-center gap-1 text-xs text-text-light font-medium mt-0.5">
+              <p className="flex items-center gap-1.5 text-xs text-text-light font-medium mt-0.5">
                 <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
                 <span>{college.location}</span>
                 <span>•</span>
@@ -84,7 +83,7 @@ const CollegeCard = ({
             </div>
 
             {/* Rating */}
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/60 rounded-lg flex-shrink-0 text-xs font-bold text-amber-800">
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 border border-amber-200/60 rounded-lg flex-shrink-0 text-xs font-bold text-amber-900">
               <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
               <span>{college.rating}</span>
             </div>
@@ -111,7 +110,7 @@ const CollegeCard = ({
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-lg border border-border-color text-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 bg-slate-50 p-2.5 rounded-xl border border-slate-100 text-xs">
           <div>
             <span className="text-[10px] text-text-light font-semibold uppercase tracking-wider block">
               Avg Package
@@ -141,25 +140,26 @@ const CollegeCard = ({
         </div>
 
         {/* Bottom Actions Row */}
-        <div className="flex items-center justify-between gap-3 pt-2 border-t border-border-color text-xs">
+        <div className="flex items-center justify-between gap-3 pt-2 border-t border-slate-100 text-xs">
           {/* Compare Checkbox */}
           <label className="flex items-center gap-1.5 font-medium text-text-secondary cursor-pointer hover:text-text-primary select-none">
             <input
               type="checkbox"
               checked={isCompared}
               onChange={() => onToggleCompare && onToggleCompare(college)}
-              className="w-3.5 h-3.5 rounded text-brand-primary border-border-color focus:ring-brand-primary accent-brand-primary cursor-pointer"
+              className="w-3.5 h-3.5 rounded text-brand-primary border-slate-300 focus:ring-brand-primary accent-brand-primary cursor-pointer"
             />
             <span>Compare</span>
           </label>
 
-          {/* View Details CTA with curved arc hover */}
+          {/* View Details CTA */}
           <button
+            type="button"
             onClick={() => onSelectCollege && onSelectCollege(college.id)}
-            className="btn btn-primary btn-sm group"
+            className="btn btn-primary btn-sm text-xs font-bold cursor-pointer"
           >
             <span>View Details</span>
-            <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-0.5 transition-transform" />
+            <ArrowRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
