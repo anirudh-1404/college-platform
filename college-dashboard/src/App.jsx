@@ -18,6 +18,7 @@ function App() {
   // College Profile Master State
   const [collegeData, setCollegeData] = useState(() => collegeService.getCollegeData())
   const [activeStep, setActiveStep] = useState(1)
+  const [completedSteps, setCompletedSteps] = useState([])
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
 
@@ -140,6 +141,7 @@ function App() {
             setActiveStep(step)
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }}
+          completedSteps={completedSteps}
           collegeData={collegeData}
           onPreviewPublic={() => setPreviewModalOpen(true)}
           onLogout={handleLogout}
@@ -166,6 +168,10 @@ function App() {
               onUpdateCollegeData={setCollegeData}
               currentStep={activeStep}
               onStepChange={(step) => setActiveStep(step)}
+              completedSteps={completedSteps}
+              onCompleteStep={(stepId) =>
+                setCompletedSteps((prev) => Array.from(new Set([...prev, stepId])))
+              }
               onOpenPublicPreview={() => setPreviewModalOpen(true)}
             />
           </main>

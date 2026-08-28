@@ -24,6 +24,7 @@ const OnboardingContainer = ({
   onUpdateCollegeData,
   currentStep = 1,
   onStepChange,
+  onCompleteStep,
   onOpenPublicPreview,
 }) => {
   const profileStatus = collegeData.profileStatus || 'draft'
@@ -44,8 +45,10 @@ const OnboardingContainer = ({
     onUpdateCollegeData(saved)
   }
 
-  // Handle Navigation Next
+  // Handle Navigation Next (Save & Continue)
   const handleNext = () => {
+    handleSaveDraft()
+    if (onCompleteStep) onCompleteStep(currentStep)
     if (currentStep < 10) {
       const next = currentStep + 1
       if (onStepChange) onStepChange(next)

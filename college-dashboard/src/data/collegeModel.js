@@ -111,7 +111,7 @@ export const DEFAULT_COLLEGE_DATA = {
   nirfCategory: 'Engineering',
   seats: '1,360',
   tags: ['Government', 'NIRF #3', 'NAAC A++', 'Institute of Eminence'],
-  logo: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=200&h=200&q=80',
+  logo: '',
   image: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&h=600&q=80',
   description: 'Premier public technical university located in Powai, Mumbai. Renowned for world-class computer science and engineering programs, stellar research output, and top international placements.',
   snapshot: {

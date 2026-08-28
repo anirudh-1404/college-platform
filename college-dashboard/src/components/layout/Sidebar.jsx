@@ -2,6 +2,7 @@ import React from 'react'
 import {
   ExternalLink,
   ChevronRight,
+  Check,
   LogOut,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
@@ -10,6 +11,7 @@ import { ONBOARDING_STEPS } from '../../data/collegeModel'
 const Sidebar = ({
   activeStep,
   onSelectStep,
+  completedSteps = [],
   collegeData,
   onPreviewPublic,
   onLogout,
@@ -83,6 +85,7 @@ const Sidebar = ({
             {ONBOARDING_STEPS.map((step) => {
               const Icon = step.icon
               const isActive = activeStep === step.id
+              const isCompleted = completedSteps.includes(step.id)
 
               return (
                 <button
@@ -102,14 +105,21 @@ const Sidebar = ({
                     <Icon className={`h-4 w-4 flex-shrink-0 ${isActive ? 'text-white' : 'text-text-light'}`} />
                     <span className="truncate">{step.label}</span>
                   </div>
-                  <div className="flex items-center gap-1">
-                    <span
-                      className={`text-[10px] px-1.5 py-0.2 rounded font-bold ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-slate-100 text-text-light'
-                      }`}
-                    >
-                      {step.id}
-                    </span>
+
+                  <div className="flex items-center gap-1.5 flex-shrink-0">
+                    {isCompleted && (
+                      <span
+                        className={`flex items-center justify-center w-4.5 h-4.5 rounded-full ${
+                          isActive
+                            ? 'bg-white text-brand-primary'
+                            : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
+                        }`}
+                        title="Completed"
+                      >
+                        <Check className="h-3 w-3 stroke-[3]" />
+                      </span>
+                    )}
+
                     {isActive && <ChevronRight className="h-3.5 w-3.5 text-white" />}
                   </div>
                 </button>

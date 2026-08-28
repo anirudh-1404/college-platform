@@ -73,7 +73,7 @@ const collegeSchema = new mongoose.Schema(
     },
     logo: {
       type: String,
-      default: "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=200&h=200&q=80",
+      default: "",
     },
     image: {
       type: String,
