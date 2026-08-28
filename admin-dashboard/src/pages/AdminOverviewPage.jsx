@@ -146,7 +146,7 @@ const AdminOverviewPage = ({
                 onClick={() => onNavigate('profiles')}
                 className="text-xs text-purple-600 hover:text-purple-700 font-medium cursor-pointer"
               >
-                View all ({profiles.length})
+                View all ({underReviewProfiles.length + changesRequestedProfiles.length})
               </button>
             </div>
 

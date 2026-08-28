@@ -5,6 +5,7 @@ import {
   XCircle,
   AlertTriangle,
   Eye,
+  FileCheck,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal } from '../components/common/AdminModal'
@@ -36,8 +37,14 @@ const CollegeProfilesReviewPage = ({
         (p.shortName && p.shortName.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (p.stream && p.stream.toLowerCase().includes(searchQuery.toLowerCase()))
 
-      const matchStatus =
-        filterStatus === 'all' || p.profileStatus === filterStatus
+      // If 'all', show ONLY submitted/actionable profiles (under_review, changes_requested, published)
+      // Unsubmitted drafts won't clutter the approval review queue unless the 'draft' tab is explicitly clicked
+      let matchStatus = false
+      if (filterStatus === 'all') {
+        matchStatus = p.profileStatus === 'under_review' || p.profileStatus === 'changes_requested' || p.profileStatus === 'published'
+      } else {
+        matchStatus = p.profileStatus === filterStatus
+      }
 
       return matchSearch && matchStatus
     })
@@ -93,7 +100,7 @@ const CollegeProfilesReviewPage = ({
             College Profiles CMS Review
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Inspect submitted college data across all 10 sections and manage live publishing.
+            Review submitted 10-step institutional data from colleges and approve for live publishing.
           </p>
         </div>
 
@@ -102,11 +109,11 @@ const CollegeProfilesReviewPage = ({
           {/* Status Tabs */}
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
             {[
-              { id: 'all', label: 'All' },
+              { id: 'all', label: 'All Submitted' },
               { id: 'under_review', label: 'Under Review' },
               { id: 'changes_requested', label: 'Changes Requested' },
               { id: 'published', label: 'Published' },
-              { id: 'draft', label: 'Draft' },
+              { id: 'draft', label: 'In-Progress Drafts' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -164,11 +171,11 @@ const CollegeProfilesReviewPage = ({
                   </td>
 
                   <td className="py-3 px-4 font-semibold text-slate-900">
-                    #{profile.nirfRank || 3}
+                    #{profile.rankings?.nirfRank || profile.nirfRank || 'N/A'}
                   </td>
 
                   <td className="py-3 px-4 font-semibold text-emerald-600">
-                    {profile.avgPackage || '₹24.5 LPA'}
+                    {profile.placements?.avgPackage || profile.avgPackage || 'Not Specified'}
                   </td>
 
                   <td className="py-3 px-4">
@@ -190,8 +197,12 @@ const CollegeProfilesReviewPage = ({
 
               {filteredProfiles.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-10 text-center text-xs text-slate-400">
-                    No college profiles found.
+                  <td colSpan={6} className="py-12 text-center text-xs text-slate-400 space-y-2">
+                    <FileCheck className="h-8 w-8 text-slate-300 mx-auto" />
+                    <p className="font-semibold text-slate-700">No Profiles Awaiting Review</p>
+                    <p className="text-slate-400 max-w-sm mx-auto">
+                      When an approved college fills in their 10-step profile and clicks "Submit for Review", it will appear here for editorial inspection and live publishing.
+                    </p>
                   </td>
                 </tr>
               )}
@@ -220,7 +231,7 @@ const CollegeProfilesReviewPage = ({
                   <AdminStatusBadge status={reviewingProfile.profileStatus} />
                 </div>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  NIRF #{reviewingProfile.nirfRank || 3} • {reviewingProfile.location || 'India'}
+                  NIRF #{reviewingProfile.rankings?.nirfRank || reviewingProfile.nirfRank || 'N/A'} • {reviewingProfile.locationContact?.city || reviewingProfile.location || 'India'}
                 </p>
               </div>
 
@@ -341,6 +352,9 @@ const CollegeProfilesReviewPage = ({
                         </span>
                       </div>
                     ))}
+                    {(reviewingProfile.coursesOffered || []).length === 0 && (
+                      <p className="p-4 text-center text-slate-400">No courses added yet by the college.</p>
+                    )}
                   </div>
                 </div>
               )}
@@ -367,6 +381,9 @@ const CollegeProfilesReviewPage = ({
                             <td className="p-2.5 text-slate-500">{c.obcCutoff}</td>
                           </tr>
                         ))}
+                        {(reviewingProfile.admissionCutoffs || []).length === 0 && (
+                          <tr><td colSpan={4} className="p-4 text-center text-slate-400">No cutoffs added yet.</td></tr>
+                        )}
                       </tbody>
                     </table>
                   </div>
@@ -377,15 +394,15 @@ const CollegeProfilesReviewPage = ({
                 <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-semibold block">Highest Domestic</span>
-                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.highestDomestic || '₹1.5 Cr'}</span>
+                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.highestDomestic || 'N/A'}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-semibold block">Average Package</span>
-                    <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{reviewingProfile.placements?.avgPackage || '₹24.5 LPA'}</span>
+                    <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{reviewingProfile.placements?.avgPackage || 'N/A'}</span>
                   </div>
                   <div>
                     <span className="text-slate-400 text-[10px] uppercase font-semibold block">Placement Rate</span>
-                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.placementRate || 98}%</span>
+                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.placementRate || 0}%</span>
                   </div>
                 </div>
               )}
@@ -393,13 +410,15 @@ const CollegeProfilesReviewPage = ({
               {activeReviewSection === 'roi' && (
                 <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 space-y-2">
                   <span className="text-slate-700 font-semibold block">Annual Cost Breakdown</span>
-                  {reviewingProfile.hiddenCosts && (
+                  {reviewingProfile.hiddenCosts ? (
                     <div className="grid grid-cols-2 gap-2 text-xs">
                       <div>Tuition/Yr: ₹{((reviewingProfile.hiddenCosts.tuitionFeePerYear || 0) / 100000).toFixed(2)} L</div>
                       <div>Hostel/Yr: ₹{((reviewingProfile.hiddenCosts.hostelRentYearly || 0) / 100000).toFixed(2)} L</div>
                       <div>Mess/Yr: ₹{((reviewingProfile.hiddenCosts.messChargesYearly || 0) / 100000).toFixed(2)} L</div>
                       <div>Caution Money: ₹{((reviewingProfile.hiddenCosts.cautionDepositOneTime || 0) / 100000).toFixed(2)} L</div>
                     </div>
+                  ) : (
+                    <p className="text-slate-400">No cost breakdown submitted.</p>
                   )}
                 </div>
               )}
@@ -411,13 +430,16 @@ const CollegeProfilesReviewPage = ({
                       ✓ {f}
                     </span>
                   ))}
+                  {(reviewingProfile.facilities || []).length === 0 && (
+                    <p className="text-slate-400">No facilities selected.</p>
+                  )}
                 </div>
               )}
 
               {activeReviewSection === 'rankings' && (
                 <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <div><strong>NIRF Rank:</strong> #{reviewingProfile.nirfRank || 3}</div>
-                  <div><strong>NAAC Grade:</strong> {reviewingProfile.naacGrade || 'A++'}</div>
+                  <div><strong>NIRF Rank:</strong> #{reviewingProfile.rankings?.nirfRank || reviewingProfile.nirfRank || 'N/A'}</div>
+                  <div><strong>NAAC Grade:</strong> {reviewingProfile.rankings?.naacGrade || reviewingProfile.naacGrade || 'N/A'}</div>
                 </div>
               )}
             </div>
