@@ -1,37 +1,27 @@
 /**
- * VidyaScope Auth & Registration Service (Local Database Simulation)
- * Implements Stage 1: College Account Registration, Verification Proof Upload,
- * Pending Verification state, and Admin acceptance/rejection flow.
+ * VidyaScope Auth & Registration Service (Connected to Live REST Backend)
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/auth'
 const STORAGE_KEY_AUTH = 'vidyascope_college_auth'
-
-const DEFAULT_AUTH_STATE = {
-  isAuthenticated: true,
-  user: {
-    id: 'user_iitb_01',
-    collegeId: 'iit-bombay',
-    collegeName: 'Indian Institute of Technology Bombay',
-    email: 'admin@iitb.ac.in',
-    contactPerson: 'Dr. S. K. Sharma',
-    designation: 'Dean of Academic & Public Relations',
-    phone: '+91-9820012345',
-    registrationProof: {
-      name: 'IITB_Govt_Establishment_Act_Proof.pdf',
-      size: '2.4 MB',
-      type: 'application/pdf',
-      uploadedAt: '24 Aug 2026, 10:00 AM',
-      url: null,
-    },
-    // Account Verification Status: 'pending_verification' | 'approved' | 'rejected'
-    accountStatus: 'approved',
-    rejectionReason: null,
-    registeredAt: '24 Aug 2026, 10:00 AM',
-  },
-}
+const STORAGE_KEY_TOKEN = 'vidyascope_token'
 
 export const authService = {
-  // Get current auth state
+  // Get token
+  getToken() {
+    return localStorage.getItem(STORAGE_KEY_TOKEN) || ''
+  },
+
+  // Set token
+  setToken(token) {
+    if (token) {
+      localStorage.setItem(STORAGE_KEY_TOKEN, token)
+    } else {
+      localStorage.removeItem(STORAGE_KEY_TOKEN)
+    }
+  },
+
+  // Get current local auth state
   getAuthState() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_AUTH)
@@ -41,9 +31,10 @@ export const authService = {
     } catch (e) {
       console.error('Error reading auth state from storage', e)
     }
-    // Set default and return
-    localStorage.setItem(STORAGE_KEY_AUTH, JSON.stringify(DEFAULT_AUTH_STATE))
-    return DEFAULT_AUTH_STATE
+    return {
+      isAuthenticated: false,
+      user: null,
+    }
   },
 
   // Save auth state
@@ -56,145 +47,111 @@ export const authService = {
     }
   },
 
-  // Register a new college account
-  async registerCollege({ collegeName, email, contactPerson, designation, phone, proofFile }) {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 600))
+  // Register a new college account in MongoDB
+  async registerCollege({ collegeName, email, password, contactPerson, designation, phone, proofFile }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/register-college`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          collegeName,
+          email,
+          password: password || 'College@123',
+          contactPerson,
+          designation,
+          phone,
+          proofDocument: proofFile ? {
+            name: proofFile.name || 'Registration_Document.pdf',
+            size: proofFile.size ? `${(proofFile.size / (1024 * 1024)).toFixed(2)} MB` : '1.2 MB',
+            type: proofFile.type || 'application/pdf',
+          } : undefined,
+        }),
+      })
 
-    const collegeId = collegeName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Registration failed')
+      }
 
-    const proofData = proofFile ? {
-      name: proofFile.name || 'Registration_Document.pdf',
-      size: proofFile.size ? `${(proofFile.size / (1024 * 1024)).toFixed(2)} MB` : '1.2 MB',
-      type: proofFile.type || 'application/pdf',
-      uploadedAt: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      url: proofFile.previewUrl || null,
-    } : {
-      name: 'Verification_Proof.pdf',
-      size: '1.5 MB',
-      type: 'application/pdf',
-      uploadedAt: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-      url: null,
+      const state = {
+        isAuthenticated: false,
+        user: {
+          ...data.user,
+          accountStatus: 'pending_verification',
+        },
+      }
+      this.saveAuthState(state)
+
+      return { success: true, user: data.user }
+    } catch (error) {
+      console.error('registerCollege error:', error)
+      throw error
     }
-
-    const newUser = {
-      id: `user_${Date.now()}`,
-      collegeId: collegeId || 'new-college',
-      collegeName,
-      email,
-      contactPerson: contactPerson || 'Authorized Representative',
-      designation: designation || 'College Registrar / Administrator',
-      phone: phone || '',
-      registrationProof: proofData,
-      accountStatus: 'pending_verification', // MUST START IN PENDING VERIFICATION
-      rejectionReason: null,
-      registeredAt: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-    }
-
-    const state = {
-      isAuthenticated: false, // Not logged into dashboard yet
-      user: newUser,
-    }
-
-    this.saveAuthState(state)
-    return { success: true, user: newUser }
   },
 
-  // Login
-  async login({ email }) {
-    await new Promise((resolve) => setTimeout(resolve, 400))
-    const current = this.getAuthState()
-    
-    // Check if account matches or allow default
-    if (current.user && current.user.email === email) {
-      if (current.user.accountStatus === 'pending_verification') {
-        return { success: false, status: 'pending_verification', user: current.user, message: 'Your college account is pending verification by VidyaScope Admin.' }
-      }
-      if (current.user.accountStatus === 'rejected') {
-        return { success: false, status: 'rejected', user: current.user, message: current.user.rejectionReason || 'Your registration was rejected by Admin.' }
+  // Login via Live Backend
+  async login({ email, password }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid credentials')
       }
 
-      const updated = {
-        ...current,
+      if (data.user?.accountStatus === 'pending_verification') {
+        const state = {
+          isAuthenticated: false,
+          user: data.user,
+        }
+        this.saveAuthState(state)
+        return { success: false, status: 'pending_verification', user: data.user, message: 'Your college account is pending verification by VidyaScope Admin.' }
+      }
+
+      if (data.user?.accountStatus === 'rejected') {
+        const state = {
+          isAuthenticated: false,
+          user: data.user,
+        }
+        this.saveAuthState(state)
+        return { success: false, status: 'rejected', user: data.user, message: data.user.rejectionReason || 'Your registration was rejected by Admin.' }
+      }
+
+      // Successful login
+      if (data.token) {
+        this.setToken(data.token)
+      }
+
+      const state = {
         isAuthenticated: true,
+        user: data.user,
       }
-      this.saveAuthState(updated)
-      return { success: true, user: updated.user }
-    }
+      this.saveAuthState(state)
 
-    // Default mock login fallback
-    const fallbackUser = {
-      ...DEFAULT_AUTH_STATE.user,
-      email,
-      accountStatus: 'approved',
+      return { success: true, user: data.user }
+    } catch (error) {
+      console.error('login error:', error)
+      throw error
     }
-    const state = {
-      isAuthenticated: true,
-      user: fallbackUser,
-    }
-    this.saveAuthState(state)
-    return { success: true, user: fallbackUser }
   },
 
   // Logout
-  logout() {
-    const current = this.getAuthState()
-    const updated = {
-      ...current,
-      isAuthenticated: false,
+  async logout() {
+    try {
+      await fetch(`${API_BASE_URL}/logout`, { method: 'POST' })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      this.setToken(null)
+      const state = {
+        isAuthenticated: false,
+        user: null,
+      }
+      this.saveAuthState(state)
     }
-    this.saveAuthState(updated)
-  },
-
-  // Admin Simulator Actions for Stage 1: Registration Approval
-  adminApproveRegistration() {
-    const current = this.getAuthState()
-    if (!current.user) return
-    const updated = {
-      ...current,
-      user: {
-        ...current.user,
-        accountStatus: 'approved',
-        rejectionReason: null,
-      },
-    }
-    this.saveAuthState(updated)
-    return updated
-  },
-
-  adminRejectRegistration(reason = 'Verification proof is blurry or invalid. Please re-upload official state recognition certificate.') {
-    const current = this.getAuthState()
-    if (!current.user) return
-    const updated = {
-      ...current,
-      isAuthenticated: false,
-      user: {
-        ...current.user,
-        accountStatus: 'rejected',
-        rejectionReason: reason,
-      },
-    }
-    this.saveAuthState(updated)
-    return updated
-  },
-
-  adminSetRegistrationPending() {
-    const current = this.getAuthState()
-    if (!current.user) return
-    const updated = {
-      ...current,
-      isAuthenticated: false,
-      user: {
-        ...current.user,
-        accountStatus: 'pending_verification',
-      },
-    }
-    this.saveAuthState(updated)
-    return updated
-  },
-
-  resetAllAuth() {
-    localStorage.removeItem(STORAGE_KEY_AUTH)
-    return DEFAULT_AUTH_STATE
   },
 }

@@ -1,11 +1,24 @@
 /**
- * VidyaScope Admin Authentication Service
- * Manages admin session persistence and login credentials.
+ * VidyaScope Admin Authentication Service (Connected to Live REST Backend)
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/auth'
 const STORAGE_KEY_ADMIN_AUTH = 'vidyascope_admin_auth_session'
+const STORAGE_KEY_ADMIN_TOKEN = 'vidyascope_admin_token'
 
 export const adminAuthService = {
+  getToken() {
+    return localStorage.getItem(STORAGE_KEY_ADMIN_TOKEN) || ''
+  },
+
+  setToken(token) {
+    if (token) {
+      localStorage.setItem(STORAGE_KEY_ADMIN_TOKEN, token)
+    } else {
+      localStorage.removeItem(STORAGE_KEY_ADMIN_TOKEN)
+    }
+  },
+
   getAdminAuth() {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_ADMIN_AUTH)
@@ -20,46 +33,49 @@ export const adminAuthService = {
   },
 
   async login(email, password) {
-    await new Promise((resolve) => setTimeout(resolve, 400))
+    try {
+      const res = await fetch(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
 
-    if (!email || !password) {
-      throw new Error('Please enter email and password.')
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid credentials')
+      }
+
+      if (data.token) {
+        this.setToken(data.token)
+      }
+
+      const session = {
+        isAuthenticated: true,
+        user: data.user,
+      }
+
+      localStorage.setItem(STORAGE_KEY_ADMIN_AUTH, JSON.stringify(session))
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_auth_change', { detail: session }))
+      return session
+    } catch (error) {
+      console.error('adminAuthService.login error:', error)
+      throw error
     }
-
-    const trimmedEmail = email.trim().toLowerCase()
-
-    // Accept standard admin emails or newly added admin credentials
-    const adminUser = {
-      id: 'admin_usr_01',
-      name: trimmedEmail.includes('editorial') ? 'Editorial Officer' : 'VidyaScope Super Admin',
-      email: trimmedEmail,
-      role: 'super_admin',
-      designation: 'Central Authority Administrator',
-      lastLogin: new Date().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
-    }
-
-    const session = {
-      isAuthenticated: true,
-      user: adminUser,
-    }
-
-    localStorage.setItem(STORAGE_KEY_ADMIN_AUTH, JSON.stringify(session))
-    window.dispatchEvent(new CustomEvent('vidyascope_admin_auth_change', { detail: session }))
-    return session
   },
 
-  logout() {
-    const emptySession = {
-      isAuthenticated: false,
-      user: null,
+  async logout() {
+    try {
+      await fetch(`${API_BASE_URL}/logout`, { method: 'POST' })
+    } catch (e) {
+      console.error(e)
+    } finally {
+      this.setToken(null)
+      const emptySession = {
+        isAuthenticated: false,
+        user: null,
+      }
+      localStorage.setItem(STORAGE_KEY_ADMIN_AUTH, JSON.stringify(emptySession))
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_auth_change', { detail: emptySession }))
     }
-    localStorage.setItem(STORAGE_KEY_ADMIN_AUTH, JSON.stringify(emptySession))
-    window.dispatchEvent(new CustomEvent('vidyascope_admin_auth_change', { detail: emptySession }))
   },
 }

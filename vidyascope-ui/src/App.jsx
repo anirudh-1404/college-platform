@@ -24,9 +24,9 @@ import CounselingPage from './pages/CounselingPage'
 const App = () => {
   const [currentPage, setCurrentPage] = useState('home')
   const [selectedStream, setSelectedStream] = useState('all')
-  const [selectedCollegeId, setSelectedCollegeId] = useState('iit-bombay')
+  const [selectedCollegeId, setSelectedCollegeId] = useState(null)
   const [compareList, setCompareList] = useState([])
-  const [shortlistedIds, setShortlistedIds] = useState(['iit-bombay', 'iim-ahmedabad', 'aiims-delhi'])
+  const [shortlistedIds, setShortlistedIds] = useState([])
   const [isCounselingModalOpen, setIsCounselingModalOpen] = useState(false)
   const [heroSearchQuery, setHeroSearchQuery] = useState('')
 

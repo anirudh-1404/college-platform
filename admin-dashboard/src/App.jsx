@@ -20,23 +20,40 @@ function App() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
 
   // Live Synchronized Master Data States
-  const [registrations, setRegistrations] = useState(() => adminService.getRegistrations())
-  const [profiles, setProfiles] = useState(() => adminService.getAllProfiles())
-  const [users, setUsers] = useState(() => adminService.getUsers())
-  const [auditLogs, setAuditLogs] = useState(() => adminService.getAuditLogs())
-  const [analytics, setAnalytics] = useState(() => adminService.getAnalytics())
+  const [registrations, setRegistrations] = useState([])
+  const [profiles, setProfiles] = useState([])
+  const [users, setUsers] = useState([])
+  const [auditLogs, setAuditLogs] = useState([])
+  const [analytics, setAnalytics] = useState({
+    totalColleges: 0,
+    publishedProfiles: 0,
+    underReviewProfiles: 0,
+    changesRequestedProfiles: 0,
+    pendingRegistrations: 0,
+    approvedRegistrations: 0,
+    totalUsers: 0,
+  })
 
   // Reload handler
-  const reloadData = () => {
-    setRegistrations(adminService.getRegistrations())
-    setProfiles(adminService.getAllProfiles())
-    setUsers(adminService.getUsers())
-    setAuditLogs(adminService.getAuditLogs())
-    setAnalytics(adminService.getAnalytics())
+  const reloadData = async () => {
+    const [regs, profs, usrs, logs, anal] = await Promise.all([
+      adminService.getRegistrations(),
+      adminService.getAllProfiles(),
+      adminService.getUsers(),
+      adminService.getAuditLogs(),
+      adminService.getAnalytics(),
+    ])
+    setRegistrations(regs)
+    setProfiles(profs)
+    setUsers(usrs)
+    setAuditLogs(logs)
+    setAnalytics(anal)
   }
 
-  // Cross-App & Window Event Listeners for Instant Synchronization
+  // Load data on mount & subscribe to changes
   useEffect(() => {
+    reloadData()
+
     const handleSync = () => reloadData()
     const handleAuth = (e) => {
       if (e.detail) setAuthState(e.detail)
@@ -55,16 +72,17 @@ function App() {
       window.removeEventListener('vidyascope_admin_auth_change', handleAuth)
       window.removeEventListener('storage', handleSync)
     }
-  }, [])
+  }, [authState.isAuthenticated])
 
   // Auth Handlers
   const handleLogin = async (email, password) => {
     const session = await adminAuthService.login(email, password)
     setAuthState(session)
+    reloadData()
   }
 
-  const handleLogout = () => {
-    adminAuthService.logout()
+  const handleLogout = async () => {
+    await adminAuthService.logout()
     setAuthState(adminAuthService.getAdminAuth())
   }
 
@@ -81,17 +99,17 @@ function App() {
 
   // Action Handlers for Profiles
   const handleApproveAndPublishProfile = async (collegeId) => {
-    await adminService.approveAndPublishProfile(collegeId)
+    await adminService.approveAndPublish(collegeId)
     reloadData()
   }
 
   const handleRequestProfileChanges = async (collegeId, feedbackNotes) => {
-    await adminService.requestProfileChanges(collegeId, feedbackNotes)
+    await adminService.requestChanges(collegeId, feedbackNotes)
     reloadData()
   }
 
   const handleUnpublishProfile = async (collegeId) => {
-    await adminService.unpublishProfile(collegeId)
+    await adminService.unpublish(collegeId)
     reloadData()
   }
 
@@ -101,23 +119,13 @@ function App() {
     reloadData()
   }
 
-  const handleUpdateUser = async (userId, data) => {
-    await adminService.updateUser(userId, data)
-    reloadData()
-  }
-
   const handleDeleteUser = async (userId) => {
     await adminService.deleteUser(userId)
     reloadData()
   }
 
-  const handleToggleUserStatus = async (userId) => {
-    await adminService.toggleUserStatus(userId)
-    reloadData()
-  }
-
-  const handleUpdatePlatformData = (collegeId, data) => {
-    adminService.updatePlatformData(collegeId, data)
+  const handleUpdatePlatformData = async (collegeId, data) => {
+    await adminService.updatePlatformData(collegeId, data)
     reloadData()
   }
 
@@ -128,32 +136,28 @@ function App() {
       case 'profiles':
         return 'College Profiles & CMS Editorial Review'
       case 'users':
-        return 'Admin Team & Roles'
+        return 'Admin Users Management'
       case 'platform-data':
-        return 'Platform Data & SEO Controls'
+        return 'Platform Data & Ratings Management'
       case 'audit-logs':
-        return 'Administrative Audit Logs'
+        return 'Audit Logs & Action Trail'
       case 'overview':
       default:
-        return 'Admin Master Overview'
+        return 'Admin Overview'
     }
   }
 
-  // Case 1: Unauthenticated -> Render Admin Login Screen
+  // If not logged in, render Admin Login screen
   if (!authState.isAuthenticated) {
     return <AdminLoginPage onLoginSuccess={handleLogin} />
   }
 
-  // Case 2: Authenticated -> Render Full Admin Authority Console
   return (
-    <div className="min-h-screen bg-slate-50 text-text-primary flex">
-      {/* 1. Left Sidebar Navigation */}
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex">
+      {/* 1. Master Left Sidebar */}
       <AdminSidebar
         activePage={activePage}
-        onSelectPage={(page) => {
-          setActivePage(page)
-          window.scrollTo({ top: 0, behavior: 'smooth' })
-        }}
+        onSelectPage={(page) => setActivePage(page)}
         pendingRegistrationsCount={analytics.pendingRegistrations}
         underReviewCount={analytics.underReviewProfiles}
         usersCount={users.length}
@@ -163,9 +167,9 @@ function App() {
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* 2. Main Content Canvas */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-        {/* Top Sticky Header */}
+      {/* 2. Main Administration Canvas */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-60">
+        {/* Top Header */}
         <AdminTopBar
           pageTitle={getPageTitle()}
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
@@ -175,24 +179,15 @@ function App() {
         />
 
         {/* Dynamic Page Views */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
           {activePage === 'overview' && (
             <AdminOverviewPage
               analytics={analytics}
               pendingRegistrations={registrations.filter((r) => r.status === 'pending')}
               profiles={profiles}
-              onNavigate={(page) => {
-                setActivePage(page)
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-              onInspectRegistration={() => {
-                setActivePage('registrations')
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
-              onInspectProfile={() => {
-                setActivePage('profiles')
-                window.scrollTo({ top: 0, behavior: 'smooth' })
-              }}
+              onNavigate={(page) => setActivePage(page)}
+              onInspectRegistration={() => setActivePage('registrations')}
+              onInspectProfile={() => setActivePage('profiles')}
             />
           )}
 
@@ -216,11 +211,8 @@ function App() {
           {activePage === 'users' && (
             <UserManagementPage
               users={users}
-              profiles={profiles}
               onAddUser={handleAddUser}
-              onUpdateUser={handleUpdateUser}
               onDeleteUser={handleDeleteUser}
-              onToggleStatus={handleToggleUserStatus}
             />
           )}
 

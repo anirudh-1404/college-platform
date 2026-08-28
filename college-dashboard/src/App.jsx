@@ -21,8 +21,14 @@ function App() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
   const [previewModalOpen, setPreviewModalOpen] = useState(false)
 
-  // Listen for storage events / updates
+  // Listen for storage events / updates & fetch live data
   useEffect(() => {
+    if (authState.isAuthenticated) {
+      collegeService.fetchCollegeData().then((data) => {
+        if (data) setCollegeData(data)
+      })
+    }
+
     const handleAuthChange = (e) => {
       if (e.detail) setAuthState(e.detail)
     }
@@ -37,12 +43,13 @@ function App() {
       window.removeEventListener('vidyascope_auth_change', handleAuthChange)
       window.removeEventListener('vidyascope_college_data_change', handleCollegeChange)
     }
-  }, [])
+  }, [authState.isAuthenticated])
 
   // Sync state changes from actions
-  const reloadAllStates = () => {
+  const reloadAllStates = async () => {
     setAuthState(authService.getAuthState())
-    setCollegeData(collegeService.getCollegeData())
+    const data = await collegeService.fetchCollegeData()
+    if (data) setCollegeData(data)
   }
 
   // Auth Handlers

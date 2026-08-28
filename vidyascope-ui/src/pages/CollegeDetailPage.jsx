@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   ChevronRight, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
-  Check, AlertCircle, Scale, Layers, GraduationCap
+  Check, AlertCircle, Scale, Layers, GraduationCap, Building
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { collegesData } from '../data/collegesData'
+import { publicApi } from '../api/publicApi'
 
 const CollegeDetailPage = ({
   collegeId = 'iit-bombay',
@@ -20,15 +20,25 @@ const CollegeDetailPage = ({
 }) => {
   const [activeTab, setActiveTab] = useState('overview')
   const [calculatorTenure, setCalculatorTenure] = useState(4)
+  const [college, setCollege] = useState(null)
+  const [loading, setLoading] = useState(true)
 
-  const college = useMemo(() => {
-    return collegesData.find((c) => c.id === collegeId) || collegesData[0]
+  // Fetch Live College Details from Backend
+  useEffect(() => {
+    const fetchDetail = async () => {
+      setLoading(true)
+      try {
+        const data = await publicApi.getCollegeDetail(collegeId)
+        setCollege(data)
+      } catch (e) {
+        console.error(e)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchDetail()
   }, [collegeId])
-
-  const similarCollegesList = useMemo(() => {
-    if (!college.similarColleges) return []
-    return collegesData.filter((c) => college.similarColleges.includes(c.id))
-  }, [college])
 
   const tabs = [
     { id: 'overview', label: 'Overview & Facts' },
@@ -42,7 +52,7 @@ const CollegeDetailPage = ({
 
   // Calculate estimated total expenditure
   const annualTotalCost = useMemo(() => {
-    if (!college.hiddenCosts) return 0
+    if (!college || !college.hiddenCosts) return 0
     const {
       tuitionFeePerYear = 0,
       hostelRentYearly = 0,
@@ -58,9 +68,38 @@ const CollegeDetailPage = ({
   }, [college])
 
   const estimatedTotalCost = useMemo(() => {
+    if (!college) return 0
     const caution = college.hiddenCosts?.cautionDepositOneTime || 0
     return (annualTotalCost * calculatorTenure + caution) / 100000 // In Lakhs
   }, [annualTotalCost, calculatorTenure, college])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-12">
+        <p className="text-xs font-semibold text-slate-500 animate-pulse">
+          Loading college intelligence profile...
+        </p>
+      </div>
+    )
+  }
+
+  if (!college) {
+    return (
+      <div className="min-h-screen bg-slate-50/50 flex flex-col items-center justify-center p-8 space-y-4">
+        <Building className="h-12 w-12 text-slate-300" />
+        <h2 className="font-serif text-xl font-bold text-slate-800">College Profile Not Found</h2>
+        <p className="text-xs text-slate-500 max-w-sm text-center">
+          This institution is either not yet published by the editorial board or has been updated.
+        </p>
+        <button
+          onClick={onNavigateListing}
+          className="btn btn-primary btn-sm text-xs cursor-pointer font-bold"
+        >
+          Browse All Colleges
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-24">
@@ -100,7 +139,7 @@ const CollegeDetailPage = ({
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
               <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
                 <img
-                  src={college.image}
+                  src={college.image || college.logo}
                   alt={college.name}
                   className="w-full h-full object-cover"
                 />
@@ -134,7 +173,6 @@ const CollegeDetailPage = ({
 
             {/* Right Action Buttons */}
             <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
-              {/* Shortlist */}
               <button
                 onClick={() => onToggleShortlist && onToggleShortlist(college.id)}
                 className={`btn btn-sm ${
@@ -147,7 +185,6 @@ const CollegeDetailPage = ({
                 <span>{isShortlisted ? 'Saved' : 'Save'}</span>
               </button>
 
-              {/* Compare */}
               <button
                 onClick={() => onToggleCompare && onToggleCompare(college)}
                 className={`btn btn-sm ${
@@ -160,7 +197,6 @@ const CollegeDetailPage = ({
                 <span>{isCompared ? 'Comparing' : 'Compare'}</span>
               </button>
 
-              {/* Counseling */}
               <button
                 onClick={onOpenCounseling}
                 className="btn btn-primary btn-md text-xs font-bold"
@@ -207,7 +243,7 @@ const CollegeDetailPage = ({
                   {college.rating}
                 </span>
                 <span className="text-xs text-text-light font-medium">
-                  ({college.reviewsCount})
+                  ({college.reviewsCount || 0})
                 </span>
               </div>
             </div>
@@ -241,30 +277,28 @@ const CollegeDetailPage = ({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
           
-          {/* Left 2 Columns: Active Tab View with AnimatePresence */}
+          {/* Left 2 Columns: Active Tab View */}
           <AnimatePresence mode="wait">
             <motion.div
               key={activeTab}
               initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -6 }}
-              transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.22 }}
               className="lg:col-span-2 space-y-6"
             >
             
             {/* 1. OVERVIEW & FACTS TAB */}
             {activeTab === 'overview' && (
               <div className="space-y-6">
-                {/* About College */}
                 <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-card">
                   <h2 className="font-serif text-xl font-bold text-text-primary">
                     About {college.name}
                   </h2>
                   <p className="text-xs sm:text-sm text-text-secondary leading-relaxed">
-                    {college.description}
+                    {college.description || 'Verified institutional disclosure.'}
                   </p>
 
-                  {/* Key Institutional Facts */}
                   {college.snapshot && (
                     <div className="pt-4 border-t border-slate-100 grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs">
                       <div className="flex items-start gap-2">
@@ -334,7 +368,7 @@ const CollegeDetailPage = ({
                 <div className="space-y-3">
                   {(college.coursesOffered || []).map((course) => (
                     <div
-                      key={course.id}
+                      key={course.id || course.name}
                       className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2.5"
                     >
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
@@ -347,7 +381,7 @@ const CollegeDetailPage = ({
                           </h4>
                         </div>
                         <span className="text-xs font-bold text-text-primary bg-white border border-slate-200 px-2.5 py-1 rounded-md self-start sm:self-auto">
-                          {course.fee} Total
+                          {course.fee}
                         </span>
                       </div>
 
@@ -376,11 +410,8 @@ const CollegeDetailPage = ({
             {activeTab === 'cutoffs' && (
               <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-card">
                 <h2 className="font-serif text-xl font-bold text-text-primary">
-                  Entrance Exam Cutoff Ranks (2024–25)
+                  Entrance Exam Cutoff Ranks (2025–26)
                 </h2>
-                <p className="text-xs text-text-secondary">
-                  Opening and closing ranks for general, OBC, and SC/ST categories based on official seat allocation rounds.
-                </p>
 
                 <div className="overflow-x-auto border border-slate-200 rounded-xl">
                   <table className="w-full text-left text-xs border-collapse">
@@ -468,7 +499,6 @@ const CollegeDetailPage = ({
                   <Calculator className="h-6 w-6 text-brand-primary flex-shrink-0" />
                 </div>
 
-                {/* Duration Picker */}
                 <div className="flex items-center gap-2 text-xs font-semibold text-text-primary">
                   <span>Program Tenure:</span>
                   {[2, 4, 5].map((yrs) => (
@@ -546,7 +576,7 @@ const CollegeDetailPage = ({
                         <span>Key Advantages (Pros)</span>
                       </h3>
                       <ul className="space-y-1.5 text-xs text-emerald-950">
-                        {college.prosAndCons.pros.map((pro, idx) => (
+                        {(college.prosAndCons.pros || []).map((pro, idx) => (
                           <li key={idx} className="flex items-start gap-1.5">
                             <span className="text-emerald-600 font-bold">•</span>
                             <span>{pro}</span>
@@ -561,7 +591,7 @@ const CollegeDetailPage = ({
                         <span>Things to Consider (Cons)</span>
                       </h3>
                       <ul className="space-y-1.5 text-xs text-amber-950">
-                        {college.prosAndCons.cons.map((con, idx) => (
+                        {(college.prosAndCons.cons || []).map((con, idx) => (
                           <li key={idx} className="flex items-start gap-1.5">
                             <span className="text-amber-600 font-bold">•</span>
                             <span>{con}</span>
@@ -596,7 +626,7 @@ const CollegeDetailPage = ({
             </motion.div>
           </AnimatePresence>
 
-          {/* Right 1 Column: Advisory & Similar Colleges Sidebar */}
+          {/* Right 1 Column: Advisory */}
           <div className="space-y-5">
             <div className="bg-navy-dark text-white p-6 rounded-2xl border border-border-dark space-y-3.5 shadow-md">
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-brand-primary bg-brand-primary/15 px-2.5 py-0.5 rounded-full border border-brand-primary/25">
@@ -617,27 +647,6 @@ const CollegeDetailPage = ({
                 <span>Connect With Student Mentor</span>
               </button>
             </div>
-
-            {/* Similar Colleges Widget */}
-            {similarCollegesList.length > 0 && (
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-5 space-y-3 shadow-card">
-                <h3 className="font-serif text-xs font-bold text-text-primary">
-                  Similar Colleges
-                </h3>
-                <div className="space-y-2">
-                  {similarCollegesList.map((similar) => (
-                    <div
-                      key={similar.id}
-                      onClick={() => onSelectCollege && onSelectCollege(similar.id)}
-                      className="p-2.5 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-purple-50/50 hover:border-brand-primary/30 flex items-center justify-between text-xs cursor-pointer transition-colors"
-                    >
-                      <span className="font-bold text-text-primary">{similar.name}</span>
-                      <span className="text-emerald-600 font-bold text-[11px]">{similar.avgPackage}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
 
         </div>
