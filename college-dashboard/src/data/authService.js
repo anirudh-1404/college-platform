@@ -2,7 +2,13 @@
  * VidyaScope Auth & Registration Service (Connected to Live REST Backend)
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/auth'
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/auth`
+    : (import.meta.env.PROD
+        ? 'https://vidyascope-backend.onrender.com/api/auth'
+        : 'http://localhost:8080/api/auth')
+
 const STORAGE_KEY_AUTH = 'vidyascope_college_auth'
 const STORAGE_KEY_TOKEN = 'vidyascope_token'
 

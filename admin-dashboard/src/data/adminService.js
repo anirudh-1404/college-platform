@@ -4,7 +4,12 @@
 
 import { adminAuthService } from './adminAuthService'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/admin'
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/admin`
+    : (import.meta.env.PROD
+        ? 'https://vidyascope-backend.onrender.com/api/admin'
+        : 'http://localhost:8080/api/admin')
 
 export const adminService = {
   getHeaders() {

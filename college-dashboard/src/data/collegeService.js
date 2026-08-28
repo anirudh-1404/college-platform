@@ -5,7 +5,13 @@
 import { DEFAULT_COLLEGE_DATA } from './collegeModel'
 import { authService } from './authService'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/college'
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/college`
+    : (import.meta.env.PROD
+        ? 'https://vidyascope-backend.onrender.com/api/college'
+        : 'http://localhost:8080/api/college')
+
 const STORAGE_KEY_COLLEGE_DATA = 'vidyascope_college_data'
 
 export const collegeService = {

@@ -2,7 +2,13 @@
  * VidyaScope Admin Authentication Service (Connected to Live REST Backend)
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/auth'
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL
+    ? `${import.meta.env.VITE_API_URL}/auth`
+    : (import.meta.env.PROD
+        ? 'https://vidyascope-backend.onrender.com/api/auth'
+        : 'http://localhost:8080/api/auth')
+
 const STORAGE_KEY_ADMIN_AUTH = 'vidyascope_admin_auth_session'
 const STORAGE_KEY_ADMIN_TOKEN = 'vidyascope_admin_token'
 

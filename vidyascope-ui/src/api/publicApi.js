@@ -2,7 +2,11 @@
  * Live Backend Public API Client for VidyaScope User Website
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8080/api/public";
+const API_BASE_URL =
+  import.meta.env.VITE_API_URL ||
+  (import.meta.env.PROD
+    ? "https://vidyascope-backend.onrender.com/api/public"
+    : "http://localhost:8080/api/public");
 
 export const publicApi = {
   async getColleges(params = {}) {
