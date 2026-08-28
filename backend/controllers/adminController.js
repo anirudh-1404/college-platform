@@ -3,6 +3,7 @@ import { College } from "../models/College.js";
 import { Registration } from "../models/Registration.js";
 import { AuditLog } from "../models/AuditLog.js";
 import { CareerGuide } from "../models/CareerGuide.js";
+import { Exam } from "../models/Exam.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -531,5 +532,157 @@ export const deleteAdminCareerGuide = async (req, res) => {
     return res.status(200).json({ success: true, message: "Career roadmap deleted successfully." });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to delete career guide." });
+  }
+};
+
+// 8. ENTRANCE EXAMS MANAGEMENT
+export const getAdminExams = async (req, res) => {
+  try {
+    const exams = await Exam.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, exams });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch exams." });
+  }
+};
+
+export const createAdminExam = async (req, res) => {
+  try {
+    const {
+      name,
+      shortName,
+      category,
+      conductingBody,
+      level,
+      mode,
+      frequency,
+      duration,
+      totalMarks,
+      eligibility,
+      examDates,
+      targetCollegesCount,
+      overview,
+      syllabusHighlights,
+      published,
+    } = req.body;
+
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, message: "Exam name is required." });
+    }
+
+    const baseSlug = (shortName || name)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    let slug = baseSlug;
+    const existing = await Exam.findOne({ slug });
+    if (existing) {
+      slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+    }
+
+    const newExam = await Exam.create({
+      name: name.trim(),
+      shortName: shortName?.trim() || name.trim().slice(0, 10),
+      slug,
+      category: category || "engineering",
+      conductingBody: conductingBody || "National Testing Agency (NTA)",
+      level: level || "National Level",
+      mode: mode || "Computer Based Test (CBT)",
+      frequency: frequency || "Once a year",
+      duration: duration || "180 Minutes (3 Hours)",
+      totalMarks: totalMarks || "300 Marks",
+      eligibility: eligibility || "10+2 with relevant subjects",
+      examDates: examDates || {
+        applicationStart: "November 2025",
+        applicationEnd: "January 2026",
+        admitCardDate: "April 2026",
+        examDate: "May 2026",
+        resultDate: "June 2026",
+      },
+      targetCollegesCount: targetCollegesCount || "Top National Universities & Institutes",
+      overview: overview || "",
+      syllabusHighlights: syllabusHighlights || [],
+      published: published !== undefined ? published : true,
+    });
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Entrance Exam Created",
+      target: newExam.name,
+      details: `Created new entrance exam record under ${newExam.category}.`,
+      type: "exam_created",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Entrance exam created successfully.",
+      exam: newExam,
+    });
+  } catch (error) {
+    console.error("createAdminExam error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to create exam." });
+  }
+};
+
+export const updateAdminExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let exam = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      exam = await Exam.findByIdAndUpdate(id, req.body, { new: true });
+    }
+    if (!exam) {
+      exam = await Exam.findOneAndUpdate({ slug: id }, req.body, { new: true });
+    }
+
+    if (!exam) {
+      return res.status(404).json({ success: false, message: "Exam not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Entrance Exam Updated",
+      target: exam.name,
+      details: `Updated details for ${exam.name}.`,
+      type: "exam_updated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Exam updated successfully.",
+      exam,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update exam." });
+  }
+};
+
+export const deleteAdminExam = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let exam = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      exam = await Exam.findByIdAndDelete(id);
+    }
+    if (!exam) {
+      exam = await Exam.findOneAndDelete({ slug: id });
+    }
+
+    if (!exam) {
+      return res.status(404).json({ success: false, message: "Exam not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Entrance Exam Deleted",
+      target: exam.name,
+      details: `Deleted entrance exam record (${exam.name}).`,
+      type: "exam_deleted",
+    });
+
+    return res.status(200).json({ success: true, message: "Entrance exam deleted successfully." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete exam." });
   }
 };

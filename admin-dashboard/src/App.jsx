@@ -7,6 +7,7 @@ import RegistrationRequestsPage from './pages/RegistrationRequestsPage'
 import CollegeProfilesReviewPage from './pages/CollegeProfilesReviewPage'
 import UserManagementPage from './pages/UserManagementPage'
 import CareerGuidesManagementPage from './pages/CareerGuidesManagementPage'
+import ExamManagementPage from './pages/ExamManagementPage'
 import PlatformDataManagementPage from './pages/PlatformDataManagementPage'
 import AuditLogPage from './pages/AuditLogPage'
 import { adminService } from './data/adminService'
@@ -25,6 +26,7 @@ function App() {
   const [profiles, setProfiles] = useState([])
   const [users, setUsers] = useState([])
   const [careerGuides, setCareerGuides] = useState([])
+  const [exams, setExams] = useState([])
   const [auditLogs, setAuditLogs] = useState([])
   const [analytics, setAnalytics] = useState({
     totalColleges: 0,
@@ -38,11 +40,12 @@ function App() {
 
   // Reload handler
   const reloadData = async () => {
-    const [regs, profs, usrs, guides, logs, anal] = await Promise.all([
+    const [regs, profs, usrs, guides, exms, logs, anal] = await Promise.all([
       adminService.getRegistrations(),
       adminService.getAllProfiles(),
       adminService.getUsers(),
       adminService.getCareerGuides(),
+      adminService.getExams(),
       adminService.getAuditLogs(),
       adminService.getAnalytics(),
     ])
@@ -50,6 +53,7 @@ function App() {
     setProfiles(profs)
     setUsers(usrs)
     setCareerGuides(guides)
+    setExams(exms)
     setAuditLogs(logs)
     setAnalytics(anal)
   }
@@ -103,21 +107,21 @@ function App() {
 
   // Action Handlers for Profiles
   const handleApproveAndPublishProfile = async (collegeId) => {
-    await adminService.approveAndPublish(collegeId)
+    await adminService.approveAndPublishProfile(collegeId)
     reloadData()
   }
 
-  const handleRequestProfileChanges = async (collegeId, feedbackNotes) => {
-    await adminService.requestChanges(collegeId, feedbackNotes)
+  const handleRequestProfileChanges = async (collegeId, feedback) => {
+    await adminService.requestProfileChanges(collegeId, feedback)
     reloadData()
   }
 
   const handleUnpublishProfile = async (collegeId) => {
-    await adminService.unpublish(collegeId)
+    await adminService.unpublishProfile(collegeId)
     reloadData()
   }
 
-  // Action Handlers for Admin Team Management
+  // Action Handlers for Admin Users
   const handleAddUser = async (userData) => {
     await adminService.addUser(userData)
     reloadData()
@@ -143,6 +147,16 @@ function App() {
     reloadData()
   }
 
+  const handleAddExam = async (examData) => {
+    await adminService.addExam(examData)
+    reloadData()
+  }
+
+  const handleDeleteExam = async (examId) => {
+    await adminService.deleteExam(examId)
+    reloadData()
+  }
+
   const getPageTitle = () => {
     switch (activePage) {
       case 'registrations':
@@ -153,6 +167,8 @@ function App() {
         return 'Admin Users Management'
       case 'career-guides':
         return 'Career Roadmaps & Guidance Management'
+      case 'exams':
+        return 'Entrance Examinations Management'
       case 'platform-data':
         return 'Platform Data & Ratings Management'
       case 'audit-logs':
@@ -236,6 +252,14 @@ function App() {
               guides={careerGuides}
               onAddGuide={handleAddGuide}
               onDeleteGuide={handleDeleteGuide}
+            />
+          )}
+
+          {activePage === 'exams' && (
+            <ExamManagementPage
+              exams={exams}
+              onAddExam={handleAddExam}
+              onDeleteExam={handleDeleteExam}
             />
           )}
 

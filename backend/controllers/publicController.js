@@ -1,5 +1,6 @@
 import { College } from "../models/College.js";
 import { CareerGuide } from "../models/CareerGuide.js";
+import { Exam } from "../models/Exam.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
 export const getPublicColleges = async (req, res) => {
@@ -252,5 +253,102 @@ export const getPublicCareerGuideDetail = async (req, res) => {
   } catch (error) {
     console.error("getPublicCareerGuideDetail error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch career roadmap." });
+  }
+};
+
+// 6. GET PUBLIC ENTRANCE EXAMS (With Category & Search Filter)
+export const getPublicExams = async (req, res) => {
+  try {
+    const { category, query } = req.query;
+    const filter = { published: true };
+
+    if (category && category !== "all") {
+      filter.category = category.toLowerCase();
+    }
+
+    if (query && query.trim() !== "") {
+      const regex = new RegExp(query.trim(), "i");
+      filter.$or = [
+        { name: regex },
+        { shortName: regex },
+        { conductingBody: regex },
+        { eligibility: regex },
+      ];
+    }
+
+    const exams = await Exam.find(filter).sort({ createdAt: -1 });
+
+    const formatted = exams.map((e) => ({
+      id: e.slug || e._id,
+      slug: e.slug,
+      name: e.name,
+      shortName: e.shortName,
+      category: e.category,
+      conductingBody: e.conductingBody,
+      level: e.level,
+      mode: e.mode,
+      frequency: e.frequency,
+      duration: e.duration,
+      totalMarks: e.totalMarks,
+      eligibility: e.eligibility,
+      examDates: e.examDates,
+      targetCollegesCount: e.targetCollegesCount,
+      overview: e.overview,
+      syllabusHighlights: e.syllabusHighlights || [],
+      published: e.published,
+      createdAt: e.createdAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: formatted.length,
+      exams: formatted,
+    });
+  } catch (error) {
+    console.error("getPublicExams error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch entrance exams." });
+  }
+};
+
+// 7. GET SINGLE PUBLIC EXAM DETAIL
+export const getPublicExamDetail = async (req, res) => {
+  try {
+    const { slugOrId } = req.params;
+
+    let exam = await Exam.findOne({ slug: slugOrId, published: true });
+    if (!exam) {
+      exam = await Exam.findById(slugOrId);
+    }
+
+    if (!exam || !exam.published) {
+      return res.status(404).json({ success: false, message: "Entrance exam not found." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      exam: {
+        id: exam.slug || exam._id,
+        slug: exam.slug,
+        name: exam.name,
+        shortName: exam.shortName,
+        category: exam.category,
+        conductingBody: exam.conductingBody,
+        level: exam.level,
+        mode: exam.mode,
+        frequency: exam.frequency,
+        duration: exam.duration,
+        totalMarks: exam.totalMarks,
+        eligibility: exam.eligibility,
+        examDates: exam.examDates,
+        targetCollegesCount: exam.targetCollegesCount,
+        overview: exam.overview,
+        syllabusHighlights: exam.syllabusHighlights || [],
+        published: exam.published,
+        createdAt: exam.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("getPublicExamDetail error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch entrance exam." });
   }
 };

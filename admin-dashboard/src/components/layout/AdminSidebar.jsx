@@ -5,6 +5,7 @@ import {
   Building2,
   Users,
   Compass,
+  FileText,
   SlidersHorizontal,
   History,
   LogOut,
@@ -54,6 +55,12 @@ const AdminSidebar = ({
       id: 'career-guides',
       label: 'Career Roadmaps',
       icon: Compass,
+      badge: null,
+    },
+    {
+      id: 'exams',
+      label: 'Entrance Exams',
+      icon: FileText,
       badge: null,
     },
     {

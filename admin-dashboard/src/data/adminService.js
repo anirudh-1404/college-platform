@@ -294,4 +294,68 @@ export const adminService = {
       throw error
     }
   },
+
+  // 8. ENTRANCE EXAMS MANAGEMENT
+  async getExams() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/exams`, { headers: this.getHeaders() })
+      const data = await res.json()
+      if (res.ok && data.exams) {
+        return data.exams.map(e => ({ ...e, id: e._id || e.slug }))
+      }
+    } catch (e) {
+      console.warn('Exams fetch error:', e)
+    }
+    return []
+  },
+
+  async addExam(examData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/exams`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(examData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Create exam failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.exam
+    } catch (error) {
+      console.error('addExam error:', error)
+      throw error
+    }
+  },
+
+  async updateExam(id, examData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/exams/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(examData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update exam failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.exam
+    } catch (error) {
+      console.error('updateExam error:', error)
+      throw error
+    }
+  },
+
+  async deleteExam(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/exams/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Delete exam failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return true
+    } catch (error) {
+      console.error('deleteExam error:', error)
+      throw error
+    }
+  },
 }

@@ -17,6 +17,10 @@ import {
   createAdminCareerGuide,
   updateAdminCareerGuide,
   deleteAdminCareerGuide,
+  getAdminExams,
+  createAdminExam,
+  updateAdminExam,
+  deleteAdminExam,
 } from "../controllers/adminController.js";
 import { verifyToken, isAdmin } from "../utils/authMiddleware.js";
 
@@ -52,6 +56,12 @@ router.get("/career-guides", getAdminCareerGuides);
 router.post("/career-guides", createAdminCareerGuide);
 router.put("/career-guides/:id", updateAdminCareerGuide);
 router.delete("/career-guides/:id", deleteAdminCareerGuide);
+
+// Entrance Exams Management
+router.get("/exams", getAdminExams);
+router.post("/exams", createAdminExam);
+router.put("/exams/:id", updateAdminExam);
+router.delete("/exams/:id", deleteAdminExam);
 
 // Audit Trail
 router.get("/audit-logs", getAuditLogs);

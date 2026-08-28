@@ -91,4 +91,37 @@ export const publicApi = {
       return null;
     }
   },
+
+  async getExams(params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.category && params.category !== "all") queryParams.append("category", params.category);
+      if (params.query) queryParams.append("query", params.query);
+
+      const url = `${API_BASE_URL}/exams?${queryParams.toString()}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        return data.exams || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("publicApi.getExams error:", error);
+      return [];
+    }
+  },
+
+  async getExamDetail(slugOrId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/exams/${slugOrId}`);
+      const data = await res.json();
+      if (data.success) {
+        return data.exam || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("publicApi.getExamDetail error:", error);
+      return null;
+    }
+  },
 };
