@@ -1,47 +1,52 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
   Star,
   Plus,
   Trash2,
   CheckCircle2,
+  Building,
 } from 'lucide-react'
 
 const PlatformDataManagementPage = ({
   profiles = [],
   onUpdatePlatformData,
 }) => {
-  const [selectedCollegeId, setSelectedCollegeId] = useState(profiles[0]?.id || 'iit-bombay')
+  const [selectedCollegeId, setSelectedCollegeId] = useState(profiles[0]?.id || '')
   const [saveSuccess, setSaveSuccess] = useState(false)
 
   const currentProfile = profiles.find((p) => p.id === selectedCollegeId) || profiles[0]
 
-  const [rating, setRating] = useState(currentProfile?.rating || 4.9)
-  const [reviewsCount, setReviewsCount] = useState(currentProfile?.reviewsCount || 2450)
-  const [pros, setPros] = useState(
-    currentProfile?.prosAndCons?.pros || [
-      'Unmatched peer group and research culture',
-      'Top placement packages across tech and finance',
-      '550-acre lush green campus',
-    ]
-  )
-  const [cons, setCons] = useState(
-    currentProfile?.prosAndCons?.cons || [
-      'High academic rigor and semester workload',
-      'Strict relative grading policy in core courses',
-    ]
-  )
+  const [rating, setRating] = useState(currentProfile?.rating || 4.8)
+  const [reviewsCount, setReviewsCount] = useState(currentProfile?.reviewsCount || 0)
+  const [pros, setPros] = useState(currentProfile?.prosAndCons?.pros || [])
+  const [cons, setCons] = useState(currentProfile?.prosAndCons?.cons || [])
 
   const [newPro, setNewPro] = useState('')
   const [newCon, setNewCon] = useState('')
+
+  useEffect(() => {
+    if (profiles.length > 0 && !selectedCollegeId) {
+      setSelectedCollegeId(profiles[0].id)
+    }
+  }, [profiles, selectedCollegeId])
+
+  useEffect(() => {
+    if (currentProfile) {
+      setRating(currentProfile.rating || 4.8)
+      setReviewsCount(currentProfile.reviewsCount || 0)
+      setPros(currentProfile.prosAndCons?.pros || [])
+      setCons(currentProfile.prosAndCons?.cons || [])
+    }
+  }, [currentProfile])
 
   const handleSelectCollege = (id) => {
     setSelectedCollegeId(id)
     const prof = profiles.find((p) => p.id === id)
     if (prof) {
       setRating(prof.rating || 4.8)
-      setReviewsCount(prof.reviewsCount || 1500)
-      setPros(prof.prosAndCons?.pros || ['Strong academic culture', 'Top recruiters'])
-      setCons(prof.prosAndCons?.cons || ['Demanding coursework'])
+      setReviewsCount(prof.reviewsCount || 0)
+      setPros(prof.prosAndCons?.pros || [])
+      setCons(prof.prosAndCons?.cons || [])
     }
   }
 
@@ -66,9 +71,10 @@ const PlatformDataManagementPage = ({
   }
 
   const handleSave = () => {
+    if (!selectedCollegeId) return
     onUpdatePlatformData(selectedCollegeId, {
-      rating: parseFloat(rating) || 4.9,
-      reviewsCount: parseInt(reviewsCount, 10) || 2450,
+      rating: parseFloat(rating) || 4.8,
+      reviewsCount: parseInt(reviewsCount, 10) || 0,
       prosAndCons: {
         pros,
         cons,
@@ -76,6 +82,31 @@ const PlatformDataManagementPage = ({
     })
     setSaveSuccess(true)
     setTimeout(() => setSaveSuccess(false), 2000)
+  }
+
+  if (profiles.length === 0) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto">
+        <div className="pb-4 border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">
+            Platform Data & Ratings
+          </h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Manage student star ratings, reviews count, and verified pros/cons.
+          </p>
+        </div>
+
+        <div className="p-16 text-center bg-white border border-slate-200 rounded-xl space-y-3 shadow-2xs">
+          <Building className="h-10 w-10 text-slate-300 mx-auto" />
+          <h3 className="text-sm font-bold text-slate-800">
+            No Colleges Registered Yet
+          </h3>
+          <p className="text-xs text-slate-500 max-w-sm mx-auto">
+            Once institutions register and submit their profiles, you will be able to manage their official star ratings and verified editorial pros/cons here.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -159,6 +190,9 @@ const PlatformDataManagementPage = ({
                   </button>
                 </div>
               ))}
+              {pros.length === 0 && (
+                <p className="text-[11px] text-slate-400 italic">No advantages added yet.</p>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -198,6 +232,9 @@ const PlatformDataManagementPage = ({
                   </button>
                 </div>
               ))}
+              {cons.length === 0 && (
+                <p className="text-[11px] text-slate-400 italic">No considerations added yet.</p>
+              )}
             </div>
 
             <div className="flex items-center gap-1.5">
@@ -225,7 +262,7 @@ const PlatformDataManagementPage = ({
             {saveSuccess && (
               <span className="text-xs font-medium text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" />
-                <span>Saved successfully</span>
+                <span>Saved successfully to database</span>
               </span>
             )}
           </div>
