@@ -155,10 +155,7 @@ const CoursesPage = ({
             {/* Header Banner */}
             <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 space-y-4 shadow-card">
               <div className="max-w-2xl">
-                <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-brand-accent px-2.5 py-0.5 rounded-md">
-                  Academics & Curricula
-                </span>
-                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-2">
+                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
                   Browse Courses by Published Institution
                 </h1>
                 <p className="text-xs sm:text-sm text-text-secondary mt-1">
@@ -333,14 +330,11 @@ const CoursesPage = ({
 
             <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
               <div>
-                <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-brand-accent px-2.5 py-0.5 rounded-md">
-                  {selectedCourse.degreeLevel}
-                </span>
-                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-2">
+                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
                   {selectedCourse.name}
                 </h1>
                 <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                  Offered by {selectedCollege.name} • {selectedCollege.location}
+                  Level: {selectedCourse.degreeLevel} • Offered by {selectedCollege.name} • {selectedCollege.location}
                 </p>
               </div>
 

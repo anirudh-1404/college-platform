@@ -111,11 +111,6 @@ const CounselingModal = ({ isOpen, onClose }) => {
               </motion.div>
             ) : (
               <div>
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-brand-primary bg-brand-accent px-2.5 py-0.5 rounded-md mb-2">
-                  <PhoneCall className="h-3 w-3" />
-                  <span>100% Free Consultation</span>
-                </div>
-
                 <h3 className="font-serif text-xl font-bold text-text-primary">
                   Book Free 1-on-1 Counseling
                 </h3>

@@ -48,10 +48,6 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
       <div className="bg-white border-b border-border-color py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-accent text-brand-primary text-xs font-bold uppercase tracking-wider mb-2.5">
-              <Compass className="h-3.5 w-3.5" />
-              <span>Educational Entrance Exam Guide</span>
-            </div>
             <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary">
               Major Entrance & Competitive Examinations
             </h1>

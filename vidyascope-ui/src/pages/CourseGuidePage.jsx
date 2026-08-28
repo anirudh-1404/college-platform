@@ -80,12 +80,12 @@ const CourseGuidePage = ({ onNavigateHome, onSelectCollege, onOpenCounseling }) 
         {/* Overview & Quick Metrics Banner */}
         <div className="bg-white border border-border-color rounded-3xl p-6 sm:p-8 shadow-sm space-y-6">
           <div>
-            <span className="text-xs font-bold text-brand-primary bg-brand-accent px-3 py-1 rounded-full uppercase tracking-wider">
-              {currentCourse.category} • {currentCourse.level}
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-text-primary mt-2">
+            <h2 className="font-serif text-2xl sm:text-3xl font-extrabold text-text-primary">
               {currentCourse.title}
             </h2>
+            <p className="text-xs text-text-light font-medium mt-1">
+              Category: {currentCourse.category} • Level: {currentCourse.level}
+            </p>
             <p className="text-sm text-text-secondary leading-relaxed mt-3">
               {currentCourse.overview}
             </p>

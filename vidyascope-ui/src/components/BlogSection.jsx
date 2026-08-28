@@ -10,10 +10,7 @@ const BlogSection = ({ onNavigate }) => {
         {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
           <div>
-            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-brand-accent px-2.5 py-0.5 rounded-md">
-              Admissions Insights
-            </span>
-            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-2">
+            <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
               Latest Guidance & Strategy Articles
             </h2>
             <p className="text-xs sm:text-sm text-text-secondary mt-1 max-w-xl">

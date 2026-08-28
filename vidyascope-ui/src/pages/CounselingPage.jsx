@@ -50,11 +50,6 @@ const CounselingPage = ({ onNavigateHome }) => {
           {/* Left Column: Counseling Request Form (Span 7) */}
           <div className="lg:col-span-7 bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-xs">
             
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-brand-accent text-brand-primary text-xs font-bold uppercase tracking-wider mb-3">
-              <PhoneCall className="h-3.5 w-3.5" />
-              <span>100% Free & Unbiased Counseling</span>
-            </div>
-
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
               Personalized Admissions Guidance
             </h1>

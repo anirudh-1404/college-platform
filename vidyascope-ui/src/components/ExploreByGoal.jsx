@@ -59,19 +59,14 @@ const ExploreByGoal = ({ onSelectCategory }) => {
     <section className="py-16 sm:py-20 bg-white border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Heading */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3">
-          <div>
-            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-purple-50 px-2.5 py-0.5 rounded-md">
-              Academic Disciplines
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
-              Explore Colleges by Academic Field
-            </h2>
-            <p className="text-sm text-slate-500 mt-1 max-w-xl font-normal">
-              Direct access to cutoff rankings, entrance exam requirements, and verified placement outcomes.
-            </p>
-          </div>
+        {/* Section Heading (No Pill Tags) */}
+        <div className="mb-10">
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
+            Explore Colleges by Academic Field
+          </h2>
+          <p className="text-sm text-slate-500 mt-1 max-w-xl font-normal">
+            Direct access to cutoff rankings, entrance exam requirements, and verified placement outcomes.
+          </p>
         </div>
 
         {/* Disciplines Grid */}
@@ -86,7 +81,7 @@ const ExploreByGoal = ({ onSelectCategory }) => {
                 className="bg-white border border-slate-200 rounded-xl p-5 hover:border-brand-primary/50 hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group space-y-4"
               >
                 <div className="space-y-2.5">
-                  <div className="w-10 h-10 rounded-lg bg-purple-50 text-brand-primary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-slate-50 border border-slate-200 text-brand-primary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white group-hover:border-brand-primary transition-colors">
                     <Icon className="h-5 w-5" />
                   </div>
 

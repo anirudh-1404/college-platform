@@ -25,13 +25,10 @@ const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
     <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Header */}
+        {/* Section Header (No Pill Tags) */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3">
           <div>
-            <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-purple-50 px-2.5 py-0.5 rounded-md">
-              Premier Institutions
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
               Top Ranked Colleges in India
             </h2>
             <p className="text-sm text-slate-500 mt-1 max-w-xl font-normal">
