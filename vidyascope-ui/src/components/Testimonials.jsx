@@ -1,81 +1,77 @@
-import React from 'react'
-import { Star } from 'lucide-react'
-import { testimonialsData, counselorStats } from '../data/testimonialsData'
+import React, { useState } from 'react'
+import { ChevronDown, HelpCircle, MessageSquare } from 'lucide-react'
 
-const Testimonials = () => {
+const Testimonials = ({ onOpenCounseling }) => {
+  const [openIndex, setOpenIndex] = useState(0)
+
+  const faqs = [
+    {
+      q: 'How does VidyaScope verify college cutoff ranks and placement data?',
+      a: 'All data is gathered through official statutory documentation, centralized counseling authorities (JoSAA, JAC, MCC, State CETs), and verified institutional audits by college deans and registrars.',
+    },
+    {
+      q: 'What is the "True Cost of Education" calculator?',
+      a: 'Unlike official tuition receipts that only show academic fees, our calculation incorporates mandatory hostel rentals, recurring mess charges, examination deposits, and hidden caution money across all 4 years.',
+    },
+    {
+      q: 'Can colleges pay to promote their rankings or placement stats?',
+      a: 'No. Rankings are strictly anchored to audited National Institutional Ranking Framework (NIRF) gazettes and NAAC accreditation scores approved by our editorial verification board.',
+    },
+    {
+      q: 'How do I compare two colleges side-by-side?',
+      a: 'Click the "Compare" checkbox on any college card or use the Compare tool in the navigation menu to view direct head-to-head metrics on average package, NIRF rank, and 4-year costs.',
+    },
+  ]
+
   return (
-    <section className="py-14 sm:py-18 bg-white border-b border-border-color">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-16 sm:py-20 bg-slate-50/50 border-b border-border-color">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Title */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-12">
-          <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-brand-accent px-2.5 py-0.5 rounded-md">
-            Student & Parent Experiences
+        <div className="text-center mb-10">
+          <span className="text-xs font-bold text-brand-primary uppercase tracking-wider bg-purple-50 px-2.5 py-0.5 rounded-md">
+            Admissions Guidance
           </span>
-          <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary mt-2">
-            Trusted by Thousands of Aspirants
+          <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mt-2">
+            Frequently Asked Questions
           </h2>
-          <p className="text-text-secondary text-xs sm:text-sm mt-1">
-            Real feedback from students and parents who used VidyaScope insights for admissions decisions.
+          <p className="text-sm text-slate-500 mt-1 font-normal">
+            Everything you need to know about navigating college admissions in India.
           </p>
         </div>
 
-        {/* Stats Strip */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-          {counselorStats.map((stat) => (
-            <div
-              key={stat.label}
-              className="bg-slate-50 border border-slate-200/80 p-4 sm:p-5 rounded-2xl text-center"
-            >
-              <p className="font-serif text-2xl sm:text-3xl font-bold text-brand-primary">
-                {stat.value}
-              </p>
-              <p className="text-xs font-semibold text-text-secondary mt-1">
-                {stat.label}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* FAQ Accordion */}
+        <div className="space-y-3">
+          {faqs.map((faq, index) => {
+            const isOpen = openIndex === index
 
-        {/* Testimonial Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {testimonialsData.map((item) => (
-            <div
-              key={item.id}
-              className="bg-white border border-slate-200/90 p-6 rounded-2xl flex flex-col justify-between hover:border-brand-primary/30 transition-colors"
-            >
-              <div>
-                <div className="flex items-center gap-1 text-amber-400 mb-3.5">
-                  {[...Array(item.rating)].map((_, i) => (
-                    <Star key={i} className="h-3.5 w-3.5 fill-amber-400" />
-                  ))}
-                </div>
-                
-                <p className="text-xs sm:text-sm text-text-secondary leading-relaxed mb-5 italic">
-                  &ldquo;{item.quote}&rdquo;
-                </p>
-              </div>
+            return (
+              <div
+                key={index}
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs"
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenIndex(isOpen ? -1 : index)}
+                  className="w-full p-4 sm:p-5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-slate-50/60 transition-colors"
+                >
+                  <span className="text-sm sm:text-base font-bold text-slate-900">
+                    {faq.q}
+                  </span>
+                  <ChevronDown
+                    className={`h-4 w-4 text-slate-400 flex-shrink-0 transition-transform ${
+                      isOpen ? 'rotate-180 text-brand-primary' : ''
+                    }`}
+                  />
+                </button>
 
-              <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-                <img
-                  src={item.avatar}
-                  alt={item.name}
-                  className="w-10 h-10 rounded-full object-cover border border-slate-200"
-                />
-                <div>
-                  <h4 className="font-serif text-xs sm:text-sm font-bold text-text-primary">
-                    {item.name}
-                  </h4>
-                  <p className="text-[11px] font-semibold text-brand-primary">
-                    {item.score}
-                  </p>
-                  <p className="text-[11px] text-text-light">
-                    {item.college}
-                  </p>
-                </div>
+                {isOpen && (
+                  <div className="px-4 sm:px-5 pb-4 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 font-normal">
+                    {faq.a}
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
 
       </div>

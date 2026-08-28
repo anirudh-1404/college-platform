@@ -1,47 +1,44 @@
-@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@300;400;500;600;700;800;900&display=swap');
 
 @import "tailwindcss";
 
 :root {
-  /* Centralized Purple Theme */
+  /* Centralized Brand Palette */
   --color-brand-primary: #7C3AED;
   --color-brand-primary-hover: #6D28D9;
   --color-brand-accent: #F5F3FF;
   --color-brand-accent-subtle: #FAF5FF;
 
-  /* Navy / Dark Theme Components */
+  /* Neutral Surface & Dark Tones */
   --color-navy-dark: #090D1A;
   --color-navy-panel: #0E1528;
   --color-navy-card: #151F38;
   --color-navy-card-hover: #1C294A;
 
-  /* Text Colors */
+  /* Clean Typography Colors */
   --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-light: #94A3B8;
+  --color-text-secondary: #334155;
+  --color-text-light: #64748B;
   --color-text-on-dark: #F8FAFC;
   --color-text-on-dark-muted: #94A3B8;
 
-  /* Border Colors */
+  /* Borders */
   --color-border-color: #E2E8F0;
   --color-border-subtle: #F1F5F9;
   --color-border-dark: #1E293B;
   --color-border-dark-hover: #334155;
 
   /* Shadows */
-  --shadow-premium: 0 10px 30px -10px rgba(124, 58, 237, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
-  --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 1px 3px -1px rgba(15, 23, 42, 0.03);
-  --shadow-card-hover: 0 12px 32px -4px rgba(124, 58, 237, 0.10), 0 4px 12px -2px rgba(15, 23, 42, 0.04);
-  --shadow-glow: 0 0 25px -5px rgba(124, 58, 237, 0.35);
-  --shadow-dark-panel: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-premium: 0 10px 30px -10px rgba(124, 58, 237, 0.10), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 12px -2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-card-hover: 0 8px 24px -4px rgba(124, 58, 237, 0.08), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 @theme {
-  /* Font Family Override */
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  /* Entire Website Font: Frank Ruhl Libre */
+  --font-sans: 'Frank Ruhl Libre', Georgia, Cambria, "Times New Roman", Times, serif;
   --font-serif: 'Frank Ruhl Libre', Georgia, Cambria, "Times New Roman", Times, serif;
 
-  /* Theme color mapping to CSS variables */
   --color-brand-primary: var(--color-brand-primary);
   --color-brand-primary-hover: var(--color-brand-primary-hover);
   --color-brand-accent: var(--color-brand-accent);
@@ -66,88 +63,38 @@
   --shadow-premium: var(--shadow-premium);
   --shadow-card: var(--shadow-card);
   --shadow-card-hover: var(--shadow-card-hover);
-  --shadow-glow: var(--shadow-glow);
-  --shadow-dark-panel: var(--shadow-dark-panel);
 }
 
-/* Typography Headings */
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
-  font-family: var(--font-serif);
+html,
+body {
+  font-family: 'Frank Ruhl Libre', Georgia, Cambria, "Times New Roman", Times, serif;
+  background-color: #FAFAFC;
+  color: var(--color-text-primary);
 }
 
-/* Smooth Page & Component Transitions */
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+button,
+input,
+optgroup,
+select,
+textarea {
+  font-family: 'Frank Ruhl Libre', Georgia, Cambria, "Times New Roman", Times, serif;
 }
 
-@keyframes popIn {
-  0% {
-    opacity: 0;
-    transform: scale(0.97);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes slideInRight {
-  0% {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-pop-in {
-  animation: popIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-slide-in {
-  animation: slideInRight 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* ========================================================================= */
-/* CLEAN & MINIMAL STATIONARY BUTTON SYSTEM                                 */
-/* ========================================================================= */
-
+/* Professional Stationary Button System */
 .btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  font-family: var(--font-sans);
+  font-family: 'Frank Ruhl Libre', Georgia, serif;
   font-weight: 600;
   white-space: nowrap;
   user-select: none;
   cursor: pointer;
-  border-radius: 0.75rem; /* rounded-xl (12px) */
+  border-radius: 0.625rem;
   outline: none;
   text-decoration: none;
-  transition: background-color 200ms ease-out,
-              color 200ms ease-out,
-              border-color 200ms ease-out,
-              box-shadow 200ms ease-out,
-              opacity 150ms ease-out;
+  transition: all 180ms ease-out;
 }
 
 .btn:focus-visible {
@@ -161,30 +108,26 @@ h6 {
   pointer-events: none;
 }
 
-/* Button Variants */
 .btn-primary {
   background-color: var(--color-brand-primary);
   color: #ffffff;
   border: 1px solid transparent;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .btn-primary:hover {
   background-color: var(--color-brand-primary-hover);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.25);
 }
 
 .btn-secondary {
   background-color: #ffffff;
-  color: var(--color-brand-primary);
+  color: var(--color-text-primary);
   border: 1px solid var(--color-border-color);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .btn-secondary:hover {
   background-color: var(--color-brand-accent);
   border-color: rgba(124, 58, 237, 0.3);
-  color: var(--color-brand-primary-hover);
+  color: var(--color-brand-primary);
 }
 
 .btn-outline {
@@ -194,66 +137,35 @@ h6 {
 }
 
 .btn-outline:hover {
-  background-color: var(--color-border-subtle);
+  background-color: #F1F5F9;
   color: var(--color-text-primary);
-  border-color: #CBD5E1;
 }
 
-.btn-ghost {
-  background-color: transparent;
-  color: var(--color-text-secondary);
-  border: 1px solid transparent;
-}
-
-.btn-ghost:hover {
-  background-color: var(--color-brand-accent);
-  color: var(--color-brand-primary);
-}
-
-.btn-dark {
-  background-color: var(--color-navy-panel);
-  color: #ffffff;
-  border: 1px solid var(--color-border-dark);
-}
-
-.btn-dark:hover {
-  background-color: var(--color-navy-card);
-  border-color: var(--color-border-dark-hover);
-}
-
-/* Button Sizing */
 .btn-sm {
-  height: 2.25rem; /* 36px */
+  height: 2.25rem;
   padding-left: 0.875rem;
   padding-right: 0.875rem;
-  font-size: 0.75rem; /* 12px */
-  border-radius: 0.625rem; /* 10px */
+  font-size: 0.8125rem;
+  border-radius: 0.5rem;
 }
 
 .btn-md {
-  height: 2.625rem; /* 42px */
-  padding-left: 1.125rem;
-  padding-right: 1.125rem;
-  font-size: 0.8125rem; /* 13px */
-  border-radius: 0.75rem; /* 12px */
+  height: 2.625rem;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  font-size: 0.875rem;
+  border-radius: 0.625rem;
 }
 
 .btn-lg {
-  height: 3rem; /* 48px */
+  height: 3rem;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
-  font-size: 0.875rem; /* 14px */
-  border-radius: 0.875rem; /* 14px */
+  font-size: 0.9375rem;
+  border-radius: 0.625rem;
 }
 
-.btn-icon-only {
-  padding: 0;
-  width: 2.5rem;
-  height: 2.5rem;
-  flex-shrink: 0;
-}
-
-/* Custom Clean Scrollbar */
+/* Minimal Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -270,19 +182,4 @@ h6 {
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
-}
-
-/* Subtle Glass Panels */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(226, 232, 240, 0.8);
-}
-
-.glass-panel-dark {
-  background: rgba(14, 21, 40, 0.85);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(30, 41, 59, 0.8);
 }
