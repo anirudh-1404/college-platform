@@ -475,7 +475,14 @@ export const createAdminCareerGuide = async (req, res) => {
 export const updateAdminCareerGuide = async (req, res) => {
   try {
     const { id } = req.params;
-    const guide = await CareerGuide.findByIdAndUpdate(id, req.body, { new: true });
+    let guide = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      guide = await CareerGuide.findByIdAndUpdate(id, req.body, { new: true });
+    }
+    if (!guide) {
+      guide = await CareerGuide.findOneAndUpdate({ slug: id }, req.body, { new: true });
+    }
+
     if (!guide) {
       return res.status(404).json({ success: false, message: "Career roadmap not found." });
     }
@@ -501,7 +508,14 @@ export const updateAdminCareerGuide = async (req, res) => {
 export const deleteAdminCareerGuide = async (req, res) => {
   try {
     const { id } = req.params;
-    const guide = await CareerGuide.findByIdAndDelete(id);
+    let guide = null;
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      guide = await CareerGuide.findByIdAndDelete(id);
+    }
+    if (!guide) {
+      guide = await CareerGuide.findOneAndDelete({ slug: id });
+    }
+
     if (!guide) {
       return res.status(404).json({ success: false, message: "Career roadmap not found." });
     }
