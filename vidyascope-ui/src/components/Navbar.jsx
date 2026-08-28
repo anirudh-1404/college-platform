@@ -34,7 +34,7 @@ const Navbar = ({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-18 sm:h-20">
           
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
@@ -45,7 +45,7 @@ const Navbar = ({
               <img
                 src={logoImg}
                 alt="VidyaScope"
-                className="h-9 w-auto object-contain"
+                className="h-11 sm:h-13 w-auto object-contain"
               />
             </button>
           </div>

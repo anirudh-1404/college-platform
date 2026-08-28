@@ -86,7 +86,7 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
-                  className="h-10 w-auto object-contain hover:opacity-90 transition-opacity"
+                  className="h-12 sm:h-14 w-auto object-contain hover:opacity-90 transition-opacity"
                 />
               </button>
               <p className="text-xs sm:text-sm font-medium leading-relaxed max-w-sm text-slate-400">
