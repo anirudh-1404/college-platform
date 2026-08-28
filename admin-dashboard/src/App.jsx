@@ -6,6 +6,7 @@ import AdminOverviewPage from './pages/AdminOverviewPage'
 import RegistrationRequestsPage from './pages/RegistrationRequestsPage'
 import CollegeProfilesReviewPage from './pages/CollegeProfilesReviewPage'
 import UserManagementPage from './pages/UserManagementPage'
+import CareerGuidesManagementPage from './pages/CareerGuidesManagementPage'
 import PlatformDataManagementPage from './pages/PlatformDataManagementPage'
 import AuditLogPage from './pages/AuditLogPage'
 import { adminService } from './data/adminService'
@@ -23,6 +24,7 @@ function App() {
   const [registrations, setRegistrations] = useState([])
   const [profiles, setProfiles] = useState([])
   const [users, setUsers] = useState([])
+  const [careerGuides, setCareerGuides] = useState([])
   const [auditLogs, setAuditLogs] = useState([])
   const [analytics, setAnalytics] = useState({
     totalColleges: 0,
@@ -36,16 +38,18 @@ function App() {
 
   // Reload handler
   const reloadData = async () => {
-    const [regs, profs, usrs, logs, anal] = await Promise.all([
+    const [regs, profs, usrs, guides, logs, anal] = await Promise.all([
       adminService.getRegistrations(),
       adminService.getAllProfiles(),
       adminService.getUsers(),
+      adminService.getCareerGuides(),
       adminService.getAuditLogs(),
       adminService.getAnalytics(),
     ])
     setRegistrations(regs)
     setProfiles(profs)
     setUsers(usrs)
+    setCareerGuides(guides)
     setAuditLogs(logs)
     setAnalytics(anal)
   }
@@ -129,6 +133,16 @@ function App() {
     reloadData()
   }
 
+  const handleAddGuide = async (guideData) => {
+    await adminService.addCareerGuide(guideData)
+    reloadData()
+  }
+
+  const handleDeleteGuide = async (guideId) => {
+    await adminService.deleteCareerGuide(guideId)
+    reloadData()
+  }
+
   const getPageTitle = () => {
     switch (activePage) {
       case 'registrations':
@@ -137,6 +151,8 @@ function App() {
         return 'College Profiles & CMS Editorial Review'
       case 'users':
         return 'Admin Users Management'
+      case 'career-guides':
+        return 'Career Roadmaps & Guidance Management'
       case 'platform-data':
         return 'Platform Data & Ratings Management'
       case 'audit-logs':
@@ -154,12 +170,12 @@ function App() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900 flex">
-      {/* 1. Master Left Sidebar */}
+      {/* Sidebar */}
       <AdminSidebar
         activePage={activePage}
         onSelectPage={(page) => setActivePage(page)}
-        pendingRegistrationsCount={analytics.pendingRegistrations}
-        underReviewCount={analytics.underReviewProfiles}
+        pendingRegistrationsCount={registrations.filter((r) => r.status === 'pending').length}
+        underReviewCount={profiles.filter((p) => p.profileStatus === 'under_review').length}
         usersCount={users.length}
         currentUser={authState.user}
         onLogout={handleLogout}
@@ -167,14 +183,13 @@ function App() {
         onCloseMobile={() => setIsMobileSidebarOpen(false)}
       />
 
-      {/* 2. Main Administration Canvas */}
+      {/* Main Workspace Layout */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-60">
-        {/* Top Header */}
+        {/* Top App Bar */}
         <AdminTopBar
           pageTitle={getPageTitle()}
-          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-          pendingCount={analytics.pendingRegistrations}
           currentUser={authState.user}
+          onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onLogout={handleLogout}
         />
 
@@ -213,6 +228,14 @@ function App() {
               users={users}
               onAddUser={handleAddUser}
               onDeleteUser={handleDeleteUser}
+            />
+          )}
+
+          {activePage === 'career-guides' && (
+            <CareerGuidesManagementPage
+              guides={careerGuides}
+              onAddGuide={handleAddGuide}
+              onDeleteGuide={handleDeleteGuide}
             />
           )}
 

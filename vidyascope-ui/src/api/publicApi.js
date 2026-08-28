@@ -58,4 +58,37 @@ export const publicApi = {
       return [];
     }
   },
+
+  async getCareerGuides(params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.category && params.category !== "all") queryParams.append("category", params.category);
+      if (params.query) queryParams.append("query", params.query);
+
+      const url = `${API_BASE_URL}/career-guides?${queryParams.toString()}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        return data.guides || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("publicApi.getCareerGuides error:", error);
+      return [];
+    }
+  },
+
+  async getCareerGuideDetail(slugOrId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/career-guides/${slugOrId}`);
+      const data = await res.json();
+      if (data.success) {
+        return data.guide || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("publicApi.getCareerGuideDetail error:", error);
+      return null;
+    }
+  },
 };

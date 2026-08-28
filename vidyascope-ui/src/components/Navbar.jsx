@@ -23,7 +23,7 @@ const Navbar = ({
     { id: 'courses', label: 'Courses' },
     { id: 'exams', label: 'Exams' },
     { id: 'compare', label: 'Compare' },
-    { id: 'counseling', label: 'Admissions & Counseling' },
+    { id: 'career-guide', label: 'Career Guidance' },
   ]
 
   const handleNavClick = (pageId) => {

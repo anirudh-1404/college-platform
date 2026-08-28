@@ -2,6 +2,7 @@ import { User } from "../models/User.js";
 import { College } from "../models/College.js";
 import { Registration } from "../models/Registration.js";
 import { AuditLog } from "../models/AuditLog.js";
+import { CareerGuide } from "../models/CareerGuide.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -394,5 +395,127 @@ export const getAuditLogs = async (req, res) => {
     return res.status(200).json({ success: true, auditLogs: logs });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch audit logs." });
+  }
+};
+
+// 7. CAREER GUIDES MANAGEMENT (Roadmaps)
+export const getAdminCareerGuides = async (req, res) => {
+  try {
+    const guides = await CareerGuide.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, guides });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch career guides." });
+  }
+};
+
+export const createAdminCareerGuide = async (req, res) => {
+  try {
+    const {
+      title,
+      category,
+      shortDescription,
+      averageSalary,
+      eligibility,
+      requiredDegrees,
+      targetExams,
+      topRecruiters,
+      roadmapSteps,
+      published,
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: "Career title is required." });
+    }
+
+    const baseSlug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    let slug = baseSlug;
+    const existing = await CareerGuide.findOne({ slug });
+    if (existing) {
+      slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+    }
+
+    const newGuide = await CareerGuide.create({
+      title: title.trim(),
+      slug,
+      category: category || "Engineering & Technology",
+      shortDescription: shortDescription || "",
+      averageSalary: averageSalary || "₹12 - 25 LPA",
+      eligibility: eligibility || "10+2 with relevant subjects",
+      requiredDegrees: requiredDegrees || [],
+      targetExams: targetExams || [],
+      topRecruiters: topRecruiters || [],
+      roadmapSteps: roadmapSteps || [],
+      published: published !== undefined ? published : true,
+    });
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Career Roadmap Created",
+      target: newGuide.title,
+      details: `Created new career roadmap under ${newGuide.category}.`,
+      type: "career_created",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Career roadmap created successfully.",
+      guide: newGuide,
+    });
+  } catch (error) {
+    console.error("createAdminCareerGuide error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to create career guide." });
+  }
+};
+
+export const updateAdminCareerGuide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const guide = await CareerGuide.findByIdAndUpdate(id, req.body, { new: true });
+    if (!guide) {
+      return res.status(404).json({ success: false, message: "Career roadmap not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Career Roadmap Updated",
+      target: guide.title,
+      details: `Updated roadmap details for ${guide.title}.`,
+      type: "career_updated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Career roadmap updated successfully.",
+      guide,
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to update career guide." });
+  }
+};
+
+export const deleteAdminCareerGuide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const guide = await CareerGuide.findByIdAndDelete(id);
+    if (!guide) {
+      return res.status(404).json({ success: false, message: "Career roadmap not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "Career Roadmap Deleted",
+      target: guide.title,
+      details: `Deleted career roadmap (${guide.title}).`,
+      type: "career_deleted",
+    });
+
+    return res.status(200).json({ success: true, message: "Career roadmap deleted successfully." });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to delete career guide." });
   }
 };

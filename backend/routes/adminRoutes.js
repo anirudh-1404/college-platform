@@ -13,6 +13,10 @@ import {
   addAdminUser,
   deleteAdminUser,
   getAuditLogs,
+  getAdminCareerGuides,
+  createAdminCareerGuide,
+  updateAdminCareerGuide,
+  deleteAdminCareerGuide,
 } from "../controllers/adminController.js";
 import { verifyToken, isAdmin } from "../utils/authMiddleware.js";
 
@@ -42,6 +46,12 @@ router.put("/platform-data/:id", updatePlatformData);
 router.get("/users", getAdminUsers);
 router.post("/users", addAdminUser);
 router.delete("/users/:id", deleteAdminUser);
+
+// Career Guides / Roadmaps Management
+router.get("/career-guides", getAdminCareerGuides);
+router.post("/career-guides", createAdminCareerGuide);
+router.put("/career-guides/:id", updateAdminCareerGuide);
+router.delete("/career-guides/:id", deleteAdminCareerGuide);
 
 // Audit Trail
 router.get("/audit-logs", getAuditLogs);

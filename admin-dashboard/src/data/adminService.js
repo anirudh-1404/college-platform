@@ -230,4 +230,68 @@ export const adminService = {
     }
     return []
   },
+
+  // 7. CAREER ROADMAPS MANAGEMENT
+  async getCareerGuides() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/career-guides`, { headers: this.getHeaders() })
+      const data = await res.json()
+      if (res.ok && data.guides) {
+        return data.guides.map(g => ({ ...g, id: g._id || g.slug }))
+      }
+    } catch (e) {
+      console.warn('Career guides fetch error:', e)
+    }
+    return []
+  },
+
+  async addCareerGuide(guideData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/career-guides`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(guideData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Create career roadmap failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.guide
+    } catch (error) {
+      console.error('addCareerGuide error:', error)
+      throw error
+    }
+  },
+
+  async updateCareerGuide(id, guideData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/career-guides/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(guideData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update career roadmap failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.guide
+    } catch (error) {
+      console.error('updateCareerGuide error:', error)
+      throw error
+    }
+  },
+
+  async deleteCareerGuide(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/career-guides/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Delete career roadmap failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return true
+    } catch (error) {
+      console.error('deleteCareerGuide error:', error)
+      throw error
+    }
+  },
 }

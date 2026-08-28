@@ -1,4 +1,5 @@
 import { College } from "../models/College.js";
+import { CareerGuide } from "../models/CareerGuide.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
 export const getPublicColleges = async (req, res) => {
@@ -164,5 +165,92 @@ export const getPublicCourses = async (req, res) => {
     return res.status(200).json({ success: true, count: allCourses.length, courses: allCourses });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch courses directory." });
+  }
+};
+
+// 4. GET PUBLIC CAREER GUIDES (Roadmaps)
+export const getPublicCareerGuides = async (req, res) => {
+  try {
+    const { category, query } = req.query;
+    const filter = { published: true };
+
+    if (category && category !== "all") {
+      filter.category = category;
+    }
+
+    if (query && query.trim() !== "") {
+      const regex = new RegExp(query.trim(), "i");
+      filter.$or = [
+        { title: regex },
+        { shortDescription: regex },
+        { requiredDegrees: regex },
+        { targetExams: regex },
+      ];
+    }
+
+    const guides = await CareerGuide.find(filter).sort({ createdAt: -1 });
+
+    const formatted = guides.map((g) => ({
+      id: g.slug || g._id,
+      slug: g.slug,
+      title: g.title,
+      category: g.category,
+      shortDescription: g.shortDescription,
+      averageSalary: g.averageSalary,
+      eligibility: g.eligibility,
+      requiredDegrees: g.requiredDegrees || [],
+      targetExams: g.targetExams || [],
+      topRecruiters: g.topRecruiters || [],
+      roadmapSteps: g.roadmapSteps || [],
+      published: g.published,
+      createdAt: g.createdAt,
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: formatted.length,
+      guides: formatted,
+    });
+  } catch (error) {
+    console.error("getPublicCareerGuides error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch career roadmaps." });
+  }
+};
+
+// 5. GET SINGLE PUBLIC CAREER GUIDE DETAIL
+export const getPublicCareerGuideDetail = async (req, res) => {
+  try {
+    const { slugOrId } = req.params;
+
+    let guide = await CareerGuide.findOne({ slug: slugOrId, published: true });
+    if (!guide) {
+      guide = await CareerGuide.findById(slugOrId);
+    }
+
+    if (!guide || !guide.published) {
+      return res.status(404).json({ success: false, message: "Career roadmap not found." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      guide: {
+        id: guide.slug || guide._id,
+        slug: guide.slug,
+        title: guide.title,
+        category: guide.category,
+        shortDescription: guide.shortDescription,
+        averageSalary: guide.averageSalary,
+        eligibility: guide.eligibility,
+        requiredDegrees: guide.requiredDegrees || [],
+        targetExams: guide.targetExams || [],
+        topRecruiters: guide.topRecruiters || [],
+        roadmapSteps: guide.roadmapSteps || [],
+        published: guide.published,
+        createdAt: guide.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("getPublicCareerGuideDetail error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch career roadmap." });
   }
 };

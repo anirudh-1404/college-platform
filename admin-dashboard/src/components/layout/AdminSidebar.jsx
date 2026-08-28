@@ -4,6 +4,7 @@ import {
   ShieldCheck,
   Building2,
   Users,
+  Compass,
   SlidersHorizontal,
   History,
   LogOut,
@@ -48,6 +49,12 @@ const AdminSidebar = ({
       icon: Users,
       badge: usersCount > 0 ? usersCount : null,
       badgeColor: 'bg-slate-100 text-slate-700',
+    },
+    {
+      id: 'career-guides',
+      label: 'Career Roadmaps',
+      icon: Compass,
+      badge: null,
     },
     {
       id: 'platform-data',
