@@ -8,8 +8,20 @@ import {
   packageOptions,
 } from '../data/collegesData'
 
+const streamList = [
+  { id: 'all', label: 'All Disciplines' },
+  { id: 'engineering', label: 'Engineering (B.Tech)' },
+  { id: 'management', label: 'Management (MBA)' },
+  { id: 'medical', label: 'Medical (MBBS)' },
+  { id: 'law', label: 'Law (LLB / LLM)' },
+  { id: 'design', label: 'Design & Architecture' },
+  { id: 'applied-sciences', label: 'Applied Sciences' },
+]
+
 const FilterSidebar = ({
   filters,
+  activeStream = 'all',
+  onStreamChange,
   onFilterChange,
   onResetFilters,
   isOpen,
@@ -54,6 +66,50 @@ const FilterSidebar = ({
           <span>Clear All</span>
         </button>
       </div>
+
+      {/* 0. Academic Stream / Discipline Filter */}
+      {onStreamChange && (
+        <>
+          <div className="space-y-3">
+            <button
+              onClick={() => toggleSection('stream')}
+              className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
+            >
+              <span>Academic Discipline</span>
+              {collapsedSections.stream ? (
+                <ChevronDown className="h-4 w-4 text-text-light" />
+              ) : (
+                <ChevronUp className="h-4 w-4 text-text-light" />
+              )}
+            </button>
+
+            {!collapsedSections.stream && (
+              <div className="space-y-2 pt-1">
+                {streamList.map((st) => {
+                  const checked = activeStream === st.id
+                  return (
+                    <label
+                      key={st.id}
+                      className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
+                    >
+                      <input
+                        type="radio"
+                        name="streamFilter"
+                        checked={checked}
+                        onChange={() => onStreamChange(st.id)}
+                        className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
+                      />
+                      <span>{st.label}</span>
+                    </label>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          <div className="h-[1px] bg-slate-100" />
+        </>
+      )}
 
       {/* 1. Location Filter */}
       <div className="space-y-3">

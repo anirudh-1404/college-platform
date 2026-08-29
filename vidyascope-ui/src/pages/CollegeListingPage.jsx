@@ -64,14 +64,6 @@ const CollegeListingPage = ({
     fetchLiveColleges()
   }, [activeStream, searchQuery, sortBy])
 
-  // Stream options
-  const streamOptions = [
-    { id: 'all', label: 'All Disciplines', icon: Layers },
-    { id: 'engineering', label: 'Engineering (B.Tech)', icon: GraduationCap },
-    { id: 'management', label: 'Management (MBA)', icon: Briefcase },
-    { id: 'medical', label: 'Medical (MBBS)', icon: Stethoscope },
-  ]
-
   // Handlers
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({
@@ -150,50 +142,24 @@ const CollegeListingPage = ({
         </div>
       </div>
 
-      {/* 2. Stream Filter Bar */}
-      <div className="bg-white border-b border-border-color">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-2 overflow-x-auto py-2.5 custom-scrollbar">
-            {streamOptions.map((stream) => {
-              const Icon = stream.icon
-              const isActive = activeStream === stream.id
-              return (
-                <button
-                  key={stream.id}
-                  onClick={() => {
-                    setActiveStream(stream.id)
-                    if (onSelectStream) onSelectStream(stream.id)
-                  }}
-                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                    isActive
-                      ? 'bg-brand-primary text-white font-bold shadow-xs'
-                      : 'bg-slate-50 text-text-secondary hover:bg-brand-accent hover:text-brand-primary border border-border-color'
-                  }`}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span>{stream.label}</span>
-                </button>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Main Discovery Workspace */}
+      {/* 2. Main Discovery Workspace */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="flex items-start gap-8">
           
-          {/* Left Desktop Sidebar */}
-          <div className="hidden lg:block w-72 flex-shrink-0">
-            <div className="bg-white border border-border-color rounded-2xl p-5 shadow-card">
-              <FilterSidebar
-                filters={filters}
-                onFilterChange={handleFilterChange}
-                onResetFilters={handleResetFilters}
-                totalResults={filteredColleges.length}
-              />
-            </div>
-          </div>
+          {/* Left Desktop & Mobile Filter Sidebar */}
+          <FilterSidebar
+            filters={filters}
+            activeStream={activeStream}
+            onStreamChange={(stream) => {
+              setActiveStream(stream)
+              if (onSelectStream) onSelectStream(stream)
+            }}
+            onFilterChange={handleFilterChange}
+            onResetFilters={handleResetFilters}
+            totalResults={filteredColleges.length}
+            isOpen={isMobileFilterOpen}
+            onCloseMobile={() => setIsMobileFilterOpen(false)}
+          />
 
           {/* Right Content Stream */}
           <div className="flex-1 min-w-0 space-y-4">
