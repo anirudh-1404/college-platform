@@ -17,16 +17,6 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
 
-const CATEGORIES = [
-  { id: 'all', label: 'All Exams' },
-  { id: 'engineering', label: 'Engineering (JEE / BITSAT)' },
-  { id: 'management', label: 'Management (CAT / XAT)' },
-  { id: 'medical', label: 'Medical (NEET UG)' },
-  { id: 'law', label: 'Law (CLAT)' },
-  { id: 'design', label: 'Design (UCEED / NIFT)' },
-  { id: 'applied-sciences', label: 'Central Universities (CUET)' },
-]
-
 const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => {
   const [exams, setExams] = useState([])
   const [loading, setLoading] = useState(true)
@@ -39,9 +29,9 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
       setLoading(true)
       try {
         const data = await publicApi.getExams()
-        setExams(data)
-        if (data.length > 0 && !selectedExamId) {
-          setSelectedExamId(data[0].id)
+        setExams(data || [])
+        if (data && data.length > 0 && !selectedExamId) {
+          setSelectedExamId(data[0].id || data[0].slug)
         }
       } catch (err) {
         console.error('Failed to fetch exams:', err)
@@ -51,6 +41,33 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
     }
     fetchExams()
   }, [])
+
+  // Dynamically derive unique categories from live exams entered by admin
+  const dynamicCategories = useMemo(() => {
+    if (!exams || exams.length === 0) return []
+    const uniqueRaw = Array.from(new Set(exams.map((e) => e.category).filter(Boolean)))
+    if (uniqueRaw.length === 0) return []
+
+    const formatCategory = (cat) => {
+      const map = {
+        engineering: 'Engineering (B.Tech)',
+        management: 'Management (MBA)',
+        medical: 'Medical (NEET)',
+        law: 'Law (CLAT)',
+        design: 'Design & Architecture',
+        'applied-sciences': 'Sciences & Humanities',
+      }
+      return map[cat.toLowerCase()] || cat.charAt(0).toUpperCase() + cat.slice(1)
+    }
+
+    return [
+      { id: 'all', label: 'All Exams' },
+      ...uniqueRaw.map((cat) => ({
+        id: cat,
+        label: formatCategory(cat),
+      })),
+    ]
+  }, [exams])
 
   const filteredExams = useMemo(() => {
     if (categoryFilter === 'all') return exams
@@ -88,35 +105,37 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
       <div className="bg-white border-b border-border-color py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-bold text-text-primary">
-              Major Entrance & Competitive Examinations
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-950">
+              Major Entrance &amp; Competitive Examinations
             </h1>
-            <p className="text-xs sm:text-sm text-text-secondary mt-2 leading-relaxed font-normal">
+            <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed font-normal">
               Understand exam eligibility, conducting bodies, question patterns, target colleges, and cutoff requirements for higher education in India.
             </p>
           </div>
 
-          {/* Discipline Filters */}
-          <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pt-6">
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => {
-                  setCategoryFilter(cat.id)
-                  const matching =
-                    cat.id === 'all' ? exams : exams.filter((e) => e.category === cat.id)
-                  if (matching.length > 0) setSelectedExamId(matching[0].id)
-                }}
-                className={`px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
-                  categoryFilter === cat.id
-                    ? 'bg-brand-primary text-white font-bold'
-                    : 'bg-slate-100 text-text-secondary hover:text-brand-primary hover:bg-brand-accent'
-                }`}
-              >
-                {cat.label}
-              </button>
-            ))}
-          </div>
+          {/* Dynamic Discipline Filters (Rendered ONLY when exams exist in database) */}
+          {dynamicCategories.length > 1 && (
+            <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pt-6">
+              {dynamicCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setCategoryFilter(cat.id)
+                    const matching =
+                      cat.id === 'all' ? exams : exams.filter((e) => e.category === cat.id)
+                    if (matching.length > 0) setSelectedExamId(matching[0].id || matching[0].slug)
+                  }}
+                  className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
+                    categoryFilter === cat.id
+                      ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

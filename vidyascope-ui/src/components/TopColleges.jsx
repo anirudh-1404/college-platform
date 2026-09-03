@@ -25,21 +25,24 @@ const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
     <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-border-color">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Header (No Pill Tags) */}
+        {/* Section Header */}
         <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
-              Top Ranked Colleges in India
+            <span className="text-[11px] font-mono font-bold tracking-widest text-slate-500 uppercase">
+              Audited National Benchmarks • Premier Campuses
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl font-bold text-slate-950 mt-1">
+              Top Ranked Institutions in India
             </h2>
-            <p className="text-sm text-slate-500 mt-1 max-w-xl font-normal">
-              Validated national NIRF rankings, verified placement figures, and official course fee structures.
+            <p className="text-xs sm:text-sm text-slate-600 mt-1 max-w-xl font-normal">
+              Validated national NIRF rankings, verified median salary records, and official course fee structures.
             </p>
           </div>
           <button
             onClick={onNavigateListing}
-            className="text-sm font-bold text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-slate-900 hover:text-brand-primary flex items-center gap-1 cursor-pointer self-start sm:self-auto"
           >
-            <span>View all colleges</span>
+            <span>Explore All Colleges</span>
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

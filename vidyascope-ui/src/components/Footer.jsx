@@ -81,12 +81,12 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
             <div className="lg:col-span-5 flex flex-col items-start gap-4">
               <button
                 onClick={() => onNavigate && onNavigate('home')}
-                className="flex items-center group focus:outline-none cursor-pointer"
+                className="flex items-center group focus:outline-none cursor-pointer bg-white px-3 py-1.5 rounded-xl border border-slate-700/50 hover:bg-slate-100 transition-all shadow-sm"
               >
                 <img
                   src={logoImg}
                   alt="VidyaScope Logo"
-                  className="h-12 sm:h-14 w-auto object-contain hover:opacity-90 transition-opacity"
+                  className="h-8 sm:h-9 w-auto object-contain"
                 />
               </button>
               <p className="text-xs sm:text-sm font-medium leading-relaxed max-w-sm text-slate-400">

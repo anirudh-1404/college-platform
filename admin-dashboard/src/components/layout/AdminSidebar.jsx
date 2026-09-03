@@ -102,7 +102,7 @@ const AdminSidebar = ({
                 alt="VidyaScope"
                 className="h-8 w-auto object-contain"
               />
-              <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-700 px-2 py-0.5 rounded">
+              <span className="text-[10px] font-bold uppercase tracking-wider bg-blue-100 text-blue-700 px-2 py-0.5 rounded">
                 Admin
               </span>
             </div>
@@ -138,14 +138,14 @@ const AdminSidebar = ({
                   }}
                   className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer text-left ${
                     isActive
-                      ? 'bg-purple-50 text-purple-700 font-semibold'
+                      ? 'bg-blue-50 text-blue-700 font-semibold'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <Icon
                       className={`h-4 w-4 flex-shrink-0 ${
-                        isActive ? 'text-purple-600' : 'text-slate-400'
+                        isActive ? 'text-blue-600' : 'text-slate-400'
                       }`}
                     />
                     <span className="truncate">{item.label}</span>

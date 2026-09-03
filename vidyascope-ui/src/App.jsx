@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react'
 import Navbar from './components/Navbar'
+import LiveAlertTicker from './components/LiveAlertTicker'
 import Hero from './components/Hero'
-import ExploreByGoal from './components/ExploreByGoal'
+import FeaturesTailored from './components/FeaturesTailored'
+import ExploreCities from './components/ExploreCities'
 import TopColleges from './components/TopColleges'
+import TopExamsSection from './components/TopExamsSection'
 import WhyVidyaScope from './components/WhyVidyaScope'
 import Testimonials from './components/Testimonials'
 import BlogSection from './components/BlogSection'
@@ -117,6 +120,12 @@ const App = () => {
         onNavigateListing={handleHeroSearch}
       />
 
+      {/* Real-time Editorial Admissions Ticker */}
+      <LiveAlertTicker
+        onNavigateExams={() => setCurrentPage('exams')}
+        onNavigateColleges={() => setCurrentPage('colleges-listing')}
+      />
+
       {/* Main Content Router View */}
       <AnimatePresence mode="wait">
         <motion.main
@@ -127,20 +136,28 @@ const App = () => {
           transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
           className="flex-grow"
         >
-          {/* 1. HOMEPAGE VIEW (Clean, Uncluttered, Purposeful) */}
+          {/* 1. HOMEPAGE VIEW (Dribbble-Inspired Human-Crafted Flow) */}
           {currentPage === 'home' && (
             <>
               <Hero
+                onNavigateListing={handleHeroSearch}
+                onNavigateCompare={() => setCurrentPage('compare')}
+                onSelectCollege={handleSelectCollege}
+              />
+              <FeaturesTailored
                 onNavigateListing={() => setCurrentPage('colleges-listing')}
+                onNavigateCompare={() => setCurrentPage('compare')}
                 onOpenCounseling={() => setIsCounselingModalOpen(true)}
               />
-              <ExploreByGoal
-                onSelectCategory={handleSelectCategory}
-                onNavigateListing={handleHeroSearch}
+              <ExploreCities
+                onSelectCity={(cityName) => handleHeroSearch({ query: cityName })}
               />
               <TopColleges
                 onSelectCollege={handleSelectCollege}
                 onNavigateListing={() => setCurrentPage('colleges-listing')}
+              />
+              <TopExamsSection
+                onNavigateExams={() => setCurrentPage('exams')}
               />
               <WhyVidyaScope onOpenCounseling={() => setIsCounselingModalOpen(true)} />
               <Testimonials />
