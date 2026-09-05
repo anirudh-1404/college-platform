@@ -1,6 +1,7 @@
 import { College } from "../models/College.js";
 import { CareerGuide } from "../models/CareerGuide.js";
 import { Exam } from "../models/Exam.js";
+import { Inquiry } from "../models/Inquiry.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
 export const getPublicColleges = async (req, res) => {
@@ -350,5 +351,71 @@ export const getPublicExamDetail = async (req, res) => {
   } catch (error) {
     console.error("getPublicExamDetail error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch entrance exam." });
+  }
+};
+
+// 6. CREATE PUBLIC INQUIRY / COUNSELING REQUEST
+export const createPublicInquiry = async (req, res) => {
+  try {
+    const {
+      studentName,
+      name,
+      email,
+      phone,
+      stream,
+      targetScore,
+      preferredLocation,
+      budgetRange,
+      admissionYear,
+      targetYear,
+      notes,
+      collegeId,
+      collegeName,
+      source,
+    } = req.body;
+
+    const resolvedName = (studentName || name || "").trim();
+    const resolvedPhone = (phone || "").trim();
+
+    if (!resolvedName) {
+      return res.status(400).json({ success: false, message: "Student name is required." });
+    }
+
+    if (!resolvedPhone) {
+      return res.status(400).json({ success: false, message: "Contact phone number is required." });
+    }
+
+    const newInquiry = await Inquiry.create({
+      studentName: resolvedName,
+      email: (email || "").trim(),
+      phone: resolvedPhone,
+      stream: stream || "engineering",
+      targetScore: targetScore || "",
+      preferredLocation: preferredLocation || "",
+      budgetRange: budgetRange || "under-10",
+      admissionYear: admissionYear || targetYear || new Date().getFullYear().toString(),
+      notes: notes || "",
+      collegeId: collegeId || null,
+      collegeName: collegeName || null,
+      source: source || "counseling_modal",
+      status: "new",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Your counseling request has been received. Our expert will contact you shortly.",
+      inquiry: {
+        id: newInquiry._id,
+        studentName: newInquiry.studentName,
+        createdAt: newInquiry.createdAt,
+      },
+    });
+  } catch (error) {
+    console.error("createPublicInquiry error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to submit counseling request. Please try again.",
+      error: error.message,
+    });
   }
 };

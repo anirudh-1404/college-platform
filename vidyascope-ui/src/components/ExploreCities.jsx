@@ -35,7 +35,7 @@ const ExploreCities = ({ onSelectCity }) => {
         
         {/* Section Header */}
         <div className="space-y-2 mb-10">
-          <span className="text-[#3B82F6] text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
+          <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Explore</span>
           </span>
@@ -54,7 +54,7 @@ const ExploreCities = ({ onSelectCity }) => {
               key={city.name}
               type="button"
               onClick={() => onSelectCity && onSelectCity(city.name)}
-              className="bg-white border border-slate-200/90 rounded-2xl p-6 flex flex-col items-center justify-center gap-3.5 hover:border-[#3B82F6] hover:shadow-md transition-all group cursor-pointer"
+              className="bg-white border border-slate-200/90 rounded-2xl p-6 flex flex-col items-center justify-center gap-3.5 hover:border-brand-primary hover:shadow-md transition-all group cursor-pointer"
             >
               {/* City Icon in round tinted badge */}
               <div className={`w-14 h-14 rounded-2xl ${city.iconBg} flex items-center justify-center transition-transform group-hover:scale-110 shadow-2xs`}>
@@ -62,7 +62,7 @@ const ExploreCities = ({ onSelectCity }) => {
               </div>
 
               {/* City Name */}
-              <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-[#3B82F6] transition-colors">
+              <h3 className="text-sm sm:text-base font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
                 {city.name}
               </h3>
 

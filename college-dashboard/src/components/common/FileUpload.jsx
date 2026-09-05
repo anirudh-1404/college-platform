@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react'
-import { Upload, FileText, Image as ImageIcon, X, CheckCircle2, AlertCircle } from 'lucide-react'
+import { Upload, FileText, Image as ImageIcon, X, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
+import { collegeService } from '../../data/collegeService'
 
 // 1. Document / Verification Proof Uploader (PDF or Image)
 export const DocumentUploader = ({
@@ -145,7 +146,7 @@ export const DocumentUploader = ({
   )
 }
 
-// 2. Single Image Uploader with Preview (Logo / Cover Photo)
+// 2. Single Image Uploader with Cloudinary Pipeline & Preview
 export const ImageUploader = ({
   imageUrl,
   onChange,
@@ -156,20 +157,32 @@ export const ImageUploader = ({
   disabled = false,
 }) => {
   const fileInputRef = useRef(null)
+  const [uploading, setUploading] = useState(false)
 
-  const handleFile = (e) => {
+  const handleFile = async (e) => {
     const file = e.target.files?.[0]
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size exceeds 5MB limit.')
+    if (file.size > 8 * 1024 * 1024) {
+      alert('Image size exceeds 8MB limit.')
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
-      onChange(reader.result)
+    setUploading(true)
+    try {
+      // Direct upload to backend Cloudinary endpoint
+      const uploadedUrl = await collegeService.uploadImage(file, 'vidyascope/colleges')
+      onChange(uploadedUrl)
+    } catch (err) {
+      console.warn('Direct upload failed, falling back to local base64:', err)
+      // Graceful fallback: local Data URI
+      const reader = new FileReader()
+      reader.onload = () => {
+        onChange(reader.result)
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setUploading(false)
     }
-    reader.readAsDataURL(file)
   }
 
   const aspectClass =
@@ -187,7 +200,12 @@ export const ImageUploader = ({
         <div
           className={`${aspectClass} overflow-hidden bg-slate-100 border border-border-color flex items-center justify-center relative group flex-shrink-0`}
         >
-          {imageUrl ? (
+          {uploading ? (
+            <div className="flex flex-col items-center justify-center p-2 text-brand-primary">
+              <Loader2 className="h-6 w-6 animate-spin mb-1" />
+              <span className="text-[10px] font-bold">Uploading...</span>
+            </div>
+          ) : imageUrl ? (
             <img src={imageUrl} alt="Uploaded preview" className="w-full h-full object-cover" />
           ) : (
             <div className="text-center p-2 text-text-light">
@@ -204,18 +222,29 @@ export const ImageUploader = ({
               type="file"
               accept="image/*"
               onChange={handleFile}
+              disabled={uploading}
               className="hidden"
             />
             <div className="flex items-center gap-2">
               <button
                 type="button"
+                disabled={uploading}
                 onClick={() => fileInputRef.current?.click()}
-                className="btn btn-sm btn-outline text-xs cursor-pointer"
+                className="btn btn-sm btn-outline text-xs cursor-pointer flex items-center gap-1.5"
               >
-                <Upload className="h-3.5 w-3.5" />
-                <span>{imageUrl ? 'Change Image' : 'Upload Image'}</span>
+                {uploading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-primary" />
+                    <span>Uploading...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload className="h-3.5 w-3.5" />
+                    <span>{imageUrl ? 'Change Image' : 'Upload Image'}</span>
+                  </>
+                )}
               </button>
-              {imageUrl && (
+              {imageUrl && !uploading && (
                 <button
                   type="button"
                   onClick={onRemove}
@@ -232,3 +261,4 @@ export const ImageUploader = ({
     </div>
   )
 }
+

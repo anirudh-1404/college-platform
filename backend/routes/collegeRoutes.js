@@ -3,6 +3,7 @@ import {
   getMyCollegeProfile,
   updateCollegeProfile,
   submitForApproval,
+  getCollegeLeads,
 } from "../controllers/collegeController.js";
 import { verifyToken, isCollegeAdmin } from "../utils/authMiddleware.js";
 
@@ -13,5 +14,6 @@ router.use(verifyToken, isCollegeAdmin);
 router.get("/profile", getMyCollegeProfile);
 router.put("/profile", updateCollegeProfile);
 router.post("/submit-review", submitForApproval);
+router.get("/leads", getCollegeLeads);
 
 export default router;

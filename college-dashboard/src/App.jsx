@@ -7,6 +7,7 @@ import CollegeLoginPage from './pages/auth/CollegeLoginPage'
 import PendingVerificationScreen from './pages/auth/PendingVerificationScreen'
 import RegistrationRejectedScreen from './pages/auth/RegistrationRejectedScreen'
 import Step10ReviewPreview from './pages/onboarding/Step10ReviewPreview'
+import CollegeLeadsPage from './pages/leads/CollegeLeadsPage'
 import { authService } from './data/authService'
 import { collegeService } from './data/collegeService'
 
@@ -17,6 +18,8 @@ function App() {
 
   // College Profile Master State
   const [collegeData, setCollegeData] = useState(() => collegeService.getCollegeData())
+  const [activeView, setActiveView] = useState('onboarding') // 'onboarding' | 'leads'
+  const [leadsCount, setLeadsCount] = useState(0)
   const [activeStep, setActiveStep] = useState(1)
   const [completedSteps, setCompletedSteps] = useState([])
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false)
@@ -27,6 +30,9 @@ function App() {
     if (authState.isAuthenticated) {
       collegeService.fetchCollegeData().then((data) => {
         if (data) setCollegeData(data)
+      })
+      collegeService.getCollegeLeads().then((leads) => {
+        if (leads) setLeadsCount(leads.length)
       })
     }
 
@@ -138,11 +144,18 @@ function App() {
         <Sidebar
           activeStep={activeStep}
           onSelectStep={(step) => {
+            setActiveView('onboarding')
             setActiveStep(step)
             window.scrollTo({ top: 0, behavior: 'smooth' })
           }}
           completedSteps={completedSteps}
           collegeData={collegeData}
+          activeView={activeView}
+          onSelectView={(view) => {
+            setActiveView(view)
+            window.scrollTo({ top: 0, behavior: 'smooth' })
+          }}
+          leadsCount={leadsCount}
           onPreviewPublic={() => setPreviewModalOpen(true)}
           onLogout={handleLogout}
           isMobileOpen={isMobileSidebarOpen}
@@ -161,19 +174,23 @@ function App() {
             onPreviewPublic={() => setPreviewModalOpen(true)}
           />
 
-          {/* Dynamic Onboarding & Profile Management View */}
+          {/* Dynamic View: Onboarding Wizard vs Student Leads */}
           <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 flex flex-col justify-between">
-            <OnboardingContainer
-              collegeData={collegeData}
-              onUpdateCollegeData={setCollegeData}
-              currentStep={activeStep}
-              onStepChange={(step) => setActiveStep(step)}
-              completedSteps={completedSteps}
-              onCompleteStep={(stepId) =>
-                setCompletedSteps((prev) => Array.from(new Set([...prev, stepId])))
-              }
-              onOpenPublicPreview={() => setPreviewModalOpen(true)}
-            />
+            {activeView === 'leads' ? (
+              <CollegeLeadsPage collegeData={collegeData} />
+            ) : (
+              <OnboardingContainer
+                collegeData={collegeData}
+                onUpdateCollegeData={setCollegeData}
+                currentStep={activeStep}
+                onStepChange={(step) => setActiveStep(step)}
+                completedSteps={completedSteps}
+                onCompleteStep={(stepId) =>
+                  setCompletedSteps((prev) => Array.from(new Set([...prev, stepId])))
+                }
+                onOpenPublicPreview={() => setPreviewModalOpen(true)}
+              />
+            )}
           </main>
         </div>
       </div>

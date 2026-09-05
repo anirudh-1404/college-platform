@@ -1,10 +1,10 @@
 @import "tailwindcss";
 
 :root {
-  /* Centralized Royal Blue Theme */
-  --color-brand-primary: #3B82F6;
-  --color-brand-primary-hover: #2563EB;
-  --color-brand-accent: #EFF6FF;
+  /* Centralized Brand Palette (Matched to VidyaScope Logo Text #033C8D) */
+  --color-brand-primary: #033C8D;
+  --color-brand-primary-hover: #022B66;
+  --color-brand-accent: #EBF2FA;
 
   /* Navy / Dark Theme Components */
   --color-navy-dark: #090D1A;
@@ -25,9 +25,9 @@
   --color-border-dark-hover: #334155;
 
   /* Shadows */
-  --shadow-premium: 0 10px 30px -10px rgba(59, 130, 246, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+  --shadow-premium: 0 10px 30px -10px rgba(3, 60, 141, 0.15), 0 1px 3px rgba(0, 0, 0, 0.05);
   --shadow-card: 0 4px 20px -2px rgba(15, 23, 42, 0.06), 0 1px 4px -1px rgba(15, 23, 42, 0.04);
-  --shadow-glow: 0 0 25px -5px rgba(59, 130, 246, 0.35);
+  --shadow-glow: 0 0 25px -5px rgba(3, 60, 141, 0.35);
   --shadow-dark-panel: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
 }
 

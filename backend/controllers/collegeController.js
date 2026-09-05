@@ -1,5 +1,6 @@
 import { College } from "../models/College.js";
 import { AuditLog } from "../models/AuditLog.js";
+import { Inquiry } from "../models/Inquiry.js";
 
 // 1. GET COLLEGE PROFILE (For Authenticated College Representative)
 export const getMyCollegeProfile = async (req, res) => {
@@ -107,5 +108,36 @@ export const submitForApproval = async (req, res) => {
   } catch (error) {
     console.error("submitForApproval error:", error);
     return res.status(500).json({ success: false, message: "Failed to submit profile for review." });
+  }
+};
+
+// 4. GET STUDENT LEADS FOR THIS COLLEGE
+export const getCollegeLeads = async (req, res) => {
+  try {
+    const collegeId = req.user?.collegeId;
+    const collegeName = req.user?.collegeName;
+
+    const orClauses = [];
+    if (collegeId) orClauses.push({ collegeId: collegeId });
+    if (collegeName) orClauses.push({ collegeName: new RegExp(`^${collegeName.trim()}$`, "i") });
+
+    if (orClauses.length === 0) {
+      return res.status(200).json({
+        success: true,
+        leads: [],
+        count: 0,
+      });
+    }
+
+    const leads = await Inquiry.find({ $or: orClauses }).sort({ createdAt: -1 });
+
+    return res.status(200).json({
+      success: true,
+      leads,
+      count: leads.length,
+    });
+  } catch (error) {
+    console.error("getCollegeLeads error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch student leads." });
   }
 };

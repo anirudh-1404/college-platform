@@ -144,4 +144,50 @@ export const collegeService = {
     }
     return { success: true, college: this.saveCollegeData(updated) }
   },
+
+  // Fetch student inquiries specifically for this college
+  async getCollegeLeads() {
+    const token = authService.getToken()
+    try {
+      const res = await fetch(`${API_BASE_URL}/leads`, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+      })
+      const data = await res.json()
+      if (res.ok && data.leads) {
+        return data.leads
+      }
+    } catch (e) {
+      console.warn('Backend leads fetch failed:', e)
+    }
+    return []
+  },
+
+  // Upload an image file to backend Cloudinary pipeline
+  async uploadImage(file, folder = 'vidyascope/colleges') {
+    const token = authService.getToken()
+    const uploadEndpoint = import.meta.env.VITE_API_URL
+      ? `${import.meta.env.VITE_API_URL}/upload`
+      : (import.meta.env.PROD
+          ? 'https://vidyascope-backend.onrender.com/api/upload'
+          : 'http://localhost:8080/api/upload')
+
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('folder', folder)
+
+    const res = await fetch(uploadEndpoint, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Image upload failed')
+    return data.url
+  },
 }

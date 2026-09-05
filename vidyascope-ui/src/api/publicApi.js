@@ -3,8 +3,13 @@
  */
 
 const API_BASE_URL =
-  import.meta.env.VITE_API_URL ||
-  "https://vidyascope-backend.onrender.com/api/public";
+  import.meta.env.VITE_API_URL
+    ? (import.meta.env.VITE_API_URL.endsWith("/public")
+        ? import.meta.env.VITE_API_URL
+        : `${import.meta.env.VITE_API_URL}/public`)
+    : (import.meta.env.PROD
+        ? "https://vidyascope-backend.onrender.com/api/public"
+        : "http://localhost:8080/api/public");
 
 export const publicApi = {
   async getColleges(params = {}) {
@@ -120,6 +125,21 @@ export const publicApi = {
     } catch (error) {
       console.error("publicApi.getExamDetail error:", error);
       return null;
+    }
+  },
+
+  async submitInquiry(formData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/counseling`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+      const data = await res.json();
+      return data;
+    } catch (error) {
+      console.error("publicApi.submitInquiry error:", error);
+      return { success: false, message: "Network error submitting inquiry." };
     }
   },
 };

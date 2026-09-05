@@ -25,3 +25,12 @@ pnpm-debug.log*
 .vscode/*
 !.vscode/extensions.json
 *.local
+
+# Environment files
+.env
+.env.*
+*.env
+*/.env
+*/.env.*
+*/*.env
+!*.env.example

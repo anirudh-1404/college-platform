@@ -10,6 +10,7 @@ import CareerGuidesManagementPage from './pages/CareerGuidesManagementPage'
 import ExamManagementPage from './pages/ExamManagementPage'
 import PlatformDataManagementPage from './pages/PlatformDataManagementPage'
 import AuditLogPage from './pages/AuditLogPage'
+import ContactInquiriesPage from './pages/ContactInquiriesPage'
 import { adminService } from './data/adminService'
 import { adminAuthService } from './data/adminAuthService'
 
@@ -161,6 +162,8 @@ function App() {
     switch (activePage) {
       case 'registrations':
         return 'Registration Verification Queue'
+      case 'inquiries':
+        return 'Contact Inquiries & Student Leads'
       case 'profiles':
         return 'College Profiles & CMS Editorial Review'
       case 'users':
@@ -193,6 +196,7 @@ function App() {
         pendingRegistrationsCount={registrations.filter((r) => r.status === 'pending').length}
         underReviewCount={profiles.filter((p) => p.profileStatus === 'under_review').length}
         usersCount={users.length}
+        newInquiriesCount={analytics.newInquiries || 0}
         currentUser={authState.user}
         onLogout={handleLogout}
         isMobileOpen={isMobileSidebarOpen}
@@ -228,6 +232,10 @@ function App() {
               onApprove={handleApproveRegistration}
               onReject={handleRejectRegistration}
             />
+          )}
+
+          {activePage === 'inquiries' && (
+            <ContactInquiriesPage />
           )}
 
           {activePage === 'profiles' && (

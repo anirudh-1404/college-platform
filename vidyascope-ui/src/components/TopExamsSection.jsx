@@ -69,7 +69,7 @@ const TopExamsSection = ({ onNavigateExams }) => {
         
         {/* Section Header */}
         <div className="space-y-2 mb-8">
-          <span className="text-[#3B82F6] text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
+          <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Exams</span>
           </span>
@@ -91,7 +91,7 @@ const TopExamsSection = ({ onNavigateExams }) => {
                 onClick={() => setActiveTab(cat.id)}
                 className={`px-5 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
                   activeTab === cat.id
-                    ? 'bg-[#3B82F6] text-white shadow-sm'
+                    ? 'bg-brand-primary text-white shadow-sm'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -110,7 +110,7 @@ const TopExamsSection = ({ onNavigateExams }) => {
                 <div
                   key={exam.id || exam.slug}
                   onClick={onNavigateExams}
-                  className="bg-white border border-slate-200/90 rounded-2xl p-6 hover:border-[#3B82F6] hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-6 hover:border-brand-primary hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div className="space-y-3">
                     {/* Badge Icon & Mode */}
@@ -125,7 +125,7 @@ const TopExamsSection = ({ onNavigateExams }) => {
 
                     {/* Exam Title & Conducting Body */}
                     <div>
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-[#3B82F6] transition-colors">
+                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
                         {exam.name}
                       </h3>
                       <p className="text-xs text-slate-500 font-medium mt-0.5">

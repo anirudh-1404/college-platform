@@ -358,4 +358,61 @@ export const adminService = {
       throw error
     }
   },
+
+  // 8. CONTACT INQUIRIES & STUDENT LEADS
+  async getInquiries(params = {}) {
+    try {
+      const query = new URLSearchParams()
+      if (params.status && params.status !== 'all') query.append('status', params.status)
+      if (params.stream && params.stream !== 'all') query.append('stream', params.stream)
+      if (params.search) query.append('search', params.search)
+
+      const res = await fetch(`${API_BASE_URL}/inquiries?${query.toString()}`, {
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (res.ok && data.inquiries) {
+        return {
+          inquiries: data.inquiries.map(i => ({ ...i, id: i._id || i.id })),
+          counts: data.counts || {},
+        }
+      }
+    } catch (e) {
+      console.warn('Inquiries fetch error:', e)
+    }
+    return { inquiries: [], counts: {} }
+  },
+
+  async updateInquiryStatus(id, updateData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/inquiries/${id}/status`, {
+        method: 'PATCH',
+        headers: this.getHeaders(),
+        body: JSON.stringify(updateData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update inquiry status failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.inquiry
+    } catch (error) {
+      console.error('updateInquiryStatus error:', error)
+      throw error
+    }
+  },
+
+  async deleteInquiry(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/inquiries/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Delete inquiry failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return true
+    } catch (error) {
+      console.error('deleteInquiry error:', error)
+      throw error
+    }
+  },
 }

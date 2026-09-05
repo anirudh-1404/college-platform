@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Menu,
   X,
@@ -16,18 +17,26 @@ const Navbar = ({
   shortlistedCount = 0,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
 
   const navLinks = [
-    { id: 'home', label: 'Home' },
-    { id: 'colleges-listing', label: 'Colleges' },
-    { id: 'courses', label: 'Courses' },
-    { id: 'exams', label: 'Exams' },
-    { id: 'compare', label: 'Compare' },
-    { id: 'career-guide', label: 'Career Guidance' },
+    { id: 'home', path: '/', label: 'Home' },
+    { id: 'colleges-listing', path: '/colleges', label: 'Colleges' },
+    { id: 'courses', path: '/courses', label: 'Courses' },
+    { id: 'exams', path: '/exams', label: 'Exams' },
+    { id: 'compare', path: '/compare', label: 'Compare' },
+    { id: 'career-guide', path: '/career-guide', label: 'Career Guidance' },
   ]
 
-  const handleNavClick = (pageId) => {
-    if (onNavigate) onNavigate(pageId)
+  const isLinkActive = (link) => {
+    if (link.path === '/') return location.pathname === '/'
+    return location.pathname.startsWith(link.path)
+  }
+
+  const handleNavClick = (link) => {
+    navigate(link.path)
+    if (onNavigate) onNavigate(link.id)
     setIsMobileMenuOpen(false)
   }
 
@@ -39,7 +48,10 @@ const Navbar = ({
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <button
-              onClick={() => handleNavClick('home')}
+              onClick={() => {
+                navigate('/')
+                if (onNavigate) onNavigate('home')
+              }}
               className="flex items-center gap-2 cursor-pointer focus:outline-none"
             >
               <img
@@ -53,15 +65,15 @@ const Navbar = ({
           {/* Desktop Navigation Links */}
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => {
-              const isActive = currentPage === link.id
+              const isActive = isLinkActive(link)
 
               return (
                 <button
                   key={link.id}
-                  onClick={() => handleNavClick(link.id)}
+                  onClick={() => handleNavClick(link)}
                   className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
                     isActive
-                      ? 'bg-purple-50 text-brand-primary font-bold'
+                      ? 'bg-brand-accent text-brand-primary font-bold'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }`}
                 >
@@ -112,15 +124,15 @@ const Navbar = ({
       {isMobileMenuOpen && (
         <div className="md:hidden bg-white border-b border-border-color px-4 py-4 space-y-1.5">
           {navLinks.map((link) => {
-            const isActive = currentPage === link.id
+            const isActive = isLinkActive(link)
 
             return (
               <button
                 key={link.id}
-                onClick={() => handleNavClick(link.id)}
+                onClick={() => handleNavClick(link)}
                 className={`w-full text-left px-3.5 py-2.5 rounded-lg text-sm font-semibold transition-colors ${
                   isActive
-                    ? 'bg-purple-50 text-brand-primary'
+                    ? 'bg-brand-accent text-brand-primary'
                     : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >

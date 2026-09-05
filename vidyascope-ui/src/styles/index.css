@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 :root {
-  /* Centralized Brand Palette */
-  --color-brand-primary: #3B82F6;
-  --color-brand-primary-hover: #2563EB;
-  --color-brand-accent: #EFF6FF;
-  --color-brand-accent-subtle: #F8FAFC;
+  /* Centralized Brand Palette (Matched to VidyaScope Logo Text #033C8D) */
+  --color-brand-primary: #033C8D;
+  --color-brand-primary-hover: #022B66;
+  --color-brand-accent: #EBF2FA;
+  --color-brand-accent-subtle: #F5F8FC;
 
   /* Neutral Surface & Dark Tones */
   --color-navy-dark: #090D1A;
@@ -27,9 +27,9 @@
   --color-border-dark-hover: #334155;
 
   /* Shadows */
-  --shadow-premium: 0 10px 30px -10px rgba(59, 130, 246, 0.12), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-premium: 0 10px 30px -10px rgba(3, 60, 141, 0.15), 0 1px 3px rgba(0, 0, 0, 0.04);
   --shadow-card: 0 2px 12px -2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
-  --shadow-card-hover: 0 8px 24px -4px rgba(59, 130, 246, 0.10), 0 2px 6px rgba(15, 23, 42, 0.04);
+  --shadow-card-hover: 0 8px 24px -4px rgba(3, 60, 141, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 @theme {
@@ -121,7 +121,7 @@ body, html {
 
 .btn-secondary:hover {
   background-color: var(--color-brand-accent);
-  border-color: rgba(124, 58, 237, 0.3);
+  border-color: rgba(3, 60, 141, 0.25);
   color: var(--color-brand-primary);
 }
 

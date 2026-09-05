@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, CheckCircle, Send, PhoneCall, Lock } from 'lucide-react'
+import { X, CheckCircle, Send, PhoneCall, Lock, Loader2 } from 'lucide-react'
+import { publicApi } from '../api/publicApi'
 
 const backdropVariants = {
   hidden: { opacity: 0 },
@@ -26,6 +27,7 @@ const modalVariants = {
 
 const CounselingModal = ({ isOpen, onClose }) => {
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,9 +36,25 @@ const CounselingModal = ({ isOpen, onClose }) => {
     targetYear: '2025',
   })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    setLoading(true)
+    try {
+      await publicApi.submitInquiry({
+        studentName: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        stream: formData.stream,
+        admissionYear: formData.targetYear,
+        source: 'counseling_modal',
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error('Failed to submit counseling modal:', err)
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleReset = () => {

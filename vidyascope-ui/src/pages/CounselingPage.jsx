@@ -1,11 +1,13 @@
 import React, { useState } from 'react'
 import {
   ChevronRight, Home, ShieldCheck, CheckCircle2, Phone, Mail,
-  UserCheck, Clock, Send, PhoneCall, Lock
+  UserCheck, Clock, Send, PhoneCall, Lock, Loader2
 } from 'lucide-react'
+import { publicApi } from '../api/publicApi'
 
 const CounselingPage = ({ onNavigateHome }) => {
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     fullName: '',
     phone: '',
@@ -18,9 +20,29 @@ const CounselingPage = ({ onNavigateHome }) => {
     notes: '',
   })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setSubmitted(true)
+    setLoading(true)
+    try {
+      await publicApi.submitInquiry({
+        studentName: formData.fullName,
+        phone: formData.phone,
+        email: formData.email,
+        stream: formData.stream,
+        targetScore: formData.targetScore,
+        preferredLocation: formData.preferredLocation,
+        budgetRange: formData.budgetRange,
+        admissionYear: formData.admissionYear,
+        notes: formData.notes,
+        source: 'counseling_page',
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error('Failed to submit counseling page:', err)
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (

@@ -32,7 +32,7 @@ const CounselingBanner = ({ onOpenCounseling }) => {
             <h3 className="font-serif text-xl sm:text-2xl font-bold text-white leading-tight">
               Talk to an Expert Admission Counselor — Free
             </h3>
-            <p className="text-xs sm:text-sm text-purple-100 font-medium mt-1">
+            <p className="text-xs sm:text-sm text-blue-100 font-medium mt-1">
               Join 50,000+ students who received unbiased 1-on-1 college and career advice.
             </p>
           </div>

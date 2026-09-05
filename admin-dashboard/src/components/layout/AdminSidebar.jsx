@@ -9,6 +9,7 @@ import {
   SlidersHorizontal,
   History,
   LogOut,
+  MessageSquare,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
 
@@ -18,6 +19,7 @@ const AdminSidebar = ({
   pendingRegistrationsCount = 0,
   underReviewCount = 0,
   usersCount = 0,
+  newInquiriesCount = 0,
   currentUser,
   onLogout,
   isMobileOpen,
@@ -36,6 +38,13 @@ const AdminSidebar = ({
       icon: ShieldCheck,
       badge: pendingRegistrationsCount > 0 ? pendingRegistrationsCount : null,
       badgeColor: 'bg-amber-100 text-amber-800',
+    },
+    {
+      id: 'inquiries',
+      label: 'Contact Inquiries',
+      icon: MessageSquare,
+      badge: newInquiriesCount > 0 ? newInquiriesCount : null,
+      badgeColor: 'bg-emerald-100 text-emerald-800',
     },
     {
       id: 'profiles',

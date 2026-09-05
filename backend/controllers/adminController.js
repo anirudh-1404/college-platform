@@ -4,6 +4,7 @@ import { Registration } from "../models/Registration.js";
 import { AuditLog } from "../models/AuditLog.js";
 import { CareerGuide } from "../models/CareerGuide.js";
 import { Exam } from "../models/Exam.js";
+import { Inquiry } from "../models/Inquiry.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -18,6 +19,9 @@ export const getAdminAnalytics = async (req, res) => {
 
     const totalAdmins = await User.countDocuments({ role: { $in: ["admin", "super_admin"] } });
 
+    const totalInquiries = await Inquiry.countDocuments();
+    const newInquiries = await Inquiry.countDocuments({ status: "new" });
+
     return res.status(200).json({
       success: true,
       analytics: {
@@ -28,6 +32,8 @@ export const getAdminAnalytics = async (req, res) => {
         pendingRegistrations,
         approvedRegistrations,
         totalUsers: totalAdmins,
+        totalInquiries,
+        newInquiries,
       },
     });
   } catch (error) {
@@ -684,5 +690,112 @@ export const deleteAdminExam = async (req, res) => {
     return res.status(200).json({ success: true, message: "Entrance exam deleted successfully." });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to delete exam." });
+  }
+};
+
+// 7. INQUIRIES & STUDENT LEADS MANAGEMENT
+export const getAdminInquiries = async (req, res) => {
+  try {
+    const { status, stream, search } = req.query;
+    const filter = {};
+
+    if (status && status !== "all") {
+      filter.status = status;
+    }
+
+    if (stream && stream !== "all") {
+      filter.stream = stream;
+    }
+
+    if (search && search.trim() !== "") {
+      const regex = new RegExp(search.trim(), "i");
+      filter.$or = [
+        { studentName: regex },
+        { phone: regex },
+        { email: regex },
+        { collegeName: regex },
+      ];
+    }
+
+    const inquiries = await Inquiry.find(filter).sort({ createdAt: -1 });
+    const counts = {
+      all: await Inquiry.countDocuments(),
+      new: await Inquiry.countDocuments({ status: "new" }),
+      contacted: await Inquiry.countDocuments({ status: "contacted" }),
+      in_progress: await Inquiry.countDocuments({ status: "in_progress" }),
+      enrolled: await Inquiry.countDocuments({ status: "enrolled" }),
+      closed: await Inquiry.countDocuments({ status: "closed" }),
+    };
+
+    return res.status(200).json({
+      success: true,
+      inquiries,
+      counts,
+    });
+  } catch (error) {
+    console.error("getAdminInquiries error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch student inquiries." });
+  }
+};
+
+export const updateInquiryStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, counselorNotes, assignedCounselor } = req.body;
+
+    const inquiry = await Inquiry.findById(id);
+    if (!inquiry) {
+      return res.status(404).json({ success: false, message: "Inquiry not found." });
+    }
+
+    if (status) inquiry.status = status;
+    if (counselorNotes !== undefined) inquiry.counselorNotes = counselorNotes;
+    if (assignedCounselor) inquiry.assignedCounselor = assignedCounselor;
+
+    await inquiry.save();
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Inquiry Status Updated",
+      target: `${inquiry.studentName} (${inquiry.phone})`,
+      details: `Updated inquiry status to "${inquiry.status}".`,
+      type: "inquiry_updated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Inquiry updated successfully.",
+      inquiry,
+    });
+  } catch (error) {
+    console.error("updateInquiryStatus error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update inquiry." });
+  }
+};
+
+export const deleteInquiry = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const inquiry = await Inquiry.findByIdAndDelete(id);
+
+    if (!inquiry) {
+      return res.status(404).json({ success: false, message: "Inquiry not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Inquiry Deleted",
+      target: `${inquiry.studentName} (${inquiry.phone})`,
+      details: `Deleted student counseling inquiry.`,
+      type: "inquiry_deleted",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Inquiry deleted successfully.",
+    });
+  } catch (error) {
+    console.error("deleteInquiry error:", error);
+    return res.status(500).json({ success: false, message: "Failed to delete inquiry." });
   }
 };

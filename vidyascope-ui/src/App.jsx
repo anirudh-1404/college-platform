@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import LiveAlertTicker from './components/LiveAlertTicker'
 import Hero from './components/Hero'
@@ -24,8 +25,45 @@ import ShortlistPage from './pages/ShortlistPage'
 import CareerGuidePage from './pages/CareerGuidePage'
 import CounselingPage from './pages/CounselingPage'
 
+const HomePage = ({
+  onNavigateListing,
+  onNavigateCompare,
+  onSelectCollege,
+  onOpenCounseling,
+  handleHeroSearch,
+  handleNavigate,
+}) => (
+  <>
+    <Hero
+      onNavigateListing={onNavigateListing}
+      onNavigateCompare={onNavigateCompare}
+      onSelectCollege={onSelectCollege}
+    />
+    <FeaturesTailored
+      onNavigateListing={onNavigateListing}
+      onNavigateCompare={onNavigateCompare}
+      onOpenCounseling={onOpenCounseling}
+    />
+    <ExploreCities
+      onSelectCity={(cityName) => handleHeroSearch({ query: cityName })}
+    />
+    <TopColleges
+      onSelectCollege={onSelectCollege}
+      onNavigateListing={onNavigateListing}
+    />
+    <TopExamsSection
+      onNavigateExams={() => handleNavigate('exams')}
+    />
+    <WhyVidyaScope onOpenCounseling={onOpenCounseling} />
+    <Testimonials />
+    <BlogSection onNavigate={handleNavigate} />
+  </>
+)
+
 const App = () => {
-  const [currentPage, setCurrentPage] = useState('home')
+  const navigate = useNavigate()
+  const location = useLocation()
+
   const [selectedStream, setSelectedStream] = useState('all')
   const [selectedCollegeId, setSelectedCollegeId] = useState(null)
   const [compareList, setCompareList] = useState([])
@@ -36,22 +74,55 @@ const App = () => {
   // Scroll to top on page navigation
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [currentPage, selectedCollegeId])
+  }, [location.pathname])
 
   // Navigation Handlers
   const handleNavigate = (page) => {
-    setCurrentPage(page)
+    switch (page) {
+      case 'home':
+        navigate('/')
+        break
+      case 'colleges-listing':
+        navigate('/colleges')
+        break
+      case 'colleges-categories':
+        navigate('/categories')
+        break
+      case 'college-detail':
+        navigate(`/colleges/${selectedCollegeId || 'iit-bombay'}`)
+        break
+      case 'courses':
+        navigate('/courses')
+        break
+      case 'exams':
+        navigate('/exams')
+        break
+      case 'compare':
+        navigate('/compare')
+        break
+      case 'shortlist':
+        navigate('/shortlist')
+        break
+      case 'career-guide':
+        navigate('/career-guide')
+        break
+      case 'counseling':
+        navigate('/counseling')
+        break
+      default:
+        navigate('/')
+    }
   }
 
   const handleSelectCategory = (streamId) => {
     setSelectedStream(streamId)
     setHeroSearchQuery('')
-    setCurrentPage('colleges-listing')
+    navigate('/colleges')
   }
 
   const handleSelectCollege = (collegeId) => {
     setSelectedCollegeId(collegeId)
-    setCurrentPage('college-detail')
+    navigate(`/colleges/${collegeId}`)
   }
 
   const handleHeroSearch = (searchData) => {
@@ -61,7 +132,7 @@ const App = () => {
     if (searchData && searchData.stream) {
       setSelectedStream(searchData.stream)
     }
-    setCurrentPage('colleges-listing')
+    navigate('/colleges')
   }
 
   // Compare List Handlers
@@ -83,199 +154,190 @@ const App = () => {
 
   const handleAddCompare = (college) => {
     if (!college) return
-    setCompareList((prev) => {
-      if (prev.some((item) => item.id === college.id)) return prev
-      if (prev.length >= 4) {
-        alert('You can compare up to 4 colleges at a time.')
-        return prev
-      }
-      return [...prev, college]
-    })
+    if (compareList.length >= 4) {
+      alert('You can compare up to 4 colleges at a time.')
+      return
+    }
+    if (!compareList.some((c) => c.id === college.id)) {
+      setCompareList((prev) => [...prev, college])
+    }
   }
 
   // Shortlist Handlers
   const handleToggleShortlist = (collegeId) => {
-    setShortlistedIds((prev) => {
-      if (prev.includes(collegeId)) {
-        return prev.filter((id) => id !== collegeId)
-      } else {
-        return [...prev, collegeId]
-      }
-    })
+    setShortlistedIds((prev) =>
+      prev.includes(collegeId) ? prev.filter((id) => id !== collegeId) : [...prev, collegeId]
+    )
   }
 
   return (
-    <div className="min-h-screen bg-white text-text-primary selection:bg-brand-accent selection:text-brand-primary flex flex-col justify-between">
+    <div className="min-h-screen flex flex-col bg-white text-text-primary selection:bg-brand-primary selection:text-white antialiased font-sans">
       
-      {/* Centralized Top Navbar with Search Integration */}
+      {/* 1. Top Real-time Regulatory & Cutoff Ticker */}
+      <LiveAlertTicker />
+
+      {/* 2. Primary Navigation Bar */}
       <Navbar
         onNavigate={handleNavigate}
-        currentPage={currentPage}
         onOpenCounseling={() => setIsCounselingModalOpen(true)}
         shortlistedCount={shortlistedIds.length}
-        onSelectCollege={handleSelectCollege}
-        onSelectCourse={() => setCurrentPage('courses')}
-        onSelectExam={() => setCurrentPage('exams')}
-        onSelectCareer={() => setCurrentPage('career-guide')}
-        onNavigateListing={handleHeroSearch}
       />
 
-      {/* Real-time Editorial Admissions Ticker */}
-      <LiveAlertTicker
-        onNavigateExams={() => setCurrentPage('exams')}
-        onNavigateColleges={() => setCurrentPage('colleges-listing')}
-      />
-
-      {/* Main Content Router View */}
+      {/* 3. Page Content with Route Transitions */}
       <AnimatePresence mode="wait">
         <motion.main
-          key={currentPage}
-          initial={{ opacity: 0, y: 10 }}
+          key={location.pathname}
+          initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          exit={{ opacity: 0, y: -6 }}
+          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
           className="flex-grow"
         >
-          {/* 1. HOMEPAGE VIEW (Dribbble-Inspired Human-Crafted Flow) */}
-          {currentPage === 'home' && (
-            <>
-              <Hero
-                onNavigateListing={handleHeroSearch}
-                onNavigateCompare={() => setCurrentPage('compare')}
-                onSelectCollege={handleSelectCollege}
-              />
-              <FeaturesTailored
-                onNavigateListing={() => setCurrentPage('colleges-listing')}
-                onNavigateCompare={() => setCurrentPage('compare')}
-                onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              />
-              <ExploreCities
-                onSelectCity={(cityName) => handleHeroSearch({ query: cityName })}
-              />
-              <TopColleges
-                onSelectCollege={handleSelectCollege}
-                onNavigateListing={() => setCurrentPage('colleges-listing')}
-              />
-              <TopExamsSection
-                onNavigateExams={() => setCurrentPage('exams')}
-              />
-              <WhyVidyaScope onOpenCounseling={() => setIsCounselingModalOpen(true)} />
-              <Testimonials />
-              <BlogSection onNavigate={handleNavigate} />
-            </>
-          )}
-
-          {/* 2. DOMAINS & CATEGORIES PAGE */}
-          {currentPage === 'colleges-categories' && (
-            <CollegeCategoryPage
-              onSelectCategory={handleSelectCategory}
-              onNavigateHome={() => setCurrentPage('home')}
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <HomePage
+                  onNavigateListing={() => navigate('/colleges')}
+                  onNavigateCompare={() => navigate('/compare')}
+                  onSelectCollege={handleSelectCollege}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  handleHeroSearch={handleHeroSearch}
+                  handleNavigate={handleNavigate}
+                />
+              }
             />
-          )}
 
-          {/* 3. COLLEGE LISTING / DISCOVERY PAGE */}
-          {currentPage === 'colleges-listing' && (
-            <CollegeListingPage
-              onNavigateHome={() => setCurrentPage('home')}
-              selectedStream={selectedStream}
-              onSelectStream={(stream) => setSelectedStream(stream)}
-              onNavigateBack={() => setCurrentPage('colleges-categories')}
-              onSelectCollege={handleSelectCollege}
-              compareList={compareList}
-              onToggleCompare={handleToggleCompare}
-              onClearCompare={() => setCompareList([])}
-              onNavigateCompare={() => setCurrentPage('compare')}
-              shortlistedIds={shortlistedIds}
-              onToggleShortlist={handleToggleShortlist}
-              initialSearchQuery={heroSearchQuery}
+            <Route
+              path="/categories"
+              element={
+                <CollegeCategoryPage
+                  onSelectCategory={handleSelectCategory}
+                  onNavigateHome={() => navigate('/')}
+                />
+              }
             />
-          )}
 
-          {/* 4. COLLEGE DETAIL PAGE */}
-          {currentPage === 'college-detail' && (
-            <CollegeDetailPage
-              collegeId={selectedCollegeId}
-              onNavigateHome={() => setCurrentPage('home')}
-              onNavigateListing={() => setCurrentPage('colleges-listing')}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              onSelectCollege={handleSelectCollege}
-              isShortlisted={shortlistedIds.includes(selectedCollegeId)}
-              onToggleShortlist={handleToggleShortlist}
-              onToggleCompare={handleToggleCompare}
-              isCompared={compareList.some((c) => c.id === selectedCollegeId)}
+            <Route
+              path="/colleges"
+              element={
+                <CollegeListingPage
+                  onNavigateHome={() => navigate('/')}
+                  selectedStream={selectedStream}
+                  onSelectStream={(stream) => setSelectedStream(stream)}
+                  onNavigateBack={() => navigate('/categories')}
+                  onSelectCollege={handleSelectCollege}
+                  compareList={compareList}
+                  onToggleCompare={handleToggleCompare}
+                  onClearCompare={() => setCompareList([])}
+                  onNavigateCompare={() => navigate('/compare')}
+                  shortlistedIds={shortlistedIds}
+                  onToggleShortlist={handleToggleShortlist}
+                  initialSearchQuery={heroSearchQuery}
+                />
+              }
             />
-          )}
 
-          {/* 5. COURSES 3-STEP DISCOVERY PAGE */}
-          {currentPage === 'courses' && (
-            <CoursesPage
-              onNavigateHome={() => setCurrentPage('home')}
-              onSelectCollegeDetail={handleSelectCollege}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
+            <Route
+              path="/colleges/:id"
+              element={
+                <CollegeDetailPage
+                  collegeId={selectedCollegeId}
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateListing={() => navigate('/colleges')}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onSelectCollege={handleSelectCollege}
+                  isShortlisted={shortlistedIds.includes(selectedCollegeId)}
+                  onToggleShortlist={handleToggleShortlist}
+                  onToggleCompare={handleToggleCompare}
+                  isCompared={compareList.some((c) => c.id === selectedCollegeId)}
+                />
+              }
             />
-          )}
 
-          {/* 6. ENTRANCE EXAMS EDUCATIONAL GUIDE PAGE */}
-          {currentPage === 'exams' && (
-            <ExamsPage
-              onNavigateHome={() => setCurrentPage('home')}
-              onNavigateColleges={() => setCurrentPage('colleges-listing')}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
+            <Route
+              path="/courses"
+              element={
+                <CoursesPage
+                  onNavigateHome={() => navigate('/')}
+                  onSelectCollegeDetail={handleSelectCollege}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                />
+              }
             />
-          )}
 
-          {/* 7. COLLEGE COMPARISON MATRIX PAGE */}
-          {currentPage === 'compare' && (
-            <CollegeComparePage
-              selectedColleges={compareList}
-              onRemoveCollege={(id) => setCompareList((prev) => prev.filter((item) => item.id !== id))}
-              onAddCollege={handleAddCompare}
-              onClearAll={() => setCompareList([])}
-              onNavigateHome={() => setCurrentPage('home')}
-              onNavigateListing={() => setCurrentPage('colleges-listing')}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              onSelectCollege={handleSelectCollege}
+            <Route
+              path="/exams"
+              element={
+                <ExamsPage
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateColleges={() => navigate('/colleges')}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                />
+              }
             />
-          )}
 
-          {/* 8. SHORTLIST / SAVED COLLEGES PAGE */}
-          {currentPage === 'shortlist' && (
-            <ShortlistPage
-              shortlistedIds={shortlistedIds}
-              onToggleShortlist={handleToggleShortlist}
-              onClearShortlist={() => setShortlistedIds([])}
-              onSelectCollege={handleSelectCollege}
-              onNavigateHome={() => setCurrentPage('home')}
-              onNavigateColleges={() => setCurrentPage('colleges-listing')}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              compareList={compareList}
-              onToggleCompare={handleToggleCompare}
-              onNavigateCompare={() => setCurrentPage('compare')}
+            <Route
+              path="/compare"
+              element={
+                <CollegeComparePage
+                  selectedColleges={compareList}
+                  onRemoveCollege={(id) => setCompareList((prev) => prev.filter((item) => item.id !== id))}
+                  onAddCollege={handleAddCompare}
+                  onClearAll={() => setCompareList([])}
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateListing={() => navigate('/colleges')}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onSelectCollege={handleSelectCollege}
+                />
+              }
             />
-          )}
 
-          {/* 9. CAREER GUIDANCE ROADMAPS PAGE */}
-          {currentPage === 'career-guide' && (
-            <CareerGuidePage
-              onNavigateHome={() => setCurrentPage('home')}
-              onOpenCounseling={() => setIsCounselingModalOpen(true)}
-              onNavigateColleges={(filter) => {
-                if (filter && filter.stream) {
-                  setSelectedStream(filter.stream)
-                }
-                setCurrentPage('colleges-listing')
-              }}
-              onNavigateCourses={() => setCurrentPage('courses')}
-              onNavigateExams={() => setCurrentPage('exams')}
-              onSelectCollege={handleSelectCollege}
+            <Route
+              path="/shortlist"
+              element={
+                <ShortlistPage
+                  shortlistedIds={shortlistedIds}
+                  onToggleShortlist={handleToggleShortlist}
+                  onClearShortlist={() => setShortlistedIds([])}
+                  onSelectCollege={handleSelectCollege}
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateColleges={() => navigate('/colleges')}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  compareList={compareList}
+                  onToggleCompare={handleToggleCompare}
+                  onNavigateCompare={() => navigate('/compare')}
+                />
+              }
             />
-          )}
 
-          {/* 10. COUNSELING / LEAD CAPTURE PAGE */}
-          {currentPage === 'counseling' && (
-            <CounselingPage onNavigateHome={() => setCurrentPage('home')} />
-          )}
+            <Route
+              path="/career-guide"
+              element={
+                <CareerGuidePage
+                  onNavigateHome={() => navigate('/')}
+                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onNavigateColleges={(filter) => {
+                    if (filter && filter.stream) {
+                      setSelectedStream(filter.stream)
+                    }
+                    navigate('/colleges')
+                  }}
+                  onNavigateCourses={() => navigate('/courses')}
+                  onNavigateExams={() => navigate('/exams')}
+                  onSelectCollege={handleSelectCollege}
+                />
+              }
+            />
 
+            <Route
+              path="/counseling"
+              element={<CounselingPage onNavigateHome={() => navigate('/')} />}
+            />
+
+            {/* Fallback route */}
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </motion.main>
       </AnimatePresence>
 

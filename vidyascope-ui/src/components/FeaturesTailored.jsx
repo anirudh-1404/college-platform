@@ -8,7 +8,7 @@ const featuresData = {
       title: 'Find Colleges',
       description: 'Discover 1,200+ premier institutions with verified cutoffs, NAAC grades, and audited placement benchmarks.',
       icon: Building2,
-      iconColor: 'bg-blue-50 text-blue-600',
+      iconColor: 'bg-brand-accent text-brand-primary',
       action: 'listing',
     },
     {
@@ -42,7 +42,7 @@ const featuresData = {
       title: 'Verified NIRF Accreditations',
       description: 'Direct integration with official regulatory gazettes ensures 100% authenticity in national institutional rankings.',
       icon: Building2,
-      iconColor: 'bg-blue-50 text-blue-600',
+      iconColor: 'bg-brand-accent text-brand-primary',
       action: 'listing',
     },
     {
@@ -89,7 +89,7 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
         
         {/* Section Header */}
         <div className="space-y-2 mb-8">
-          <span className="text-[#3B82F6] text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
+          <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Features</span>
           </span>
@@ -105,7 +105,7 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
             onClick={() => setActiveTab('consultancy')}
             className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'consultancy'
-                ? 'bg-[#3B82F6] text-white shadow-sm'
+                ? 'bg-brand-primary text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >
@@ -116,7 +116,7 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
             onClick={() => setActiveTab('college')}
             className={`px-6 py-2 rounded-full text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               activeTab === 'college'
-                ? 'bg-[#3B82F6] text-white shadow-sm'
+                ? 'bg-brand-primary text-white shadow-sm'
                 : 'text-slate-600 hover:text-slate-900'
             }`}
           >

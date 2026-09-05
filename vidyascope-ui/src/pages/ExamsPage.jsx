@@ -127,7 +127,7 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
                   }}
                   className={`px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors cursor-pointer ${
                     categoryFilter === cat.id
-                      ? 'bg-[#3B82F6] text-white font-bold shadow-xs'
+                      ? 'bg-brand-primary text-white font-bold shadow-xs'
                       : 'bg-slate-100 text-slate-600 hover:text-slate-900 hover:bg-slate-200'
                   }`}
                 >

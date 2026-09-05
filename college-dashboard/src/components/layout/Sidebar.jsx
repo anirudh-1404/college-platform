@@ -4,6 +4,8 @@ import {
   ChevronRight,
   Check,
   LogOut,
+  Users,
+  Layers,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
 import { ONBOARDING_STEPS } from '../../data/collegeModel'
@@ -13,6 +15,9 @@ const Sidebar = ({
   onSelectStep,
   completedSteps = [],
   collegeData,
+  activeView = 'onboarding',
+  onSelectView,
+  leadsCount = 0,
   onPreviewPublic,
   onLogout,
   isMobileOpen,
@@ -78,8 +83,58 @@ const Sidebar = ({
 
           {/* Navigation Step Items (Scrollable) */}
           <div className="p-3 space-y-1 max-h-[calc(100vh-250px)] overflow-y-auto custom-scrollbar">
+            {/* View Switcher: Onboarding vs Student Leads */}
+            <div className="mb-3 pb-3 border-b border-border-color space-y-1">
+              <button
+                type="button"
+                onClick={() => {
+                  if (onSelectView) onSelectView('onboarding')
+                  if (onCloseMobile) onCloseMobile()
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer text-left ${
+                  activeView === 'onboarding'
+                    ? 'bg-slate-100 text-slate-900 font-bold'
+                    : 'text-text-secondary hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Layers className="h-4 w-4 text-brand-primary" />
+                  <span>Profile CMS (10 Steps)</span>
+                </div>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (onSelectView) onSelectView('leads')
+                  if (onCloseMobile) onCloseMobile()
+                }}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-colors cursor-pointer text-left ${
+                  activeView === 'leads'
+                    ? 'bg-brand-primary text-white font-bold shadow-xs'
+                    : 'text-text-secondary hover:bg-slate-50 hover:text-text-primary'
+                }`}
+              >
+                <div className="flex items-center gap-2">
+                  <Users className={`h-4 w-4 ${activeView === 'leads' ? 'text-white' : 'text-brand-primary'}`} />
+                  <span>Student Leads</span>
+                </div>
+                {leadsCount > 0 && (
+                  <span
+                    className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${
+                      activeView === 'leads'
+                        ? 'bg-white text-brand-primary'
+                        : 'bg-emerald-100 text-emerald-800'
+                    }`}
+                  >
+                    {leadsCount}
+                  </span>
+                )}
+              </button>
+            </div>
+
             <span className="px-3 text-[10px] font-bold uppercase tracking-wider text-text-light block mb-2">
-              Profile Management Sections
+              Profile Sections
             </span>
 
             {ONBOARDING_STEPS.map((step) => {

@@ -1,7 +1,7 @@
+import "dotenv/config";
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import { connectdb } from "./config/db.js";
 
 // Routes
@@ -9,8 +9,7 @@ import authRoutes from "./routes/authRoutes.js";
 import collegeRoutes from "./routes/collegeRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
-
-dotenv.config();
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -52,6 +51,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/college", collegeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/public", publicRoutes);
+app.use("/api/upload", uploadRoutes);
 
 // Health Check
 app.get("/api/health", (req, res) => {

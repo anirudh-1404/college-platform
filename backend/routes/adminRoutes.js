@@ -21,6 +21,9 @@ import {
   createAdminExam,
   updateAdminExam,
   deleteAdminExam,
+  getAdminInquiries,
+  updateInquiryStatus,
+  deleteInquiry,
 } from "../controllers/adminController.js";
 import { verifyToken, isAdmin } from "../utils/authMiddleware.js";
 
@@ -65,5 +68,10 @@ router.delete("/exams/:id", deleteAdminExam);
 
 // Audit Trail
 router.get("/audit-logs", getAuditLogs);
+
+// Contact Inquiries / Student Leads Management
+router.get("/inquiries", getAdminInquiries);
+router.patch("/inquiries/:id/status", updateInquiryStatus);
+router.delete("/inquiries/:id", deleteInquiry);
 
 export default router;

@@ -7,6 +7,7 @@ import {
   getPublicCareerGuideDetail,
   getPublicExams,
   getPublicExamDetail,
+  createPublicInquiry,
 } from "../controllers/publicController.js";
 
 const router = express.Router();
@@ -19,5 +20,9 @@ router.get("/career-guides", getPublicCareerGuides);
 router.get("/career-guides/:slugOrId", getPublicCareerGuideDetail);
 router.get("/exams", getPublicExams);
 router.get("/exams/:slugOrId", getPublicExamDetail);
+
+// Student Lead / Counseling Request Capture
+router.post("/counseling", createPublicInquiry);
+router.post("/inquiries", createPublicInquiry);
 
 export default router;

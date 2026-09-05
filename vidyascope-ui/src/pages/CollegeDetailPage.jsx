@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
@@ -18,6 +19,10 @@ const CollegeDetailPage = ({
   onToggleCompare,
   isCompared = false,
 }) => {
+  const { id } = useParams()
+  const effectiveCollegeId = id || collegeId || 'iit-bombay'
+  const navigate = useNavigate()
+
   const [activeTab, setActiveTab] = useState('overview')
   const [calculatorTenure, setCalculatorTenure] = useState(4)
   const [college, setCollege] = useState(null)
@@ -28,7 +33,7 @@ const CollegeDetailPage = ({
     const fetchDetail = async () => {
       setLoading(true)
       try {
-        const data = await publicApi.getCollegeDetail(collegeId)
+        const data = await publicApi.getCollegeDetail(effectiveCollegeId)
         setCollege(data)
       } catch (e) {
         console.error(e)
@@ -38,7 +43,7 @@ const CollegeDetailPage = ({
     }
 
     fetchDetail()
-  }, [collegeId])
+  }, [effectiveCollegeId])
 
   const tabs = [
     { id: 'overview', label: 'Overview & Facts' },

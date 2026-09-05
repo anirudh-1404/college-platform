@@ -1,39 +1,20 @@
-import React, { useState } from 'react'
-import { Search, ArrowRight, GraduationCap, Star, CheckCircle, ChevronDown } from 'lucide-react'
+import React from 'react'
+import { ArrowRight, GraduationCap, Star, CheckCircle, Scale } from 'lucide-react'
 import studentImg from '../assets/student-hero.jpg'
 
 const Hero = ({ onNavigateListing, onNavigateCompare, onSelectCollege }) => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedStream, setSelectedStream] = useState('all')
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault()
-    if (onNavigateListing) {
-      onNavigateListing({
-        query: searchQuery.trim(),
-        stream: selectedStream === 'all' ? undefined : selectedStream,
-      })
-    }
-  }
-
-  const handleQuickSearch = (name) => {
-    if (onNavigateListing) {
-      onNavigateListing({ query: name })
-    }
-  }
-
   return (
     <section className="relative bg-white pt-8 pb-16 lg:py-16 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
           
-          {/* Left Column (Span 7): Title, Subtitle, Search Console */}
+          {/* Left Column (Span 7): Title, Subtitle, Direct CTAs */}
           <div className="lg:col-span-7 space-y-6 text-left">
             
             <div className="space-y-3">
               <h1 className="text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-[#111827] leading-[1.12] tracking-tight">
                 Find colleges, <br />
-                <span className="text-[#3B82F6]">courses, & exams</span>
+                <span className="text-brand-primary">courses, & exams</span>
               </h1>
               
               <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
@@ -41,61 +22,25 @@ const Hero = ({ onNavigateListing, onNavigateCompare, onSelectCollege }) => {
               </p>
             </div>
 
-            {/* Dribbble Style Search Console Bar */}
-            <form
-              onSubmit={handleSearchSubmit}
-              className="bg-white rounded-full p-2 border border-slate-200 shadow-md flex items-center gap-2 max-w-xl"
-            >
-              {/* Category Dropdown */}
-              <div className="relative pl-3 flex items-center flex-shrink-0">
-                <select
-                  value={selectedStream}
-                  onChange={(e) => setSelectedStream(e.target.value)}
-                  className="appearance-none bg-transparent pr-6 text-xs sm:text-sm font-bold text-slate-800 outline-none cursor-pointer"
-                >
-                  <option value="all">All Streams</option>
-                  <option value="engineering">Engineering</option>
-                  <option value="management">Management</option>
-                  <option value="medical">Medical</option>
-                  <option value="law">Law</option>
-                </select>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-1 pointer-events-none" />
-              </div>
-
-              <div className="h-5 w-[1px] bg-slate-200 flex-shrink-0" />
-
-              {/* Search Text Input */}
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search from 1200+ Colleges, Courses, Exams"
-                className="flex-1 min-w-0 bg-transparent px-2 text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none"
-              />
-
-              {/* Round Blue Search Action Button */}
+            {/* Direct Action CTAs */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2">
               <button
-                type="submit"
-                className="w-10 h-10 rounded-full bg-[#3B82F6] hover:bg-[#2563EB] text-white flex items-center justify-center flex-shrink-0 transition-colors shadow-sm cursor-pointer"
-                title="Search Colleges"
+                type="button"
+                onClick={() => onNavigateListing && onNavigateListing()}
+                className="btn btn-primary btn-lg shadow-md cursor-pointer flex items-center gap-2 text-sm font-bold"
               >
-                <Search className="h-4 w-4" />
+                <span>Explore 1,280+ Colleges</span>
+                <ArrowRight className="h-4 w-4" />
               </button>
-            </form>
 
-            {/* Popular Searches */}
-            <div className="flex items-center gap-2 flex-wrap text-xs text-slate-500 pt-1">
-              <span className="font-semibold text-slate-400">Popular:</span>
-              {['IIT Bombay', 'IIM Ahmedabad', 'BITS Pilani', 'AIIMS Delhi', 'NLSIU'].map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  onClick={() => handleQuickSearch(item)}
-                  className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium transition-colors cursor-pointer"
-                >
-                  {item}
-                </button>
-              ))}
+              <button
+                type="button"
+                onClick={() => onNavigateCompare && onNavigateCompare()}
+                className="btn btn-outline btn-lg cursor-pointer flex items-center gap-2 text-sm font-bold bg-white"
+              >
+                <Scale className="h-4 w-4 text-slate-500" />
+                <span>Compare Colleges</span>
+              </button>
             </div>
 
             {/* Quick Metrics */}
@@ -105,7 +50,7 @@ const Hero = ({ onNavigateListing, onNavigateCompare, onSelectCollege }) => {
                 <p className="text-xs text-slate-500 font-medium">Verified Campuses</p>
               </div>
               <div className="border-l border-slate-200 pl-6">
-                <p className="text-xl sm:text-2xl font-extrabold text-[#3B82F6]">450+</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-brand-primary">450+</p>
                 <p className="text-xs text-slate-500 font-medium">Entrance Exams</p>
               </div>
               <div className="border-l border-slate-200 pl-6">
@@ -136,7 +81,7 @@ const Hero = ({ onNavigateListing, onNavigateCompare, onSelectCollege }) => {
 
               {/* Floating Badge 1: Top Right */}
               <div className="absolute top-4 -right-2 z-20 bg-white/95 backdrop-blur-sm px-3.5 py-2 rounded-2xl shadow-lg border border-slate-100 flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-blue-50 text-[#3B82F6] flex items-center justify-center">
+                <div className="w-8 h-8 rounded-full bg-brand-accent text-brand-primary flex items-center justify-center">
                   <GraduationCap className="h-4 w-4" />
                 </div>
                 <div>
