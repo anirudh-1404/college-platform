@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { College } from "../models/College.js";
 import { AuditLog } from "../models/AuditLog.js";
 import { Inquiry } from "../models/Inquiry.js";
@@ -6,13 +7,18 @@ import { Inquiry } from "../models/Inquiry.js";
 export const getMyCollegeProfile = async (req, res) => {
   try {
     const collegeId = req.user.collegeId;
-    if (!collegeId) {
+    if (!collegeId && !req.user.collegeName) {
       return res.status(404).json({ success: false, message: "No college associated with this account." });
     }
 
-    let college = await College.findOne({ slug: collegeId });
-    if (!college) {
-      // Try by ID or Name
+    let college = null;
+    if (collegeId) {
+      college = await College.findOne({ slug: collegeId });
+      if (!college && mongoose.Types.ObjectId.isValid(collegeId)) {
+        college = await College.findById(collegeId);
+      }
+    }
+    if (!college && req.user.collegeName) {
       college = await College.findOne({ name: req.user.collegeName });
     }
 
@@ -33,8 +39,14 @@ export const updateCollegeProfile = async (req, res) => {
     const collegeId = req.user.collegeId;
     const updates = req.body;
 
-    let college = await College.findOne({ slug: collegeId });
-    if (!college) {
+    let college = null;
+    if (collegeId) {
+      college = await College.findOne({ slug: collegeId });
+      if (!college && mongoose.Types.ObjectId.isValid(collegeId)) {
+        college = await College.findById(collegeId);
+      }
+    }
+    if (!college && req.user.collegeName) {
       college = await College.findOne({ name: req.user.collegeName });
     }
 
@@ -74,8 +86,14 @@ export const submitForApproval = async (req, res) => {
   try {
     const collegeId = req.user.collegeId;
 
-    let college = await College.findOne({ slug: collegeId });
-    if (!college) {
+    let college = null;
+    if (collegeId) {
+      college = await College.findOne({ slug: collegeId });
+      if (!college && mongoose.Types.ObjectId.isValid(collegeId)) {
+        college = await College.findById(collegeId);
+      }
+    }
+    if (!college && req.user.collegeName) {
       college = await College.findOne({ name: req.user.collegeName });
     }
 

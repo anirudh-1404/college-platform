@@ -407,8 +407,20 @@ export const collegeService = {
   },
 
   // Submit complete 10-step profile to Admin for editorial review
-  async submitForReview() {
+  async submitForApproval() {
     const token = authService.getToken()
+    const current = this.getCollegeData()
+
+    // 1. Ensure latest profile data is saved first before locking
+    try {
+      if (token && current.profileStatus !== 'under_review') {
+        await this.saveCollegeData(current)
+      }
+    } catch (saveErr) {
+      console.warn('Pre-submit save warning:', saveErr)
+    }
+
+    // 2. Call backend approval endpoint
     try {
       const res = await fetch(`${API_BASE_URL}/submit-review`, {
         method: 'POST',
@@ -419,15 +431,20 @@ export const collegeService = {
       })
       const data = await res.json()
       if (res.ok && data.college) {
-        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(data.college))
-        window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: data.college }))
-        return { success: true, college: data.college }
+        const normalized = this.normalizeCollegeData({
+          ...current,
+          ...data.college,
+          profileStatus: 'under_review',
+        })
+        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
+        window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: normalized }))
+        return normalized
       }
     } catch (e) {
-      console.warn('Backend submit review failed, falling back', e)
+      console.warn('Backend submit review failed, falling back to local state', e)
     }
 
-    const current = this.getCollegeData()
+    // 3. Fallback if backend route fails or in offline/demo mode
     const updated = {
       ...current,
       profileStatus: 'under_review',
@@ -439,7 +456,15 @@ export const collegeService = {
         minute: '2-digit',
       }),
     }
-    return { success: true, college: this.saveCollegeData(updated) }
+    const normalized = this.normalizeCollegeData(updated)
+    localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
+    window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: normalized }))
+    return normalized
+  },
+
+  // Alias for backward compatibility
+  async submitForReview() {
+    return await this.submitForApproval()
   },
 
   // Fetch student inquiries specifically for this college

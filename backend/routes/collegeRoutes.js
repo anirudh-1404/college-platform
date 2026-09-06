@@ -14,6 +14,7 @@ router.use(verifyToken, isCollegeAdmin);
 router.get("/profile", getMyCollegeProfile);
 router.put("/profile", updateCollegeProfile);
 router.post("/submit-review", submitForApproval);
+router.post("/submit-approval", submitForApproval);
 router.get("/leads", getCollegeLeads);
 
 export default router;

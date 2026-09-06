@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Clock, CheckCircle2, AlertTriangle, ArrowLeft, ArrowRight, Save, Globe, Send,
@@ -69,21 +69,32 @@ const OnboardingContainer = ({
     }
   }
 
+  const [isSavingDraft, setIsSavingDraft] = useState(false)
+  const [isSubmittingApproval, setIsSubmittingApproval] = useState(false)
+
   // Handle Save as Draft (Persist to Backend & Storage)
   const handleSaveDraft = async () => {
-    const toSave = {
-      ...collegeData,
-      profileStatus: profileStatus === 'changes_requested' ? 'changes_requested' : 'draft',
-      lastUpdated: new Date().toLocaleDateString('en-IN', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-      }),
+    if (isSavingDraft) return
+    setIsSavingDraft(true)
+    try {
+      const toSave = {
+        ...collegeData,
+        profileStatus: profileStatus === 'changes_requested' ? 'changes_requested' : 'draft',
+        lastUpdated: new Date().toLocaleDateString('en-IN', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      }
+      onUpdateCollegeData(toSave)
+      await collegeService.saveCollegeData(toSave)
+    } catch (err) {
+      console.error('Failed to save draft:', err)
+    } finally {
+      setTimeout(() => setIsSavingDraft(false), 500)
     }
-    onUpdateCollegeData(toSave)
-    await collegeService.saveCollegeData(toSave)
   }
 
   // Handle Navigation Next (Save & Continue)
@@ -108,9 +119,19 @@ const OnboardingContainer = ({
 
   // Handle Submit for Approval
   const handleSubmitForApproval = async () => {
-    const updated = await collegeService.submitForApproval()
-    onUpdateCollegeData(updated)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    if (isSubmittingApproval) return
+    setIsSubmittingApproval(true)
+    try {
+      const updated = await collegeService.submitForApproval()
+      if (updated) {
+        onUpdateCollegeData(updated)
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    } catch (err) {
+      console.error('Submit for approval failed:', err)
+    } finally {
+      setIsSubmittingApproval(false)
+    }
   }
 
   const currentStepObj = ONBOARDING_STEPS.find((s) => s.id === currentStep) || ONBOARDING_STEPS[0]
@@ -474,10 +495,11 @@ const OnboardingContainer = ({
               <button
                 type="button"
                 onClick={handleSaveDraft}
-                className="btn btn-outline btn-md text-xs font-semibold bg-white hover:bg-slate-50 text-text-primary border-border-color cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                disabled={isSavingDraft}
+                className="btn btn-outline btn-md text-xs font-semibold bg-white hover:bg-slate-50 text-text-primary border-border-color cursor-pointer flex items-center gap-1.5 shadow-2xs disabled:opacity-60"
               >
                 <Bookmark className="h-3.5 w-3.5 text-text-secondary" />
-                <span>Save as Draft</span>
+                <span>{isSavingDraft ? 'Saving Draft...' : 'Save as Draft'}</span>
               </button>
             )}
 
@@ -485,7 +507,8 @@ const OnboardingContainer = ({
               <button
                 type="button"
                 onClick={handleNext}
-                className="btn btn-primary btn-md text-xs font-bold cursor-pointer flex items-center gap-2 shadow-xs"
+                disabled={isSavingDraft}
+                className="btn btn-primary btn-md text-xs font-bold cursor-pointer flex items-center gap-2 shadow-xs disabled:opacity-60"
               >
                 <span>Continue to {nextStepObj?.label || 'Next Step'}</span>
                 <ArrowRight className="h-4 w-4" />
@@ -495,10 +518,11 @@ const OnboardingContainer = ({
                 <button
                   type="button"
                   onClick={handleSubmitForApproval}
-                  className="btn btn-primary btn-md text-xs font-bold cursor-pointer flex items-center gap-2 shadow-md bg-emerald-600 hover:bg-emerald-700 border-emerald-600"
+                  disabled={isSubmittingApproval}
+                  className="btn btn-primary btn-md text-xs font-bold cursor-pointer flex items-center gap-2 shadow-md bg-emerald-600 hover:bg-emerald-700 border-emerald-600 disabled:opacity-60"
                 >
                   <Send className="h-4 w-4" />
-                  <span>Send for Approval</span>
+                  <span>{isSubmittingApproval ? 'Submitting...' : 'Send for Approval'}</span>
                 </button>
               )
             )}
