@@ -44,7 +44,32 @@ export const collegeService = {
     const admissionPortalUrl = data.admissionPortalUrl || ''
     const examAccepted = data.examAccepted || admissions.examAccepted || []
     const admissionOverview = data.admissionOverview || ''
-    const admissionProcessSteps = data.admissionProcessSteps || []
+    
+    // Normalize admission process steps (handle both structured objects and string arrays)
+    let admissionProcessSteps = []
+    if (Array.isArray(data.admissionProcessSteps) && data.admissionProcessSteps.length > 0) {
+      admissionProcessSteps = data.admissionProcessSteps
+    } else if (Array.isArray(admissions.admissionSteps) && admissions.admissionSteps.length > 0) {
+      admissionProcessSteps = admissions.admissionSteps.map((stepStr, idx) => {
+        if (typeof stepStr === 'object' && stepStr !== null) return stepStr
+        const colonIdx = String(stepStr).indexOf(':')
+        if (colonIdx !== -1) {
+          return {
+            step: String(idx + 1),
+            title: String(stepStr).substring(0, colonIdx).trim(),
+            desc: String(stepStr).substring(colonIdx + 1).trim(),
+          }
+        }
+        return {
+          step: String(idx + 1),
+          title: `Step ${idx + 1}`,
+          desc: String(stepStr).trim(),
+        }
+      })
+    } else if (Array.isArray(base.admissionProcessSteps)) {
+      admissionProcessSteps = base.admissionProcessSteps
+    }
+
     const hostelDetails = { ...base.hostelDetails, ...(data.hostelDetails || {}) }
     const hiddenCosts = { ...base.hiddenCosts, ...(data.hiddenCosts || {}) }
     const snapshot = { ...base.snapshot, ...(data.snapshot || {}) }
@@ -57,6 +82,11 @@ export const collegeService = {
       : (rankingsObj.nirfRank !== undefined ? rankingsObj.nirfRank : base.nirfRank || '')
     const nirfCategory = data.nirfCategory || rankingsObj.nirfCategory || base.nirfCategory || 'Engineering'
     const naacGrade = data.naacGrade || rankingsObj.naacGrade || base.naacGrade || 'A++ (3.88 CGPA)'
+    const affiliation = data.affiliation || base.affiliation || ''
+    const university = data.university || base.university || ''
+    const accreditation = data.accreditation || base.accreditation || ''
+    const seats = data.seats || base.seats || ''
+    const tags = Array.isArray(data.tags) ? data.tags : (Array.isArray(base.tags) ? base.tags : [])
 
     let additionalRankings = []
     if (Array.isArray(data.additionalRankings) && data.additionalRankings.length > 0) {
@@ -67,12 +97,20 @@ export const collegeService = {
       additionalRankings = rankingsObj.otherRankings.map((item, idx) => {
         if (typeof item === 'object' && item !== null) return item
         const parts = String(item).split(':')
+        const agency = parts[0]?.trim() || String(item)
+        let rest = parts.slice(1).join(':').trim()
+        let category = 'General'
+        const catMatch = rest.match(/\(([^)]+)\)$/)
+        if (catMatch) {
+          category = catMatch[1]
+          rest = rest.replace(/\s*\([^)]+\)$/, '').trim()
+        }
         return {
           id: `rank_${idx}_${Date.now()}`,
-          agency: parts[0]?.trim() || String(item),
+          agency,
           year: '2025',
-          rank: parts[1]?.trim() || '',
-          category: 'General',
+          rank: rest || '',
+          category,
         }
       })
     } else if (Array.isArray(base.additionalRankings)) {
@@ -121,6 +159,11 @@ export const collegeService = {
       nirfRank,
       nirfCategory,
       naacGrade,
+      affiliation,
+      university,
+      accreditation,
+      seats,
+      tags,
       rankings: safeRankings,
       additionalRankings,
       locationContact: {
@@ -150,7 +193,8 @@ export const collegeService = {
       })
       const data = await res.json()
       if (res.ok && data.college) {
-        const normalized = this.normalizeCollegeData(data.college)
+        const current = this.getCollegeData()
+        const normalized = this.normalizeCollegeData({ ...current, ...data.college })
         localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
         return normalized
       }
@@ -188,68 +232,120 @@ export const collegeService = {
   // Save complete or partial college data to live backend
   async saveCollegeData(updatedData) {
     const token = authService.getToken()
+    const current = this.getCollegeData()
+    const fullData = { ...current, ...updatedData }
 
-    const additionalRankings = Array.isArray(updatedData.additionalRankings)
-      ? updatedData.additionalRankings
-      : (Array.isArray(updatedData.rankings) ? updatedData.rankings : [])
+    // Resolve additionalRankings with full fallback preservation
+    let additionalRankings = []
+    if (Array.isArray(fullData.additionalRankings) && fullData.additionalRankings.length > 0) {
+      additionalRankings = fullData.additionalRankings
+    } else if (Array.isArray(fullData.rankings) && fullData.rankings.length > 0) {
+      additionalRankings = fullData.rankings
+    } else if (Array.isArray(fullData.rankings?.otherRankings) && fullData.rankings.otherRankings.length > 0) {
+      additionalRankings = fullData.rankings.otherRankings.map((item, idx) => {
+        if (typeof item === 'object' && item !== null) return item
+        const parts = String(item).split(':')
+        const agency = parts[0]?.trim() || String(item)
+        let rest = parts.slice(1).join(':').trim()
+        let category = 'General'
+        const catMatch = rest.match(/\(([^)]+)\)$/)
+        if (catMatch) {
+          category = catMatch[1]
+          rest = rest.replace(/\s*\([^)]+\)$/, '').trim()
+        }
+        return {
+          id: `rank_${idx}_${Date.now()}`,
+          agency,
+          year: '2025',
+          rank: rest || '',
+          category,
+        }
+      })
+    } else if (Array.isArray(current.additionalRankings) && current.additionalRankings.length > 0) {
+      additionalRankings = current.additionalRankings
+    }
 
-    const existingRankingsObj = (typeof updatedData.rankings === 'object' && !Array.isArray(updatedData.rankings))
-      ? updatedData.rankings
-      : {}
+    const existingRankingsObj = (typeof fullData.rankings === 'object' && !Array.isArray(fullData.rankings))
+      ? fullData.rankings
+      : (typeof current.rankings === 'object' && !Array.isArray(current.rankings) ? current.rankings : {})
 
-    const nirfRank = (updatedData.nirfRank !== undefined && updatedData.nirfRank !== '')
-      ? Number(updatedData.nirfRank)
+    const nirfRank = (fullData.nirfRank !== undefined && fullData.nirfRank !== '')
+      ? Number(fullData.nirfRank)
       : (existingRankingsObj.nirfRank !== undefined ? Number(existingRankingsObj.nirfRank) : 3)
 
+    const existingOther = Array.isArray(existingRankingsObj.otherRankings) ? existingRankingsObj.otherRankings : []
+    const otherRankings = additionalRankings.length > 0
+      ? additionalRankings.map((r) => {
+          if (typeof r === 'string') return r
+          return `${r.agency || ''}: ${r.rank || ''}${r.category ? ` (${r.category})` : ''}`.trim()
+        }).filter(Boolean)
+      : existingOther
+
+    // Resolve admissionProcessSteps with full fallback preservation
+    let admissionProcessSteps = Array.isArray(fullData.admissionProcessSteps) ? fullData.admissionProcessSteps : []
+    if (admissionProcessSteps.length === 0 && Array.isArray(fullData.admissions?.admissionSteps)) {
+      admissionProcessSteps = fullData.admissions.admissionSteps.map((s, idx) => {
+        if (typeof s === 'object' && s !== null) return s
+        const colonIdx = String(s).indexOf(':')
+        return {
+          step: String(idx + 1),
+          title: colonIdx !== -1 ? String(s).substring(0, colonIdx).trim() : `Step ${idx + 1}`,
+          desc: colonIdx !== -1 ? String(s).substring(colonIdx + 1).trim() : String(s).trim(),
+        }
+      })
+    }
+
     const payload = {
-      ...updatedData,
+      ...fullData,
       nirfRank,
-      nirfCategory: updatedData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
-      naacGrade: updatedData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
+      nirfCategory: fullData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
+      naacGrade: fullData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
+      affiliation: fullData.affiliation || current.affiliation || '',
+      university: fullData.university || current.university || '',
+      accreditation: fullData.accreditation || current.accreditation || '',
+      seats: fullData.seats || current.seats || '',
+      tags: Array.isArray(fullData.tags) ? fullData.tags : (Array.isArray(current.tags) ? current.tags : []),
       additionalRankings,
       rankings: {
         ...existingRankingsObj,
         nirfRank,
-        nirfCategory: updatedData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
-        nirfYear: updatedData.nirfYear || existingRankingsObj.nirfYear || 2025,
-        naacGrade: updatedData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
-        naacCgpa: updatedData.naacCgpa || existingRankingsObj.naacCgpa || '3.88',
-        otherRankings: additionalRankings.map((r) => {
-          if (typeof r === 'string') return r
-          return `${r.agency || ''}: ${r.rank || ''}${r.category ? ` (${r.category})` : ''}`.trim()
-        }).filter(Boolean),
+        nirfCategory: fullData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
+        nirfYear: fullData.nirfYear || existingRankingsObj.nirfYear || 2025,
+        naacGrade: fullData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
+        naacCgpa: fullData.naacCgpa || existingRankingsObj.naacCgpa || '3.88',
+        otherRankings,
       },
-      admissionStatus: updatedData.admissionStatus || 'Admissions Open',
-      academicYear: updatedData.academicYear || '2026 - 2027',
-      applicationStartDate: updatedData.applicationStartDate || '',
-      applicationEndDate: updatedData.applicationEndDate || '',
-      admissionPortalUrl: updatedData.admissionPortalUrl || '',
-      examAccepted: updatedData.examAccepted || [],
-      admissionOverview: updatedData.admissionOverview || '',
-      admissionProcessSteps: updatedData.admissionProcessSteps || [],
+      admissionStatus: fullData.admissionStatus || 'Admissions Open',
+      academicYear: fullData.academicYear || '2026 - 2027',
+      applicationStartDate: fullData.applicationStartDate || '',
+      applicationEndDate: fullData.applicationEndDate || '',
+      admissionPortalUrl: fullData.admissionPortalUrl || '',
+      examAccepted: fullData.examAccepted || [],
+      admissionOverview: fullData.admissionOverview || '',
+      admissionProcessSteps,
       admissions: {
-        status: updatedData.admissionStatus || 'Admissions Open',
-        applicationStart: updatedData.applicationStartDate || '',
-        applicationEnd: updatedData.applicationEndDate || '',
-        examAccepted: updatedData.examAccepted || [],
-        admissionSteps: (updatedData.admissionProcessSteps || []).map(
+        status: fullData.admissionStatus || 'Admissions Open',
+        applicationStart: fullData.applicationStartDate || '',
+        applicationEnd: fullData.applicationEndDate || '',
+        examAccepted: fullData.examAccepted || [],
+        admissionSteps: admissionProcessSteps.map(
           (s) => (s.title && s.desc ? `${s.title}: ${s.desc}` : s.title || s.desc || '')
         ).filter(Boolean),
       },
-      hostelDetails: updatedData.hostelDetails || {},
-      hiddenCosts: updatedData.hiddenCosts || {},
-      snapshot: updatedData.snapshot || {},
+      hostelDetails: fullData.hostelDetails || {},
+      hiddenCosts: fullData.hiddenCosts || {},
+      snapshot: fullData.snapshot || {},
       locationContact: {
-        address: updatedData.address || updatedData.locationContact?.address || '',
-        city: updatedData.city || updatedData.locationContact?.city || '',
-        state: updatedData.state || updatedData.locationContact?.state || '',
-        pincode: updatedData.pincode || updatedData.locationContact?.pincode || '',
-        admissionEmail: updatedData.admissionEmail || updatedData.locationContact?.admissionEmail || '',
-        helplineNumber: updatedData.helplinePhone || updatedData.locationContact?.helplineNumber || '',
-        alternatePhone: updatedData.tollFreeHelpline || updatedData.locationContact?.alternatePhone || '',
-        websiteUrl: updatedData.website || updatedData.locationContact?.websiteUrl || '',
-        mapCoordinates: updatedData.googleMapCoordinates || updatedData.locationContact?.mapCoordinates || '',
-        ...(updatedData.locationContact || {}),
+        address: fullData.address || fullData.locationContact?.address || '',
+        city: fullData.city || fullData.locationContact?.city || '',
+        state: fullData.state || fullData.locationContact?.state || '',
+        pincode: fullData.pincode || fullData.locationContact?.pincode || '',
+        admissionEmail: fullData.admissionEmail || fullData.locationContact?.admissionEmail || '',
+        helplineNumber: fullData.helplinePhone || fullData.locationContact?.helplineNumber || '',
+        alternatePhone: fullData.tollFreeHelpline || fullData.locationContact?.alternatePhone || '',
+        websiteUrl: fullData.website || fullData.locationContact?.websiteUrl || '',
+        mapCoordinates: fullData.googleMapCoordinates || fullData.locationContact?.mapCoordinates || '',
+        ...(fullData.locationContact || {}),
       },
     }
 
@@ -264,7 +360,8 @@ export const collegeService = {
       })
       const data = await res.json()
       if (res.ok && data.college) {
-        const normalized = this.normalizeCollegeData(data.college)
+        // Merge returned college with fullData to guarantee zero data loss
+        const normalized = this.normalizeCollegeData({ ...fullData, ...data.college })
         localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
         window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: normalized }))
         return normalized
@@ -274,8 +371,7 @@ export const collegeService = {
     }
 
     // Local fallback
-    const current = this.getCollegeData()
-    const merged = this.normalizeCollegeData({ ...current, ...updatedData })
+    const merged = this.normalizeCollegeData(fullData)
     localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(merged))
     window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: merged }))
     return merged

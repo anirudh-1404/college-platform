@@ -50,6 +50,7 @@ export const updateCollegeProfile = async (req, res) => {
     // Merge updates
     Object.keys(updates).forEach((key) => {
       if (key !== "_id" && key !== "slug") {
+        college.set(key, updates[key], { strict: false });
         college[key] = updates[key];
         college.markModified(key);
       }

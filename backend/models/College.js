@@ -30,6 +30,14 @@ const admissionStepSchema = new mongoose.Schema({
   desc: { type: String, default: "" },
 });
 
+const rankingAgencySchema = new mongoose.Schema({
+  id: { type: String, default: () => `rank_${Date.now()}_${Math.random().toString(36).substr(2, 4)}` },
+  agency: { type: String, default: "" },
+  year: { type: String, default: "2025" },
+  rank: { type: String, default: "" },
+  category: { type: String, default: "" },
+});
+
 const feedbackSchema = new mongoose.Schema({
   id: { type: String, default: () => `fb_${Date.now()}` },
   date: { type: String, default: () => new Date().toLocaleDateString("en-IN") },
@@ -55,6 +63,26 @@ const collegeSchema = new mongoose.Schema(
     shortName: {
       type: String,
       default: "",
+    },
+    affiliation: {
+      type: String,
+      default: "",
+    },
+    university: {
+      type: String,
+      default: "",
+    },
+    accreditation: {
+      type: String,
+      default: "",
+    },
+    seats: {
+      type: String,
+      default: "",
+    },
+    tags: {
+      type: [String],
+      default: [],
     },
     stream: {
       type: String,
@@ -157,6 +185,32 @@ const collegeSchema = new mongoose.Schema(
       naacCgpa: { type: String, default: "3.88" },
       otherRankings: { type: [String], default: ["QS World University Rankings: #118", "India Today: #2"] },
     },
+    additionalRankings: [rankingAgencySchema],
+    nirfRank: { type: Number, default: 3 },
+    nirfCategory: { type: String, default: "Engineering" },
+    naacGrade: { type: String, default: "A++ (3.88 CGPA)" },
+    lastUpdated: { type: String, default: "Just now" },
+
+    // Location & Contact flat fields for convenience & resilience
+    address: { type: String, default: "" },
+    city: { type: String, default: "" },
+    state: { type: String, default: "" },
+    pincode: { type: String, default: "" },
+    location: { type: String, default: "" },
+    website: { type: String, default: "" },
+    admissionEmail: { type: String, default: "" },
+    helplinePhone: { type: String, default: "" },
+    tollFreeHelpline: { type: String, default: "" },
+    googleMapCoordinates: { type: String, default: "" },
+
+    // Placements flat fields for convenience & resilience
+    avgPackage: { type: String, default: "" },
+    avgPackageVal: { type: Number, default: 0 },
+    highestPackage: { type: String, default: "" },
+    totalFees: { type: String, default: "" },
+    totalFeesVal: { type: Number, default: 0 },
+    feesPeriod: { type: String, default: "Yearly" },
+    placementPercent: { type: Number, default: 0 },
     hostelDetails: {
       totalHostels: { type: String, default: "" },
       totalCapacity: { type: String, default: "" },

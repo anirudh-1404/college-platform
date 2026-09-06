@@ -12,12 +12,20 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
             ? collegeData.rankings.otherRankings.map((item, idx) => {
                 if (typeof item === 'object' && item !== null) return item
                 const parts = String(item).split(':')
+                const agency = parts[0]?.trim() || String(item)
+                let rest = parts.slice(1).join(':').trim()
+                let category = 'General'
+                const catMatch = rest.match(/\(([^)]+)\)$/)
+                if (catMatch) {
+                  category = catMatch[1]
+                  rest = rest.replace(/\s*\([^)]+\)$/, '').trim()
+                }
                 return {
                   id: `rank_${idx}_${Date.now()}`,
-                  agency: parts[0]?.trim() || String(item),
+                  agency,
                   year: '2025',
-                  rank: parts[1]?.trim() || '',
-                  category: 'General',
+                  rank: rest || '',
+                  category,
                 }
               })
             : []
@@ -35,6 +43,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
   const handleChange = (field, value) => {
     onChange({
       ...collegeData,
+      additionalRankings: rankings,
       [field]: value,
     })
   }
@@ -88,6 +97,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
     onChange({
       ...collegeData,
       nirfRank: parsed,
+      additionalRankings: rankings,
       rankings: {
         ...currentRankingsObj,
         nirfRank: parsed,
@@ -102,6 +112,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
     onChange({
       ...collegeData,
       nirfCategory: val,
+      additionalRankings: rankings,
       rankings: {
         ...currentRankingsObj,
         nirfCategory: val,
@@ -116,6 +127,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
     onChange({
       ...collegeData,
       naacGrade: val,
+      additionalRankings: rankings,
       rankings: {
         ...currentRankingsObj,
         naacGrade: val,
