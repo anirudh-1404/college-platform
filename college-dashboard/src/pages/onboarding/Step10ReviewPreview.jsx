@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react'
 import {
   MapPin, Star, Heart, Scale, Calculator, ShieldCheck, Building2, Users,
-  Check, AlertCircle, Layers, GraduationCap, Lock, Send, Eye
+  Check, AlertCircle, Layers, GraduationCap, Lock, Send, Eye,
+  Compass, Calendar, ExternalLink, FileText, CheckCircle2, Clock, Sparkles
 } from 'lucide-react'
 import { ConfirmationModal } from '../../components/common/ConfirmationModal'
 import { StatusBadge } from '../../components/common/StatusBadge'
@@ -19,6 +20,7 @@ const Step10ReviewPreview = ({
 
   const tabs = [
     { id: 'overview', label: 'Overview & Facts' },
+    { id: 'admissions', label: 'Admissions & Process' },
     { id: 'courses', label: 'Courses & Fees' },
     { id: 'cutoffs', label: 'Cutoffs & Eligibility' },
     { id: 'placements', label: 'Placements' },
@@ -51,11 +53,12 @@ const Step10ReviewPreview = ({
 
   // Profile readiness checklist
   const validationChecklist = useMemo(() => {
+    const examsCount = collegeData.examAccepted?.length || collegeData.admissions?.examAccepted?.length || 0
     return [
       { step: 1, label: 'Basic Information & Branding', valid: !!(collegeData.name && collegeData.shortName && collegeData.establishmentYear) },
       { step: 2, label: 'Location & Official Contact', valid: !!(collegeData.city && collegeData.state && collegeData.admissionEmail) },
       { step: 3, label: 'Academic Courses & Fees', valid: (collegeData.coursesOffered?.length || 0) > 0, detail: `${collegeData.coursesOffered?.length || 0} courses added` },
-      { step: 4, label: 'Admissions & Exam Criteria', valid: (collegeData.examAccepted?.length || 0) > 0, detail: `${collegeData.examAccepted?.length || 0} exams accepted` },
+      { step: 4, label: 'Admissions & Exam Criteria', valid: examsCount > 0 || !!collegeData.admissionStatus, detail: `${examsCount} exams accepted` },
       { step: 5, label: 'Cutoff Ranks Matrix', valid: (collegeData.admissionCutoffs?.length || 0) > 0, detail: `${collegeData.admissionCutoffs?.length || 0} records` },
       { step: 6, label: 'Placements & Hiring Partners', valid: !!(collegeData.placements?.avgPackage && collegeData.placements?.placementRate) },
       { step: 7, label: 'Rankings & Accreditations', valid: !!(collegeData.nirfRank || (collegeData.rankings?.length || 0) > 0) },
@@ -350,10 +353,215 @@ const Step10ReviewPreview = ({
                       ))}
                     </div>
                   </div>
+
+                  {/* Residential Hostels & Housing */}
+                  {collegeData.hostelDetails && (collegeData.hostelDetails.totalHostels || collegeData.hostelDetails.totalCapacity || collegeData.hostelDetails.boysHostelDetails) && (
+                    <div className="bg-white border border-border-color rounded-xl p-6 space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Building2 className="h-5 w-5 text-brand-primary" />
+                        <h4 className="font-serif text-lg font-bold text-text-primary">
+                          Residential Hostels & Accommodation
+                        </h4>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                        {collegeData.hostelDetails.totalHostels && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color">
+                            <strong className="text-text-primary">Total Hostels: </strong>
+                            <span className="text-text-secondary">{collegeData.hostelDetails.totalHostels}</span>
+                          </div>
+                        )}
+                        {collegeData.hostelDetails.totalCapacity && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color">
+                            <strong className="text-text-primary">Hostel Capacity: </strong>
+                            <span className="text-text-secondary">{collegeData.hostelDetails.totalCapacity}</span>
+                          </div>
+                        )}
+                        {collegeData.hostelDetails.boysHostelDetails && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color">
+                            <strong className="text-text-primary">Boys Hostels: </strong>
+                            <span className="text-text-secondary">{collegeData.hostelDetails.boysHostelDetails}</span>
+                          </div>
+                        )}
+                        {collegeData.hostelDetails.girlsHostelDetails && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color">
+                            <strong className="text-text-primary">Girls Hostels: </strong>
+                            <span className="text-text-secondary">{collegeData.hostelDetails.girlsHostelDetails}</span>
+                          </div>
+                        )}
+                        {collegeData.hostelDetails.messFoodType && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color sm:col-span-2">
+                            <strong className="text-text-primary">Mess & Dining: </strong>
+                            <span className="text-text-secondary">{collegeData.hostelDetails.messFoodType}</span>
+                          </div>
+                        )}
+                        {collegeData.hostelDetails.annualHostelMessFee && (
+                          <div className="p-3 bg-slate-50 rounded-xl border border-border-color sm:col-span-2">
+                            <strong className="text-text-primary">Annual Hostel + Mess Fee: </strong>
+                            <span className="text-emerald-700 font-bold">{collegeData.hostelDetails.annualHostelMessFee}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
-              {/* TAB 2: COURSES */}
+              {/* TAB 2: ADMISSIONS & PROCESS */}
+              {activeTab === 'admissions' && (
+                <div className="space-y-6">
+                  {/* Admission Status & Timeline */}
+                  <div className="bg-white border border-border-color rounded-xl p-6 space-y-5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-border-color">
+                      <div>
+                        <div className="flex items-center gap-2.5">
+                          <span className="relative flex h-2.5 w-2.5">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                          </span>
+                          <h3 className="font-serif text-xl font-bold text-text-primary">
+                            {collegeData.admissionStatus || collegeData.admissions?.status || 'Admissions Open'}
+                          </h3>
+                        </div>
+                        <p className="text-xs text-text-secondary mt-1">
+                          Official enrollment cycle for Academic Year <strong className="text-text-primary font-bold">{collegeData.academicYear || '2026 - 2027'}</strong>
+                        </p>
+                      </div>
+
+                      {collegeData.admissionPortalUrl && (
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-brand-primary text-white text-xs font-bold shadow-2xs self-start sm:self-auto">
+                          <span>Apply Portal Active</span>
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Timeline Dates */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-4 rounded-xl bg-slate-50 border border-border-color flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                          <Calendar className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                            Application Start Date
+                          </p>
+                          <p className="text-sm font-bold text-text-primary mt-0.5">
+                            {collegeData.applicationStartDate
+                              ? new Date(collegeData.applicationStartDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                              : (collegeData.admissions?.applicationStart || 'Announced upon official notice')}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-xl bg-slate-50 border border-border-color flex items-center gap-3.5">
+                        <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                          <Clock className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                            Application Closing Deadline
+                          </p>
+                          <p className="text-sm font-bold text-rose-600 mt-0.5">
+                            {collegeData.applicationEndDate
+                              ? new Date(collegeData.applicationEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                              : (collegeData.admissions?.applicationEnd || 'Subject to counseling schedule')}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Accepted Exams */}
+                  <div className="bg-white border border-border-color rounded-xl p-6 space-y-4">
+                    <div>
+                      <h4 className="font-serif text-lg font-bold text-text-primary">
+                        Accepted Entrance Examinations
+                      </h4>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        Qualifying ranks in the following examinations are accepted for admission.
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {(collegeData.examAccepted?.length ? collegeData.examAccepted : (collegeData.admissions?.examAccepted || ['JEE Advanced', 'JEE Main'])).map((exam) => (
+                        <div
+                          key={exam}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-accent text-brand-primary border border-brand-primary/20 text-xs font-bold"
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5 text-brand-primary" />
+                          <span>{exam}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Eligibility Overview */}
+                  <div className="bg-white border border-border-color rounded-xl p-6 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <ShieldCheck className="h-5 w-5 text-brand-primary" />
+                      <h4 className="font-serif text-lg font-bold text-text-primary">
+                        Eligibility & Qualification Criteria
+                      </h4>
+                    </div>
+                    <p className="text-xs sm:text-sm text-text-secondary leading-relaxed bg-slate-50/70 p-4 rounded-xl border border-border-color">
+                      {collegeData.admissionOverview ||
+                        'Minimum qualifying marks in 10+2 / Bachelor degree with compulsory subjects along with a valid competitive rank in national entrance test.'}
+                    </p>
+                  </div>
+
+                  {/* Step-by-Step Process */}
+                  <div className="bg-white border border-border-color rounded-xl p-6 space-y-4">
+                    <div className="pb-2 border-b border-border-color">
+                      <h4 className="font-serif text-lg font-bold text-text-primary">
+                        Step-by-Step Admission Process
+                      </h4>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        Official sequence of stages for registration, counseling, and seat confirmation.
+                      </p>
+                    </div>
+
+                    <div className="space-y-3 pt-1">
+                      {(collegeData.admissionProcessSteps?.length > 0
+                        ? collegeData.admissionProcessSteps
+                        : (collegeData.admissions?.admissionSteps || [
+                            { step: '1', title: 'Appear for Entrance Exam', desc: 'Qualify national or institutional exam.' },
+                            { step: '2', title: 'Counseling Registration', desc: 'Lock preferred choices on central counseling portal.' },
+                            { step: '3', title: 'Seat Allotment & Fee', desc: 'Accept allotted seat and pay confirmation fee.' },
+                            { step: '4', title: 'Campus Verification', desc: 'Report for physical document verification.' },
+                          ])
+                      ).map((item, idx) => {
+                        const stepNum = item.step || idx + 1
+                        const title = typeof item === 'string' ? (item.split(':')[0] || `Stage ${stepNum}`) : (item.title || `Stage ${stepNum}`)
+                        const desc = typeof item === 'string' ? (item.split(':')[1] || item) : (item.desc || '')
+
+                        return (
+                          <div
+                            key={idx}
+                            className="flex items-start gap-3.5 p-4 rounded-xl border border-border-color bg-slate-50/60"
+                          >
+                            <div className="w-8 h-8 rounded-full bg-brand-primary text-white text-xs font-extrabold flex items-center justify-center flex-shrink-0 mt-0.5 shadow-2xs">
+                              {stepNum}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <h5 className="text-xs sm:text-sm font-bold text-text-primary">
+                                {title}
+                              </h5>
+                              {desc && (
+                                <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                                  {desc}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* TAB 3: COURSES */}
               {activeTab === 'courses' && (
                 <div className="bg-white border border-border-color rounded-xl p-6 space-y-4">
                   <div className="flex items-center justify-between">
