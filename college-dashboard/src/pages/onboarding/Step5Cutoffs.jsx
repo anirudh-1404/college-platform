@@ -3,7 +3,7 @@ import { Plus, Trash2 } from 'lucide-react'
 import { TextInput, SectionCard } from '../../components/common/FormControls'
 
 const Step5Cutoffs = ({ collegeData, onChange, isReadOnly = false }) => {
-  const cutoffs = collegeData.admissionCutoffs || []
+  const cutoffs = Array.isArray(collegeData.admissionCutoffs) ? collegeData.admissionCutoffs : []
 
   const [newRow, setNewRow] = useState({
     exam: 'JEE Advanced 2025',

@@ -181,7 +181,18 @@ export const DEFAULT_COLLEGE_DATA = {
   },
 
   // Rankings (Step 7)
-  rankings: [],
+  nirfRank: '',
+  nirfCategory: '',
+  naacGrade: '',
+  rankings: {
+    nirfRank: '',
+    nirfCategory: '',
+    nirfYear: 2025,
+    naacGrade: '',
+    naacCgpa: '',
+    otherRankings: [],
+  },
+  additionalRankings: [],
 
   // Facilities & ROI / Hidden Costs (Step 8)
   facilities: [],
@@ -282,7 +293,21 @@ export const MOCK_IIT_BOMBAY_DATA = {
     totalOffers: '1,850+ Offers',
     topRecruiters: ['Google', 'Microsoft', 'Apple'],
   },
-  rankings: [],
+  nirfRank: 3,
+  nirfCategory: 'Engineering',
+  naacGrade: 'A++ (3.88 CGPA)',
+  rankings: {
+    nirfRank: 3,
+    nirfCategory: 'Engineering',
+    nirfYear: 2025,
+    naacGrade: 'A++ (3.88 CGPA)',
+    naacCgpa: '3.88',
+    otherRankings: ['QS World University Rankings: #118', 'India Today: #2'],
+  },
+  additionalRankings: [
+    { id: 'rank_1', agency: 'QS World University Rankings', year: '2025', rank: '#118 Worldwide', category: 'Overall' },
+    { id: 'rank_2', agency: 'India Today', year: '2024', rank: '#2 National', category: 'Engineering' },
+  ],
   facilities: ['Hostel', 'Gym', 'Sports', 'Wi-Fi', 'Library'],
   gallery: [],
   profileStatus: 'draft',

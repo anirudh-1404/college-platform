@@ -4,7 +4,7 @@ import { FormField, TextInput, Textarea, SectionCard } from '../../components/co
 import { COMMON_FACILITIES_LIST } from '../../data/collegeModel'
 
 const Step8Facilities = ({ collegeData, onChange, isReadOnly = false }) => {
-  const facilities = collegeData.facilities || []
+  const facilities = Array.isArray(collegeData.facilities) ? collegeData.facilities : []
   const hostel = collegeData.hostelDetails || {}
   const costs = collegeData.hiddenCosts || {}
 

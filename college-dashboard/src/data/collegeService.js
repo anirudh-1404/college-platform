@@ -50,6 +50,48 @@ export const collegeService = {
     const snapshot = { ...base.snapshot, ...(data.snapshot || {}) }
     const placements = { ...base.placements, ...(data.placements || {}) }
 
+    // Safe Rankings Normalization: handle both object and array schemas seamlessly
+    const rankingsObj = (data.rankings && typeof data.rankings === 'object' && !Array.isArray(data.rankings)) ? data.rankings : {}
+    const nirfRank = (data.nirfRank !== undefined && data.nirfRank !== '')
+      ? data.nirfRank
+      : (rankingsObj.nirfRank !== undefined ? rankingsObj.nirfRank : base.nirfRank || '')
+    const nirfCategory = data.nirfCategory || rankingsObj.nirfCategory || base.nirfCategory || 'Engineering'
+    const naacGrade = data.naacGrade || rankingsObj.naacGrade || base.naacGrade || 'A++ (3.88 CGPA)'
+
+    let additionalRankings = []
+    if (Array.isArray(data.additionalRankings) && data.additionalRankings.length > 0) {
+      additionalRankings = data.additionalRankings
+    } else if (Array.isArray(data.rankings) && data.rankings.length > 0) {
+      additionalRankings = data.rankings
+    } else if (Array.isArray(rankingsObj.otherRankings) && rankingsObj.otherRankings.length > 0) {
+      additionalRankings = rankingsObj.otherRankings.map((item, idx) => {
+        if (typeof item === 'object' && item !== null) return item
+        const parts = String(item).split(':')
+        return {
+          id: `rank_${idx}_${Date.now()}`,
+          agency: parts[0]?.trim() || String(item),
+          year: '2025',
+          rank: parts[1]?.trim() || '',
+          category: 'General',
+        }
+      })
+    } else if (Array.isArray(base.additionalRankings)) {
+      additionalRankings = base.additionalRankings
+    }
+
+    const safeRankings = {
+      ...rankingsObj,
+      nirfRank,
+      nirfCategory,
+      nirfYear: data.nirfYear || rankingsObj.nirfYear || 2025,
+      naacGrade,
+      naacCgpa: data.naacCgpa || rankingsObj.naacCgpa || '3.88',
+      otherRankings: additionalRankings.map((r) => {
+        if (typeof r === 'string') return r
+        return `${r.agency || ''}: ${r.rank || ''}${r.category ? ` (${r.category})` : ''}`.trim()
+      }).filter(Boolean),
+    }
+
     return {
       ...base,
       ...data,
@@ -76,6 +118,11 @@ export const collegeService = {
       hiddenCosts,
       snapshot,
       placements,
+      nirfRank,
+      nirfCategory,
+      naacGrade,
+      rankings: safeRankings,
+      additionalRankings,
       locationContact: {
         address,
         city,
@@ -141,8 +188,37 @@ export const collegeService = {
   // Save complete or partial college data to live backend
   async saveCollegeData(updatedData) {
     const token = authService.getToken()
+
+    const additionalRankings = Array.isArray(updatedData.additionalRankings)
+      ? updatedData.additionalRankings
+      : (Array.isArray(updatedData.rankings) ? updatedData.rankings : [])
+
+    const existingRankingsObj = (typeof updatedData.rankings === 'object' && !Array.isArray(updatedData.rankings))
+      ? updatedData.rankings
+      : {}
+
+    const nirfRank = (updatedData.nirfRank !== undefined && updatedData.nirfRank !== '')
+      ? Number(updatedData.nirfRank)
+      : (existingRankingsObj.nirfRank !== undefined ? Number(existingRankingsObj.nirfRank) : 3)
+
     const payload = {
       ...updatedData,
+      nirfRank,
+      nirfCategory: updatedData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
+      naacGrade: updatedData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
+      additionalRankings,
+      rankings: {
+        ...existingRankingsObj,
+        nirfRank,
+        nirfCategory: updatedData.nirfCategory || existingRankingsObj.nirfCategory || 'Engineering',
+        nirfYear: updatedData.nirfYear || existingRankingsObj.nirfYear || 2025,
+        naacGrade: updatedData.naacGrade || existingRankingsObj.naacGrade || 'A++ (3.88 CGPA)',
+        naacCgpa: updatedData.naacCgpa || existingRankingsObj.naacCgpa || '3.88',
+        otherRankings: additionalRankings.map((r) => {
+          if (typeof r === 'string') return r
+          return `${r.agency || ''}: ${r.rank || ''}${r.category ? ` (${r.category})` : ''}`.trim()
+        }).filter(Boolean),
+      },
       admissionStatus: updatedData.admissionStatus || 'Admissions Open',
       academicYear: updatedData.academicYear || '2026 - 2027',
       applicationStartDate: updatedData.applicationStartDate || '',
@@ -223,10 +299,10 @@ export const collegeService = {
     if (data.name && data.shortName && data.description) score += 1
     if (data.locationContact?.city && data.locationContact?.admissionEmail) score += 1
     if (data.coursesOffered?.length > 0) score += 1
-    if (data.admissions?.examAccepted?.length > 0) score += 1
+    if (data.admissions?.examAccepted?.length > 0 || data.examAccepted?.length > 0) score += 1
     if (data.admissionCutoffs?.length > 0) score += 1
-    if (data.placements?.avgPackage) score += 1
-    if (data.rankings?.nirfRank) score += 1
+    if (data.placements?.avgPackage || data.avgPackage) score += 1
+    if (data.nirfRank || data.rankings?.nirfRank) score += 1
     if (data.facilities?.length > 0) score += 1
     if (data.gallery?.length > 0) score += 1
     if (data.hiddenCosts?.tuitionFeePerYear) score += 1

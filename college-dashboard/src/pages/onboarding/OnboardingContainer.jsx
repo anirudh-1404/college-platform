@@ -20,6 +20,7 @@ import Step7Rankings from './Step7Rankings'
 import Step8Facilities from './Step8Facilities'
 import Step9Gallery from './Step9Gallery'
 import Step10ReviewPreview from './Step10ReviewPreview'
+import ErrorBoundary from '../../components/common/ErrorBoundary'
 
 const STEP_ICONS = {
   1: Sparkles,
@@ -245,89 +246,91 @@ const OnboardingContainer = ({
           
           {/* Main Form Canvas (Left 8 Cols on desktop) */}
           <main className="xl:col-span-8 min-h-[460px]">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentStep}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.16 }}
-              >
-                {currentStep === 1 && (
-                  <Step1BasicInfo
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 2 && (
-                  <Step2LocationContact
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 3 && (
-                  <Step3CoursesFees
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 4 && (
-                  <Step4Admissions
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 5 && (
-                  <Step5Cutoffs
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 6 && (
-                  <Step6Placements
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 7 && (
-                  <Step7Rankings
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 8 && (
-                  <Step8Facilities
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 9 && (
-                  <Step9Gallery
-                    collegeData={collegeData}
-                    onChange={handleDataChange}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-                {currentStep === 10 && (
-                  <Step10ReviewPreview
-                    collegeData={collegeData}
-                    onSubmitForApproval={handleSubmitForApproval}
-                    onNavigateStep={(s) => {
-                      if (onStepChange) onStepChange(s)
-                    }}
-                    isReadOnly={isReadOnly}
-                  />
-                )}
-              </motion.div>
-            </AnimatePresence>
+            <ErrorBoundary>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentStep}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -6 }}
+                  transition={{ duration: 0.16 }}
+                >
+                  {currentStep === 1 && (
+                    <Step1BasicInfo
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 2 && (
+                    <Step2LocationContact
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 3 && (
+                    <Step3CoursesFees
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 4 && (
+                    <Step4Admissions
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 5 && (
+                    <Step5Cutoffs
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 6 && (
+                    <Step6Placements
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 7 && (
+                    <Step7Rankings
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 8 && (
+                    <Step8Facilities
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 9 && (
+                    <Step9Gallery
+                      collegeData={collegeData}
+                      onChange={handleDataChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                  {currentStep === 10 && (
+                    <Step10ReviewPreview
+                      collegeData={collegeData}
+                      onSubmitForApproval={handleSubmitForApproval}
+                      onNavigateStep={(s) => {
+                        if (onStepChange) onStepChange(s)
+                      }}
+                      isReadOnly={isReadOnly}
+                    />
+                  )}
+                </motion.div>
+              </AnimatePresence>
+            </ErrorBoundary>
           </main>
 
           {/* Right Column: Institutional Profile Preview & Tips (Right 4 Cols on desktop) */}

@@ -12,7 +12,7 @@ const SAMPLE_IMAGE_OPTIONS = [
 ]
 
 const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
-  const gallery = collegeData.gallery || []
+  const gallery = Array.isArray(collegeData.gallery) ? collegeData.gallery : []
   const fileInputRef = useRef(null)
 
   const [newImage, setNewImage] = useState({

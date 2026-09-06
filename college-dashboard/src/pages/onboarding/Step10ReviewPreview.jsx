@@ -61,7 +61,7 @@ const Step10ReviewPreview = ({
       { step: 4, label: 'Admissions & Exam Criteria', valid: examsCount > 0 || !!collegeData.admissionStatus, detail: `${examsCount} exams accepted` },
       { step: 5, label: 'Cutoff Ranks Matrix', valid: (collegeData.admissionCutoffs?.length || 0) > 0, detail: `${collegeData.admissionCutoffs?.length || 0} records` },
       { step: 6, label: 'Placements & Hiring Partners', valid: !!(collegeData.placements?.avgPackage && collegeData.placements?.placementRate) },
-      { step: 7, label: 'Rankings & Accreditations', valid: !!(collegeData.nirfRank || (collegeData.rankings?.length || 0) > 0) },
+      { step: 7, label: 'Rankings & Accreditations', valid: !!(collegeData.nirfRank || collegeData.rankings?.nirfRank || (Array.isArray(collegeData.additionalRankings) ? collegeData.additionalRankings.length : 0) || (Array.isArray(collegeData.rankings) ? collegeData.rankings.length : 0)) },
       { step: 8, label: 'Facilities & ROI Cost Structure', valid: (collegeData.facilities?.length || 0) > 0 && !!collegeData.hiddenCosts },
       { step: 9, label: 'Campus Photography Gallery', valid: (collegeData.gallery?.length || 0) > 0, detail: `${collegeData.gallery?.length || 0} photos` },
     ]
@@ -177,7 +177,7 @@ const Step10ReviewPreview = ({
               <div>
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
                   <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase">
-                    NIRF #{collegeData.nirfRank || '3'}
+                    NIRF #{collegeData.nirfRank || collegeData.rankings?.nirfRank || '3'}
                   </span>
                   <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold">
                     {collegeData.ownership || 'Government'}

@@ -3,7 +3,27 @@ import { Plus, Trash2, Award, ShieldCheck } from 'lucide-react'
 import { FormField, TextInput, TagInput, SectionCard } from '../../components/common/FormControls'
 
 const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
-  const rankings = collegeData.rankings || []
+  // Always resolve an array for the table repeater to prevent rankings.map is not a function runtime crash
+  const rankings = Array.isArray(collegeData.additionalRankings)
+    ? collegeData.additionalRankings
+    : (Array.isArray(collegeData.rankings)
+        ? collegeData.rankings
+        : (Array.isArray(collegeData.rankings?.otherRankings)
+            ? collegeData.rankings.otherRankings.map((item, idx) => {
+                if (typeof item === 'object' && item !== null) return item
+                const parts = String(item).split(':')
+                return {
+                  id: `rank_${idx}_${Date.now()}`,
+                  agency: parts[0]?.trim() || String(item),
+                  year: '2025',
+                  rank: parts[1]?.trim() || '',
+                  category: 'General',
+                }
+              })
+            : []
+          )
+      )
+
   const [newRanking, setNewRanking] = useState({
     agency: '',
     year: '2025',
@@ -23,12 +43,20 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
     const updated = rankings.map((r, idx) =>
       idx === index ? { ...r, [field]: value } : r
     )
-    handleChange('rankings', updated)
+    onChange({
+      ...collegeData,
+      additionalRankings: updated,
+      ...(Array.isArray(collegeData.rankings) ? { rankings: updated } : {}),
+    })
   }
 
   const handleRemoveRanking = (index) => {
     const updated = rankings.filter((_, idx) => idx !== index)
-    handleChange('rankings', updated)
+    onChange({
+      ...collegeData,
+      additionalRankings: updated,
+      ...(Array.isArray(collegeData.rankings) ? { rankings: updated } : {}),
+    })
   }
 
   const handleAddRanking = (e) => {
@@ -42,10 +70,62 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
       ...newRanking,
       id: `rank_${Date.now()}`,
     }
-    handleChange('rankings', [...rankings, row])
+    const updated = [...rankings, row]
+    onChange({
+      ...collegeData,
+      additionalRankings: updated,
+      ...(Array.isArray(collegeData.rankings) ? { rankings: updated } : {}),
+    })
     setNewRanking({ agency: '', year: '2025', rank: '', category: '' })
     setIsAddingRow(false)
   }
+
+  const handleNirfRankChange = (val) => {
+    const parsed = parseInt(val, 10) || ''
+    const currentRankingsObj = (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings))
+      ? collegeData.rankings
+      : {}
+    onChange({
+      ...collegeData,
+      nirfRank: parsed,
+      rankings: {
+        ...currentRankingsObj,
+        nirfRank: parsed,
+      },
+    })
+  }
+
+  const handleNirfCategoryChange = (val) => {
+    const currentRankingsObj = (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings))
+      ? collegeData.rankings
+      : {}
+    onChange({
+      ...collegeData,
+      nirfCategory: val,
+      rankings: {
+        ...currentRankingsObj,
+        nirfCategory: val,
+      },
+    })
+  }
+
+  const handleNaacGradeChange = (val) => {
+    const currentRankingsObj = (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings))
+      ? collegeData.rankings
+      : {}
+    onChange({
+      ...collegeData,
+      naacGrade: val,
+      rankings: {
+        ...currentRankingsObj,
+        naacGrade: val,
+      },
+    })
+  }
+
+  const nirfRankValue = collegeData.nirfRank ?? (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings) ? collegeData.rankings?.nirfRank : '') ?? ''
+  const nirfCategoryValue = collegeData.nirfCategory || (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings) ? collegeData.rankings?.nirfCategory : '') || ''
+  const naacGradeValue = collegeData.naacGrade || (typeof collegeData.rankings === 'object' && !Array.isArray(collegeData.rankings) ? collegeData.rankings?.naacGrade : '') || ''
 
   return (
     <div className="space-y-6">
@@ -63,8 +143,8 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
             >
               <TextInput
                 type="number"
-                value={collegeData.nirfRank}
-                onChange={(e) => handleChange('nirfRank', parseInt(e.target.value, 10) || '')}
+                value={nirfRankValue}
+                onChange={(e) => handleNirfRankChange(e.target.value)}
                 placeholder="3"
                 disabled={isReadOnly}
                 icon={Award}
@@ -77,8 +157,8 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
               helperText="e.g. Engineering, Management, Medical"
             >
               <TextInput
-                value={collegeData.nirfCategory}
-                onChange={(e) => handleChange('nirfCategory', e.target.value)}
+                value={nirfCategoryValue}
+                onChange={(e) => handleNirfCategoryChange(e.target.value)}
                 placeholder="Engineering"
                 disabled={isReadOnly}
               />
@@ -91,8 +171,8 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
               helperText="e.g. A++ (3.88 CGPA)"
             >
               <TextInput
-                value={collegeData.naacGrade}
-                onChange={(e) => handleChange('naacGrade', e.target.value)}
+                value={naacGradeValue}
+                onChange={(e) => handleNaacGradeChange(e.target.value)}
                 placeholder="A++ (3.88 CGPA)"
                 disabled={isReadOnly}
                 icon={ShieldCheck}
@@ -104,7 +184,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
               helperText="e.g. Autonomous (Ministry of Education, GoI)"
             >
               <TextInput
-                value={collegeData.affiliation}
+                value={collegeData.affiliation || ''}
                 onChange={(e) => handleChange('affiliation', e.target.value)}
                 placeholder="Autonomous National University"
                 disabled={isReadOnly}
@@ -117,7 +197,7 @@ const Step7Rankings = ({ collegeData, onChange, isReadOnly = false }) => {
             helperText="Badges displayed on public cards. Type and press enter."
           >
             <TagInput
-              tags={collegeData.tags || []}
+              tags={Array.isArray(collegeData.tags) ? collegeData.tags : []}
               onChange={(tags) => handleChange('tags', tags)}
               placeholder="e.g. Government, NIRF #3, NAAC A++, IoE..."
               disabled={isReadOnly}
