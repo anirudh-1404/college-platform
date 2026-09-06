@@ -15,7 +15,7 @@ const API_BASE_URL =
 const STORAGE_KEY_COLLEGE_DATA = 'vidyascope_college_data'
 
 export const collegeService = {
-  // Normalize data ensuring both top-level and nested locationContact fields are populated
+  // Normalize data ensuring both top-level and nested locationContact and admissions fields are populated
   normalizeCollegeData(data) {
     const user = authService.getAuthState()?.user
     const registeredName = user?.collegeName || ''
@@ -36,6 +36,20 @@ export const collegeService = {
     const tollFreeHelpline = data.tollFreeHelpline || lc.alternatePhone || ''
     const googleMapCoordinates = data.googleMapCoordinates || lc.mapCoordinates || ''
 
+    const admissions = data.admissions || {}
+    const admissionStatus = data.admissionStatus || admissions.status || base.admissionStatus || 'Admissions Open'
+    const academicYear = data.academicYear || base.academicYear || '2026 - 2027'
+    const applicationStartDate = data.applicationStartDate || admissions.applicationStart || ''
+    const applicationEndDate = data.applicationEndDate || admissions.applicationEnd || ''
+    const admissionPortalUrl = data.admissionPortalUrl || ''
+    const examAccepted = data.examAccepted || admissions.examAccepted || []
+    const admissionOverview = data.admissionOverview || ''
+    const admissionProcessSteps = data.admissionProcessSteps || []
+    const hostelDetails = { ...base.hostelDetails, ...(data.hostelDetails || {}) }
+    const hiddenCosts = { ...base.hiddenCosts, ...(data.hiddenCosts || {}) }
+    const snapshot = { ...base.snapshot, ...(data.snapshot || {}) }
+    const placements = { ...base.placements, ...(data.placements || {}) }
+
     return {
       ...base,
       ...data,
@@ -50,6 +64,18 @@ export const collegeService = {
       tollFreeHelpline,
       googleMapCoordinates,
       location: data.location || (city && state ? `${city}, ${state}` : ''),
+      admissionStatus,
+      academicYear,
+      applicationStartDate,
+      applicationEndDate,
+      admissionPortalUrl,
+      examAccepted,
+      admissionOverview,
+      admissionProcessSteps,
+      hostelDetails,
+      hiddenCosts,
+      snapshot,
+      placements,
       locationContact: {
         address,
         city,
@@ -117,6 +143,26 @@ export const collegeService = {
     const token = authService.getToken()
     const payload = {
       ...updatedData,
+      admissionStatus: updatedData.admissionStatus || 'Admissions Open',
+      academicYear: updatedData.academicYear || '2026 - 2027',
+      applicationStartDate: updatedData.applicationStartDate || '',
+      applicationEndDate: updatedData.applicationEndDate || '',
+      admissionPortalUrl: updatedData.admissionPortalUrl || '',
+      examAccepted: updatedData.examAccepted || [],
+      admissionOverview: updatedData.admissionOverview || '',
+      admissionProcessSteps: updatedData.admissionProcessSteps || [],
+      admissions: {
+        status: updatedData.admissionStatus || 'Admissions Open',
+        applicationStart: updatedData.applicationStartDate || '',
+        applicationEnd: updatedData.applicationEndDate || '',
+        examAccepted: updatedData.examAccepted || [],
+        admissionSteps: (updatedData.admissionProcessSteps || []).map(
+          (s) => (s.title && s.desc ? `${s.title}: ${s.desc}` : s.title || s.desc || '')
+        ).filter(Boolean),
+      },
+      hostelDetails: updatedData.hostelDetails || {},
+      hiddenCosts: updatedData.hiddenCosts || {},
+      snapshot: updatedData.snapshot || {},
       locationContact: {
         address: updatedData.address || updatedData.locationContact?.address || '',
         city: updatedData.city || updatedData.locationContact?.city || '',

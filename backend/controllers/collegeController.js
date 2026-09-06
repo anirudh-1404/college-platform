@@ -51,6 +51,7 @@ export const updateCollegeProfile = async (req, res) => {
     Object.keys(updates).forEach((key) => {
       if (key !== "_id" && key !== "slug") {
         college[key] = updates[key];
+        college.markModified(key);
       }
     });
 

@@ -3,7 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom'
 import {
   ChevronRight, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
-  Check, AlertCircle, Scale, Layers, GraduationCap, Building
+  Check, AlertCircle, Scale, Layers, GraduationCap, Building,
+  Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
@@ -47,6 +48,7 @@ const CollegeDetailPage = ({
 
   const tabs = [
     { id: 'overview', label: 'Overview & Facts' },
+    { id: 'admissions', label: 'Admissions & Process' },
     { id: 'courses', label: 'Courses & Fees' },
     { id: 'cutoffs', label: 'Cutoffs & Eligibility' },
     { id: 'placements', label: 'Placements' },
@@ -355,10 +357,223 @@ const CollegeDetailPage = ({
                     ))}
                   </div>
                 </div>
+
+                {/* Residential Hostels & Housing (If provided) */}
+                {college.hostelDetails && (college.hostelDetails.totalHostels || college.hostelDetails.totalCapacity || college.hostelDetails.boysHostelDetails) && (
+                  <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-card space-y-4">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-5 w-5 text-brand-primary" />
+                      <h3 className="font-serif text-lg font-bold text-text-primary">
+                        Residential Hostels & Accommodation
+                      </h3>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                      {college.hostelDetails.totalHostels && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <strong className="text-text-primary">Total Hostels: </strong>
+                          <span className="text-text-secondary">{college.hostelDetails.totalHostels}</span>
+                        </div>
+                      )}
+                      {college.hostelDetails.totalCapacity && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <strong className="text-text-primary">Hostel Capacity: </strong>
+                          <span className="text-text-secondary">{college.hostelDetails.totalCapacity}</span>
+                        </div>
+                      )}
+                      {college.hostelDetails.boysHostelDetails && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <strong className="text-text-primary">Boys Hostels: </strong>
+                          <span className="text-text-secondary">{college.hostelDetails.boysHostelDetails}</span>
+                        </div>
+                      )}
+                      {college.hostelDetails.girlsHostelDetails && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100">
+                          <strong className="text-text-primary">Girls Hostels: </strong>
+                          <span className="text-text-secondary">{college.hostelDetails.girlsHostelDetails}</span>
+                        </div>
+                      )}
+                      {college.hostelDetails.messFoodType && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 sm:col-span-2">
+                          <strong className="text-text-primary">Mess & Dining: </strong>
+                          <span className="text-text-secondary">{college.hostelDetails.messFoodType}</span>
+                        </div>
+                      )}
+                      {college.hostelDetails.annualHostelMessFee && (
+                        <div className="p-3 bg-slate-50 rounded-xl border border-slate-100 sm:col-span-2">
+                          <strong className="text-text-primary">Annual Hostel + Mess Fee: </strong>
+                          <span className="text-emerald-700 font-bold">{college.hostelDetails.annualHostelMessFee}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            {/* 2. COURSES TAB */}
+            {/* 2. ADMISSIONS & PROCESS TAB */}
+            {activeTab === 'admissions' && (
+              <div className="space-y-6">
+                {/* A. Admission Status, Academic Session & Timeline Card */}
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-card space-y-5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
+                    <div>
+                      <div className="flex items-center gap-2.5">
+                        <span className="relative flex h-2.5 w-2.5">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                        </span>
+                        <h2 className="font-serif text-lg sm:text-xl font-bold text-text-primary">
+                          {college.admissionStatus || college.admissions?.status || 'Admissions Open'}
+                        </h2>
+                      </div>
+                      <p className="text-xs text-text-secondary mt-1">
+                        Official enrollment cycle for Academic Year <strong className="text-text-primary font-bold">{college.academicYear || '2026 - 2027'}</strong>
+                      </p>
+                    </div>
+
+                    {college.admissionPortalUrl && (
+                      <a
+                        href={college.admissionPortalUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-brand-primary hover:bg-[#022B66] text-white text-xs font-bold transition-all shadow-sm hover:shadow cursor-pointer self-start sm:self-auto"
+                      >
+                        <span>Apply via Central Portal</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </a>
+                    )}
+                  </div>
+
+                  {/* Application Timeline Dates */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center flex-shrink-0">
+                        <Calendar className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-text-light uppercase tracking-wider">
+                          Application Start Date
+                        </p>
+                        <p className="text-sm font-bold text-text-primary mt-0.5">
+                          {college.applicationStartDate
+                            ? new Date(college.applicationStartDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                            : (college.admissions?.applicationStart || 'Announced upon official notification')}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl bg-slate-50 border border-slate-100 flex items-center gap-3.5">
+                      <div className="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center flex-shrink-0">
+                        <Clock className="h-5 w-5" />
+                      </div>
+                      <div>
+                        <p className="text-[11px] font-semibold text-text-light uppercase tracking-wider">
+                          Application Closing Deadline
+                        </p>
+                        <p className="text-sm font-bold text-rose-600 mt-0.5">
+                          {college.applicationEndDate
+                            ? new Date(college.applicationEndDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })
+                            : (college.admissions?.applicationEnd || 'Subject to counseling schedule')}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* B. Accepted Entrance Examinations */}
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-card space-y-4">
+                  <div>
+                    <h3 className="font-serif text-lg font-bold text-text-primary">
+                      Accepted Entrance Examinations
+                    </h3>
+                    <p className="text-xs text-text-secondary mt-0.5">
+                      Applicants must obtain qualifying ranks in the following recognized national or institutional entrance tests.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    {(college.examAccepted?.length ? college.examAccepted : (college.admissions?.examAccepted || ['JEE Advanced', 'JEE Main'])).map((exam) => (
+                      <div
+                        key={exam}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-brand-accent text-brand-primary border border-brand-primary/20 text-xs font-bold shadow-2xs"
+                      >
+                        <CheckCircle2 className="h-3.5 w-3.5 text-brand-primary" />
+                        <span>{exam}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* C. General Eligibility Overview */}
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-card space-y-3">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="h-5 w-5 text-brand-primary" />
+                    <h3 className="font-serif text-lg font-bold text-text-primary">
+                      Eligibility & Qualification Criteria
+                    </h3>
+                  </div>
+
+                  <p className="text-xs sm:text-sm text-text-secondary leading-relaxed bg-slate-50/70 p-4 rounded-xl border border-slate-100">
+                    {college.admissionOverview ||
+                      'Candidates must meet minimum educational aggregate requirements (e.g., 75% in 10+2 with Physics, Chemistry & Mathematics for B.Tech, or 65% for reserved categories) along with a valid qualifying rank in the designated national entrance test.'}
+                  </p>
+                </div>
+
+                {/* D. Step-by-Step Admission Process Flow */}
+                <div className="bg-white border border-slate-200/90 rounded-2xl p-6 shadow-card space-y-4">
+                  <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                    <div>
+                      <h3 className="font-serif text-lg font-bold text-text-primary">
+                        Step-by-Step Admission Process
+                      </h3>
+                      <p className="text-xs text-text-secondary mt-0.5">
+                        Follow the sequence of stages to secure confirmed enrollment.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3 pt-1">
+                    {(college.admissionProcessSteps?.length > 0
+                      ? college.admissionProcessSteps
+                      : (college.admissions?.admissionSteps || [
+                          { step: '1', title: 'Appear for Entrance Exam', desc: 'Qualify the national or institutional entrance exam with a competitive rank.' },
+                          { step: '2', title: 'Counseling & Choice Locking', desc: 'Register on the designated central counseling portal (e.g., JoSAA / CSAB) and submit branch preferences.' },
+                          { step: '3', title: 'Seat Allotment & Acceptance', desc: 'Accept the allotted seat and pay the provisional seat confirmation fee.' },
+                          { step: '4', title: 'Physical Verification & Onboarding', desc: 'Report to campus with original documents for document verification and hostel allotment.' },
+                        ])
+                    ).map((item, idx) => {
+                      const stepNum = item.step || idx + 1
+                      const title = typeof item === 'string' ? (item.split(':')[0] || `Stage ${stepNum}`) : (item.title || `Stage ${stepNum}`)
+                      const desc = typeof item === 'string' ? (item.split(':')[1] || item) : (item.desc || '')
+
+                      return (
+                        <div
+                          key={idx}
+                          className="flex items-start gap-3.5 p-4 rounded-xl border border-slate-100 bg-slate-50/60 hover:bg-slate-50 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-brand-primary text-white text-xs font-extrabold flex items-center justify-center flex-shrink-0 shadow-2xs mt-0.5">
+                            {stepNum}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <h4 className="text-xs sm:text-sm font-bold text-text-primary">
+                              {title}
+                            </h4>
+                            {desc && (
+                              <p className="text-xs text-text-secondary mt-1 leading-relaxed">
+                                {desc}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 3. COURSES TAB */}
             {activeTab === 'courses' && (
               <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-card">
                 <div className="flex items-center justify-between">

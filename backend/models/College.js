@@ -24,6 +24,12 @@ const cutoffSchema = new mongoose.Schema({
   round: { type: String, default: "Round 6" },
 });
 
+const admissionStepSchema = new mongoose.Schema({
+  step: { type: String, default: "1" },
+  title: { type: String, default: "" },
+  desc: { type: String, default: "" },
+});
+
 const feedbackSchema = new mongoose.Schema({
   id: { type: String, default: () => `fb_${Date.now()}` },
   date: { type: String, default: () => new Date().toLocaleDateString("en-IN") },
@@ -104,6 +110,18 @@ const collegeSchema = new mongoose.Schema(
       },
     },
     coursesOffered: [courseSchema],
+
+    // Complete Admissions Fields
+    admissionStatus: { type: String, default: "Admissions Open" },
+    academicYear: { type: String, default: "2026 - 2027" },
+    applicationStartDate: { type: String, default: "" },
+    applicationEndDate: { type: String, default: "" },
+    admissionPortalUrl: { type: String, default: "" },
+    examAccepted: { type: [String], default: [] },
+    admissionOverview: { type: String, default: "" },
+    admissionProcessSteps: { type: [admissionStepSchema], default: [] },
+
+    // Legacy / Convenience admissions object
     admissions: {
       status: { type: String, default: "Applications Open (2026–27)" },
       applicationStart: { type: String, default: "May 2026" },
@@ -139,6 +157,14 @@ const collegeSchema = new mongoose.Schema(
       naacCgpa: { type: String, default: "3.88" },
       otherRankings: { type: [String], default: ["QS World University Rankings: #118", "India Today: #2"] },
     },
+    hostelDetails: {
+      totalHostels: { type: String, default: "" },
+      totalCapacity: { type: String, default: "" },
+      boysHostelDetails: { type: String, default: "" },
+      girlsHostelDetails: { type: String, default: "" },
+      messFoodType: { type: String, default: "" },
+      annualHostelMessFee: { type: String, default: "" },
+    },
     facilities: {
       type: [String],
       default: [
@@ -157,6 +183,7 @@ const collegeSchema = new mongoose.Schema(
       cautionDepositOneTime: { type: Number, default: 15000 },
       examinationMiscYearly: { type: Number, default: 12000 },
       estimatedTotal4Yr: { type: String, default: "₹11.83 Lakhs" },
+      notes: { type: String, default: "" },
     },
     gallery: {
       type: [String],
@@ -197,7 +224,7 @@ const collegeSchema = new mongoose.Schema(
     },
     similarColleges: { type: [String], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true, strict: false }
 );
 
 export const College = mongoose.model("College", collegeSchema);
