@@ -1,6 +1,6 @@
 import React from 'react'
-import { Building2, Users, ShieldCheck, Layers, Calendar, Maximize2 } from 'lucide-react'
-import { FormField, TextInput, Textarea, SelectInput, SectionCard } from '../../components/common/FormControls'
+import { Building2, Users, ShieldCheck, Layers, Calendar, Maximize2, Sparkles, BookOpen } from 'lucide-react'
+import { FormField, TextInput, Textarea, SelectInput } from '../../components/common/FormControls'
 import { ImageUploader } from '../../components/common/FileUpload'
 import { STREAM_OPTIONS, OWNERSHIP_OPTIONS } from '../../data/collegeModel'
 
@@ -23,17 +23,24 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* 1. College Identity & Name */}
-      <SectionCard
-        title="Institutional Identity"
-        description="Provide the primary registered name and discipline categories shown on the public directory."
-      >
-        <div className="space-y-4">
+    <div className="space-y-8 bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-2xs">
+      
+      {/* 1. Institution Details */}
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
+            Institution Details
+          </h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Provide the basic details about your college or university.
+          </p>
+        </div>
+
+        <div className="space-y-4 pt-1">
           <FormField
             label="Full College / University Name"
             required
-            helperText="The official complete name displayed on the public College Detail page header."
+            helperText="This will be displayed on your public profile."
           >
             <TextInput
               value={collegeData.name}
@@ -48,12 +55,12 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
             <FormField
               label="Short Name / Acronym"
               required
-              helperText="Used in breadcrumbs, tags, and compact cards."
+              helperText="Used in listings, filters and compact views."
             >
               <TextInput
                 value={collegeData.shortName}
                 onChange={(e) => handleChange('shortName', e.target.value)}
-                placeholder="e.g. IIT Bombay"
+                placeholder="e.g. IITB"
                 disabled={isReadOnly}
               />
             </FormField>
@@ -61,7 +68,7 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
             <FormField
               label="Primary Academic Stream"
               required
-              helperText="Determines the public category filter listing."
+              helperText="Select the main academic category."
             >
               <SelectInput
                 value={collegeData.stream}
@@ -106,49 +113,70 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
               <TextInput
                 value={collegeData.campusArea}
                 onChange={(e) => handleChange('campusArea', e.target.value)}
-                placeholder="e.g. 550 Acres"
+                placeholder="550"
                 disabled={isReadOnly}
                 icon={Maximize2}
+                addonRight="Acres"
               />
             </FormField>
           </div>
         </div>
-      </SectionCard>
+      </section>
 
-      {/* 2. Media & Branding */}
-      <SectionCard
-        title="College Branding & Imagery"
-        description="Upload official high-resolution logo and main campus cover photo."
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <hr className="border-border-color/80" />
+
+      {/* 2. College Branding */}
+      <section className="space-y-5">
+        <div>
+          <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
+            College Branding
+          </h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Upload your official logo and a high-quality campus image.
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-1 items-start">
           <ImageUploader
             label="College Official Logo"
+            required
             aspectRatio="square"
             imageUrl={collegeData.logo}
             onChange={(url) => handleChange('logo', url)}
             onRemove={() => handleChange('logo', '')}
-            helperText="Square format (PNG/JPG, min 200x200px recommended)."
+            helperText={`PNG or JPG, min 200×200px\nMax 5MB`}
             disabled={isReadOnly}
           />
 
           <ImageUploader
             label="Main Campus Banner / Header Image"
-            aspectRatio="video"
+            required
+            aspectRatio="banner"
             imageUrl={collegeData.image}
             onChange={(url) => handleChange('image', url)}
             onRemove={() => handleChange('image', '')}
-            helperText="Landscape cover photo displayed in public listings and header banner."
+            helperText="Recommended size: 1200×400px (3:1 ratio). Max 5MB."
             disabled={isReadOnly}
           />
         </div>
-      </SectionCard>
+      </section>
 
-      {/* 3. Institutional Snapshot Facts */}
-      <SectionCard
-        title="Key Institutional Facts (Public Snapshot)"
-        description="These factual statistics appear in the 'Overview & Facts' snapshot on the public website."
-      >
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <hr className="border-border-color/80" />
+
+      {/* 3. Key Institutional Facts (Preserved Snapshot) */}
+      <section className="space-y-5">
+        <div className="flex items-center gap-2">
+          <div>
+            <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
+              Key Institutional Facts
+            </h2>
+            <p className="text-xs text-text-secondary mt-0.5">
+              These factual statistics appear in the 'Overview & Facts' snapshot on the public website.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
           <FormField
             label="Accreditation / Status"
             helperText="e.g. NAAC A++ | IoE (Institute of Eminence)"
@@ -200,13 +228,21 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
             />
           </FormField>
         </div>
-      </SectionCard>
+      </section>
 
-      {/* 4. About College Overview */}
-      <SectionCard
-        title="About College / Overview"
-        description="Comprehensive narrative of the institution's legacy, academic culture, and research output."
-      >
+      <hr className="border-border-color/80" />
+
+      {/* 4. About College / Overview Description */}
+      <section className="space-y-4">
+        <div>
+          <h2 className="text-base sm:text-lg font-bold text-text-primary tracking-tight">
+            About College Overview
+          </h2>
+          <p className="text-xs text-text-secondary mt-0.5">
+            Comprehensive narrative of the institution's legacy, academic culture, and research output.
+          </p>
+        </div>
+
         <FormField
           label="College Description"
           required
@@ -221,7 +257,7 @@ const Step1BasicInfo = ({ collegeData, onChange, isReadOnly = false }) => {
             maxLength={1000}
           />
         </FormField>
-      </SectionCard>
+      </section>
     </div>
   )
 }

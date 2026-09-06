@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import {
   Search,
   CheckCircle2,
@@ -12,12 +12,17 @@ import { AdminModal } from '../components/common/AdminModal'
 
 const CollegeProfilesReviewPage = ({
   profiles = [],
+  defaultFilter = 'all',
   onApproveAndPublish,
   onRequestChanges,
   onUnpublish,
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  const [filterStatus, setFilterStatus] = useState(defaultFilter)
+
+  useEffect(() => {
+    setFilterStatus(defaultFilter)
+  }, [defaultFilter])
 
   // Selected Profile for Full 10-Step Review Canvas
   const [reviewingProfile, setReviewingProfile] = useState(null)
@@ -109,11 +114,12 @@ const CollegeProfilesReviewPage = ({
           {/* Status Tabs */}
           <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
             {[
-              { id: 'all', label: 'All Submitted' },
+              { id: 'all', label: 'All' },
               { id: 'under_review', label: 'Under Review' },
               { id: 'changes_requested', label: 'Changes Requested' },
               { id: 'published', label: 'Published' },
-              { id: 'draft', label: 'In-Progress Drafts' },
+              { id: 'draft', label: 'Draft' },
+              { id: 'rejected', label: 'Rejected' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -138,7 +144,7 @@ const CollegeProfilesReviewPage = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search college..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-purple-600"
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#033C8D] focus:border-[#033C8D]"
             />
           </div>
         </div>

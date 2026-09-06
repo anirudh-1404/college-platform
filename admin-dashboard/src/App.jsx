@@ -11,6 +11,7 @@ import ExamManagementPage from './pages/ExamManagementPage'
 import PlatformDataManagementPage from './pages/PlatformDataManagementPage'
 import AuditLogPage from './pages/AuditLogPage'
 import ContactInquiriesPage from './pages/ContactInquiriesPage'
+import SettingsPage from './pages/SettingsPage'
 import { adminService } from './data/adminService'
 import { adminAuthService } from './data/adminAuthService'
 
@@ -158,6 +159,8 @@ function App() {
     reloadData()
   }
 
+  const [profilesFilterPreset, setProfilesFilterPreset] = useState('all')
+
   const getPageTitle = () => {
     switch (activePage) {
       case 'registrations':
@@ -166,8 +169,12 @@ function App() {
         return 'Contact Inquiries & Student Leads'
       case 'profiles':
         return 'College Profiles & CMS Editorial Review'
+      case 'published-colleges':
+        return 'Published Colleges Directory'
       case 'users':
-        return 'Admin Users Management'
+        return 'Users Management'
+      case 'admin-team':
+        return 'Admin Team & Authorization Management'
       case 'career-guides':
         return 'Career Roadmaps & Guidance Management'
       case 'exams':
@@ -176,6 +183,8 @@ function App() {
         return 'Platform Data & Ratings Management'
       case 'audit-logs':
         return 'Audit Logs & Action Trail'
+      case 'settings':
+        return 'Platform Settings & Governance'
       case 'overview':
       default:
         return 'Admin Overview'
@@ -188,11 +197,18 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 flex">
+    <div className="min-h-screen bg-slate-50/70 text-slate-900 flex">
       {/* Sidebar */}
       <AdminSidebar
         activePage={activePage}
-        onSelectPage={(page) => setActivePage(page)}
+        onSelectPage={(page) => {
+          if (page === 'published-colleges') {
+            setProfilesFilterPreset('published')
+          } else if (page === 'profiles') {
+            setProfilesFilterPreset('all')
+          }
+          setActivePage(page)
+        }}
         pendingRegistrationsCount={registrations.filter((r) => r.status === 'pending').length}
         underReviewCount={profiles.filter((p) => p.profileStatus === 'under_review').length}
         usersCount={users.length}
@@ -204,11 +220,15 @@ function App() {
       />
 
       {/* Main Workspace Layout */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-60">
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
         {/* Top App Bar */}
         <AdminTopBar
           pageTitle={getPageTitle()}
           currentUser={authState.user}
+          pendingCount={
+            registrations.filter((r) => r.status === 'pending').length +
+            profiles.filter((p) => p.profileStatus === 'under_review').length
+          }
           onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
           onLogout={handleLogout}
         />
@@ -218,9 +238,14 @@ function App() {
           {activePage === 'overview' && (
             <AdminOverviewPage
               analytics={analytics}
+              registrations={registrations}
               pendingRegistrations={registrations.filter((r) => r.status === 'pending')}
               profiles={profiles}
-              onNavigate={(page) => setActivePage(page)}
+              auditLogs={auditLogs}
+              onNavigate={(page, filter) => {
+                if (filter) setProfilesFilterPreset(filter)
+                setActivePage(page)
+              }}
               onInspectRegistration={() => setActivePage('registrations')}
               onInspectProfile={() => setActivePage('profiles')}
             />
@@ -238,16 +263,17 @@ function App() {
             <ContactInquiriesPage />
           )}
 
-          {activePage === 'profiles' && (
+          {(activePage === 'profiles' || activePage === 'published-colleges') && (
             <CollegeProfilesReviewPage
               profiles={profiles}
+              defaultFilter={activePage === 'published-colleges' ? 'published' : profilesFilterPreset}
               onApproveAndPublish={handleApproveAndPublishProfile}
               onRequestChanges={handleRequestProfileChanges}
               onUnpublish={handleUnpublishProfile}
             />
           )}
 
-          {activePage === 'users' && (
+          {(activePage === 'users' || activePage === 'admin-team') && (
             <UserManagementPage
               users={users}
               onAddUser={handleAddUser}
@@ -280,6 +306,10 @@ function App() {
 
           {activePage === 'audit-logs' && (
             <AuditLogPage auditLogs={auditLogs} />
+          )}
+
+          {activePage === 'settings' && (
+            <SettingsPage currentUser={authState.user} />
           )}
         </main>
       </div>

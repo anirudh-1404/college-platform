@@ -1,12 +1,10 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import {
   Menu,
   X,
   ArrowUpRight,
   MessageSquare,
-  Scale,
-  Heart,
 } from 'lucide-react'
 import logoImg from '../assets/logo.png'
 
@@ -17,8 +15,18 @@ const Navbar = ({
   shortlistedCount = 0,
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isScrolled, setIsScrolled] = useState(false)
   const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20)
+    }
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
 
   const navLinks = [
     { id: 'home', path: '/', label: 'Home' },
@@ -41,9 +49,15 @@ const Navbar = ({
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-border-color">
+    <header className={`sticky top-0 z-40 transition-all duration-300 ${
+      isScrolled
+        ? 'bg-white/90 backdrop-blur-lg border-b border-slate-200/90 shadow-sm'
+        : 'bg-white/95 backdrop-blur-md border-b border-border-color'
+    }`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18 sm:h-20">
+        <div className={`flex items-center justify-between transition-all duration-300 ${
+          isScrolled ? 'h-16 sm:h-17' : 'h-18 sm:h-20'
+        }`}>
           
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
@@ -57,7 +71,9 @@ const Navbar = ({
               <img
                 src={logoImg}
                 alt="VidyaScope"
-                className="h-11 sm:h-13 w-auto object-contain"
+                className={`w-auto object-contain transition-all duration-300 ${
+                  isScrolled ? 'h-10 sm:h-11' : 'h-11 sm:h-13'
+                }`}
               />
             </button>
           </div>

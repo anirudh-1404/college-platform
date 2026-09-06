@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { Building2, ChevronLeft, ChevronRight, Landmark } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Landmark } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const cities = [
   { name: 'New Delhi', count: '180+ Colleges', iconBg: 'bg-amber-100 text-amber-700' },
@@ -30,11 +32,17 @@ const ExploreCities = ({ onSelectCity }) => {
   const visibleCities = cities.slice(startIndex, startIndex + visibleCount)
 
   return (
-    <section className="py-16 bg-slate-50/60 border-b border-slate-100 text-center">
+    <section className="py-16 bg-slate-50/60 border-b border-slate-100 text-center overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="space-y-2 mb-10">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="space-y-2 mb-10"
+        >
           <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Explore</span>
@@ -45,14 +53,23 @@ const ExploreCities = ({ onSelectCity }) => {
           <p className="text-xs sm:text-sm text-slate-500 max-w-lg mx-auto">
             Discover premier universities, hostels, and job placements in India's leading educational hubs.
           </p>
-        </div>
+        </motion.div>
 
         {/* Cities Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 mb-8">
+        <motion.div
+          key={startIndex}
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 sm:gap-6 mb-8"
+        >
           {visibleCities.map((city) => (
-            <button
+            <motion.button
               key={city.name}
               type="button"
+              variants={cardVariant}
+              whileHover={{ y: -6, transition: { duration: 0.2 } }}
+              whileTap={{ scale: 0.96 }}
               onClick={() => onSelectCity && onSelectCity(city.name)}
               className="bg-white border border-slate-200/90 rounded-2xl p-6 flex flex-col items-center justify-center gap-3.5 hover:border-brand-primary hover:shadow-md transition-all group cursor-pointer"
             >
@@ -70,9 +87,9 @@ const ExploreCities = ({ onSelectCity }) => {
               <span className="text-[11px] text-slate-400 font-medium -mt-2">
                 {city.count}
               </span>
-            </button>
+            </motion.button>
           ))}
-        </div>
+        </motion.div>
 
         {/* Carousel Pagination Controls */}
         <div className="flex items-center justify-center gap-3">

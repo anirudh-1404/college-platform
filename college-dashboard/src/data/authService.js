@@ -132,6 +132,9 @@ export const authService = {
         this.setToken(data.token)
       }
 
+      // Clear any prior user's cached profile data
+      localStorage.removeItem('vidyascope_college_data')
+
       const state = {
         isAuthenticated: true,
         user: data.user,
@@ -153,6 +156,7 @@ export const authService = {
       console.error(e)
     } finally {
       this.setToken(null)
+      localStorage.removeItem('vidyascope_college_data')
       const state = {
         isAuthenticated: false,
         user: null,

@@ -15,6 +15,56 @@ const API_BASE_URL =
 const STORAGE_KEY_COLLEGE_DATA = 'vidyascope_college_data'
 
 export const collegeService = {
+  // Normalize data ensuring both top-level and nested locationContact fields are populated
+  normalizeCollegeData(data) {
+    const user = authService.getAuthState()?.user
+    const registeredName = user?.collegeName || ''
+    const base = {
+      ...DEFAULT_COLLEGE_DATA,
+      name: registeredName,
+    }
+    if (!data) return base
+
+    const lc = data.locationContact || {}
+    const city = data.city || lc.city || ''
+    const state = data.state || lc.state || ''
+    const address = data.address || lc.address || ''
+    const pincode = data.pincode || lc.pincode || ''
+    const website = data.website || lc.websiteUrl || ''
+    const admissionEmail = data.admissionEmail || lc.admissionEmail || ''
+    const helplinePhone = data.helplinePhone || lc.helplineNumber || ''
+    const tollFreeHelpline = data.tollFreeHelpline || lc.alternatePhone || ''
+    const googleMapCoordinates = data.googleMapCoordinates || lc.mapCoordinates || ''
+
+    return {
+      ...base,
+      ...data,
+      name: data.name || registeredName,
+      address,
+      city,
+      state,
+      pincode,
+      website,
+      admissionEmail,
+      helplinePhone,
+      tollFreeHelpline,
+      googleMapCoordinates,
+      location: data.location || (city && state ? `${city}, ${state}` : ''),
+      locationContact: {
+        address,
+        city,
+        state,
+        pincode,
+        websiteUrl: website,
+        admissionEmail,
+        helplineNumber: helplinePhone,
+        alternatePhone: tollFreeHelpline,
+        mapCoordinates: googleMapCoordinates,
+        ...lc,
+      },
+    }
+  },
+
   // Load college profile data from live backend
   async fetchCollegeData() {
     const token = authService.getToken()
@@ -27,8 +77,9 @@ export const collegeService = {
       })
       const data = await res.json()
       if (res.ok && data.college) {
-        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(data.college))
-        return data.college
+        const normalized = this.normalizeCollegeData(data.college)
+        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
+        return normalized
       }
     } catch (e) {
       console.warn('Backend fetch failed, using local cache', e)
@@ -42,17 +93,44 @@ export const collegeService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_COLLEGE_DATA)
       if (stored) {
-        return JSON.parse(stored)
+        const parsed = JSON.parse(stored)
+        const user = authService.getAuthState()?.user
+        // Auto-purge stale mock IIT Bombay cache if user registered under a different college
+        if (user?.collegeName && parsed.name === 'Indian Institute of Technology Bombay' && user.collegeName !== 'Indian Institute of Technology Bombay') {
+          localStorage.removeItem(STORAGE_KEY_COLLEGE_DATA)
+        } else {
+          return this.normalizeCollegeData(parsed)
+        }
       }
     } catch (e) {
       console.error('Failed to parse college data from storage', e)
     }
-    return DEFAULT_COLLEGE_DATA
+    const user = authService.getAuthState()?.user
+    return {
+      ...DEFAULT_COLLEGE_DATA,
+      name: user?.collegeName || '',
+    }
   },
 
   // Save complete or partial college data to live backend
   async saveCollegeData(updatedData) {
     const token = authService.getToken()
+    const payload = {
+      ...updatedData,
+      locationContact: {
+        address: updatedData.address || updatedData.locationContact?.address || '',
+        city: updatedData.city || updatedData.locationContact?.city || '',
+        state: updatedData.state || updatedData.locationContact?.state || '',
+        pincode: updatedData.pincode || updatedData.locationContact?.pincode || '',
+        admissionEmail: updatedData.admissionEmail || updatedData.locationContact?.admissionEmail || '',
+        helplineNumber: updatedData.helplinePhone || updatedData.locationContact?.helplineNumber || '',
+        alternatePhone: updatedData.tollFreeHelpline || updatedData.locationContact?.alternatePhone || '',
+        websiteUrl: updatedData.website || updatedData.locationContact?.websiteUrl || '',
+        mapCoordinates: updatedData.googleMapCoordinates || updatedData.locationContact?.mapCoordinates || '',
+        ...(updatedData.locationContact || {}),
+      },
+    }
+
     try {
       const res = await fetch(`${API_BASE_URL}/profile`, {
         method: 'PUT',
@@ -60,13 +138,14 @@ export const collegeService = {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify(updatedData),
+        body: JSON.stringify(payload),
       })
       const data = await res.json()
       if (res.ok && data.college) {
-        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(data.college))
-        window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: data.college }))
-        return data.college
+        const normalized = this.normalizeCollegeData(data.college)
+        localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(normalized))
+        window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: normalized }))
+        return normalized
       }
     } catch (e) {
       console.warn('Backend save failed, saving to local cache', e)
@@ -74,7 +153,7 @@ export const collegeService = {
 
     // Local fallback
     const current = this.getCollegeData()
-    const merged = { ...current, ...updatedData }
+    const merged = this.normalizeCollegeData({ ...current, ...updatedData })
     localStorage.setItem(STORAGE_KEY_COLLEGE_DATA, JSON.stringify(merged))
     window.dispatchEvent(new CustomEvent('vidyascope_college_data_change', { detail: merged }))
     return merged

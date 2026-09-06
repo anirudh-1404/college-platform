@@ -61,9 +61,8 @@ const CollegeLeadsPage = ({ collegeData }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 flex items-center gap-2.5">
-            <Users className="h-7 w-7 text-brand-primary" />
-            <span>Student Inquiries & Leads</span>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">
+            Student Inquiries & Leads
           </h1>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
             Direct admission queries and counseling requests for {collegeData?.name || 'your institution'}.

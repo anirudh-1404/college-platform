@@ -113,7 +113,7 @@ const RegistrationRequestsPage = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-purple-600"
+              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#033C8D] focus:border-[#033C8D]"
             />
           </div>
         </div>
@@ -153,7 +153,7 @@ const RegistrationRequestsPage = ({
                         onClick={() => setPreviewDoc(reg.proofDocument)}
                         className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium cursor-pointer"
                       >
-                        <FileText className="h-3 w-3 text-purple-600" />
+                        <FileText className="h-3 w-3 text-blue-600" />
                         <span className="truncate max-w-[120px]">{reg.proofDocument.name}</span>
                       </button>
                     ) : (
@@ -174,10 +174,10 @@ const RegistrationRequestsPage = ({
                       <button
                         type="button"
                         onClick={() => setSelectedReg(reg)}
-                        className="btn btn-secondary btn-sm text-xs cursor-pointer"
+                        className="btn btn-primary btn-sm text-xs cursor-pointer font-semibold shadow-2xs"
                       >
                         <Eye className="h-3 w-3" />
-                        <span>Inspect</span>
+                        <span>Review →</span>
                       </button>
 
                       {reg.status === 'pending' && (

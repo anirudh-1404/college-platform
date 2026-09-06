@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react'
 import { ArrowRight, Building, MapPin, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
   const [featuredColleges, setFeaturedColleges] = useState([])
@@ -22,11 +24,17 @@ const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
   }, [])
 
   return (
-    <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-border-color">
+    <section className="py-16 sm:py-20 bg-slate-50/60 border-b border-border-color overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="flex flex-col sm:flex-row sm:items-end justify-between mb-10 gap-3"
+        >
           <div>
             <span className="text-[11px] font-mono font-bold tracking-widest text-slate-500 uppercase">
               Audited National Benchmarks • Premier Campuses
@@ -40,21 +48,29 @@ const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
           </div>
           <button
             onClick={onNavigateListing}
-            className="text-xs sm:text-sm font-bold text-slate-900 hover:text-brand-primary flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-slate-900 hover:text-brand-primary flex items-center gap-1 cursor-pointer self-start sm:self-auto transition-colors"
           >
             <span>Explore All Colleges</span>
             <ArrowRight className="h-4 w-4" />
           </button>
-        </div>
+        </motion.div>
 
         {/* Dynamic College Cards Grid */}
         {featuredColleges.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5"
+          >
             {featuredColleges.map((college) => (
-              <div
+              <motion.div
                 key={college.id}
+                variants={cardVariant}
+                whileHover={{ y: -7, transition: { duration: 0.22 } }}
                 onClick={() => onSelectCollege && onSelectCollege(college.id)}
-                className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-primary/50 hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group"
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-primary/50 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group"
               >
                 <div>
                   {/* Card Image */}
@@ -116,9 +132,9 @@ const TopColleges = ({ onSelectCollege, onNavigateListing }) => {
                     </span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         ) : (
           <div className="p-12 text-center bg-white border border-slate-200 rounded-xl">
             <Building className="h-10 w-10 text-slate-300 mx-auto mb-2" />

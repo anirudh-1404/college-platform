@@ -7,8 +7,8 @@ import { authService } from '../../data/authService'
 
 const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect }) => {
   const [formData, setFormData] = useState({
-    email: 'admin@iitb.ac.in',
-    password: 'password123',
+    email: '',
+    password: '',
   })
 
   const [errors, setErrors] = useState({})
@@ -19,12 +19,13 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
     e.preventDefault()
     setErrorMessage('')
     const errs = {}
-    if (!formData.email) errs.email = 'Email is required.'
+    if (!formData.email.trim()) errs.email = 'Email is required.'
     if (!formData.password) errs.password = 'Password is required.'
     if (Object.keys(errs).length > 0) {
       setErrors(errs)
       return
     }
+    setErrors({})
 
     setIsSubmitting(true)
     try {
@@ -35,12 +36,16 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
         if (res.status === 'pending_verification' || res.status === 'rejected') {
           onStatusRedirect(res.status, res.user)
         } else {
-          setErrorMessage(res.message || 'Login failed. Please check credentials.')
+          setErrorMessage(res.message || 'Invalid email or password. Please check your credentials.')
         }
       }
     } catch (err) {
-      console.error(err)
-      setErrorMessage('Network error during login.')
+      console.error('Login error:', err)
+      if (err.message && err.message.toLowerCase().includes('failed to fetch')) {
+        setErrorMessage('Unable to connect to the server. Please check your connection.')
+      } else {
+        setErrorMessage(err.message || 'Invalid email or password. Please check your credentials.')
+      }
     } finally {
       setIsSubmitting(false)
     }
@@ -73,11 +78,6 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
             </div>
           )}
 
-          <div className="p-3 bg-slate-50 border border-border-color rounded-xl flex items-center justify-between text-xs">
-            <span className="text-text-secondary">Demo Institutional Login:</span>
-            <span className="font-mono text-brand-primary font-bold">admin@iitb.ac.in</span>
-          </div>
-
           <form onSubmit={handleSubmit} className="space-y-4">
             <FormField label="Official College Email" required error={errors.email}>
               <TextInput
@@ -85,7 +85,11 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
                 placeholder="registrar@institution.edu.in"
                 icon={Mail}
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, email: e.target.value })
+                  if (errors.email) setErrors((prev) => ({ ...prev, email: '' }))
+                  if (errorMessage) setErrorMessage('')
+                }}
               />
             </FormField>
 
@@ -95,7 +99,11 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
                 placeholder="••••••••"
                 icon={Lock}
                 value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                onChange={(e) => {
+                  setFormData({ ...formData, password: e.target.value })
+                  if (errors.password) setErrors((prev) => ({ ...prev, password: '' }))
+                  if (errorMessage) setErrorMessage('')
+                }}
               />
             </FormField>
 

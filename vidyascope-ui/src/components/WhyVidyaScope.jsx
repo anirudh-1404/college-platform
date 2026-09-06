@@ -1,5 +1,7 @@
 import React from 'react'
-import { ShieldCheck, XCircle, CheckCircle2, Scale, AlertTriangle, FileCheck2 } from 'lucide-react'
+import { XCircle, CheckCircle2 } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { fadeInUp, cardVariant, staggerContainer } from '../utils/animations'
 
 const comparisons = [
   {
@@ -34,11 +36,17 @@ const comparisons = [
 
 const WhyVidyaScope = () => {
   return (
-    <section className="bg-white border-b border-border-color py-16 sm:py-24 text-left">
+    <section className="bg-white border-b border-border-color py-16 sm:py-24 text-left overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="max-w-3xl mb-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="max-w-3xl mb-12"
+        >
           <span className="text-[11px] font-mono font-bold tracking-widest text-slate-500 uppercase">
             Consumer Protection Standard • Transparency Ledger
           </span>
@@ -48,10 +56,16 @@ const WhyVidyaScope = () => {
           <p className="text-xs sm:text-sm text-slate-600 mt-2 font-normal leading-relaxed">
             Higher education is among the largest financial investments an Indian family will ever make. Here is why thousands of students and parents trust our forensic audit over commercial portals.
           </p>
-        </div>
+        </motion.div>
 
         {/* Forensic Truth Ledger Table */}
-        <div className="border border-slate-300 rounded-2xl overflow-hidden bg-white shadow-sm">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+          variants={fadeInUp}
+          className="border border-slate-300 rounded-2xl overflow-hidden bg-white shadow-sm"
+        >
           
           {/* Table Header */}
           <div className="grid grid-cols-1 md:grid-cols-12 bg-slate-900 text-white text-xs font-mono font-bold uppercase tracking-wider py-4 px-6 border-b border-slate-800">
@@ -69,8 +83,9 @@ const WhyVidyaScope = () => {
           {/* Table Body Rows */}
           <div className="divide-y divide-slate-200 text-xs">
             {comparisons.map((row, idx) => (
-              <div
+              <motion.div
                 key={idx}
+                variants={fadeInUp}
                 className="grid grid-cols-1 md:grid-cols-12 p-6 hover:bg-slate-50/70 transition-colors gap-4 items-start"
               >
                 {/* Parameter Tag */}
@@ -104,11 +119,11 @@ const WhyVidyaScope = () => {
                     {row.vidyascopeDesc}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
 
-        </div>
+        </motion.div>
 
       </div>
     </section>

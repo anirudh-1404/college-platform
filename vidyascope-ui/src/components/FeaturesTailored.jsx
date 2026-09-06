@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
-import { ArrowRight, Building2, Scale, Award, Headphones, ChevronRight } from 'lucide-react'
+import { ArrowRight, Building2, Scale, Award, Headphones } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const featuresData = {
   consultancy: [
@@ -84,11 +86,17 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
   const items = featuresData[activeTab]
 
   return (
-    <section className="py-16 sm:py-20 bg-white border-b border-slate-100 text-center">
+    <section className="py-16 sm:py-20 bg-white border-b border-slate-100 text-center overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="space-y-2 mb-8">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="space-y-2 mb-8"
+        >
           <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Features</span>
@@ -96,10 +104,16 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
           <h2 className="text-2xl sm:text-4xl font-extrabold text-[#111827]">
             Features Tailored for Your Success
           </h2>
-        </div>
+        </motion.div>
 
         {/* Segmented Switcher Tab */}
-        <div className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 mb-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeInUp}
+          className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 mb-12"
+        >
           <button
             type="button"
             onClick={() => setActiveTab('consultancy')}
@@ -122,16 +136,26 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
           >
             College
           </button>
-        </div>
+        </motion.div>
 
         {/* 4 Clean Columns Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center">
+        <motion.div
+          key={activeTab}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 text-center"
+        >
           {items.map((feat) => {
             const Icon = feat.icon
             return (
-              <div
+              <motion.div
                 key={feat.id}
-                className="flex flex-col items-center p-6 rounded-2xl hover:bg-slate-50 transition-colors group"
+                variants={cardVariant}
+                whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                className="flex flex-col items-center p-6 rounded-2xl bg-white border border-transparent hover:border-slate-200 hover:bg-slate-50/80 transition-colors shadow-2xs hover:shadow-md group cursor-pointer"
+                onClick={() => handleAction(feat.action)}
               >
                 {/* Clean Feature Icon */}
                 <div className={`w-14 h-14 rounded-2xl ${feat.iconColor} flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-xs`}>
@@ -149,18 +173,16 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
                 </p>
 
                 {/* Read More Link */}
-                <button
-                  type="button"
-                  onClick={() => handleAction(feat.action)}
-                  className="text-xs font-bold text-[#3B82F6] hover:text-[#2563EB] inline-flex items-center gap-1 cursor-pointer transition-colors"
+                <div
+                  className="text-xs font-bold text-[#3B82F6] hover:text-[#2563EB] inline-flex items-center gap-1 transition-colors mt-auto"
                 >
                   <span>Read More</span>
                   <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
-                </button>
-              </div>
+                </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
       </div>
     </section>

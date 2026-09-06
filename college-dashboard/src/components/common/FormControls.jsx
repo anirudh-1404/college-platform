@@ -50,18 +50,19 @@ export const TextInput = ({
   icon: Icon,
   prefix,
   suffix,
+  addonRight,
   className = '',
   ...props
 }) => {
   return (
-    <div className="relative flex items-center">
+    <div className={`relative flex items-center ${addonRight ? 'rounded-lg border border-border-color focus-within:ring-2 focus-within:ring-brand-primary/20 focus-within:border-brand-primary bg-white' : ''}`}>
       {Icon && (
-        <div className="absolute left-3 text-text-light pointer-events-none">
+        <div className="absolute left-3 text-text-light pointer-events-none z-10">
           <Icon className="h-4 w-4" />
         </div>
       )}
       {prefix && (
-        <span className="absolute left-3 text-xs font-medium text-text-light pointer-events-none">
+        <span className="absolute left-3 text-xs font-medium text-text-light pointer-events-none z-10">
           {prefix}
         </span>
       )}
@@ -72,7 +73,9 @@ export const TextInput = ({
         placeholder={placeholder}
         disabled={disabled || readOnly}
         readOnly={readOnly}
-        className={`w-full text-xs font-medium text-text-primary bg-white border border-border-color rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-colors disabled:bg-slate-50 disabled:text-text-light disabled:cursor-not-allowed ${
+        className={`w-full text-xs font-medium text-text-primary bg-white ${
+          addonRight ? 'border-0 rounded-l-lg' : 'border border-border-color rounded-lg focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary'
+        } py-2.5 px-3 focus:outline-none transition-colors disabled:bg-slate-50 disabled:text-text-light disabled:cursor-not-allowed ${
           Icon ? 'pl-9' : prefix ? 'pl-8' : ''
         } ${suffix ? 'pr-12' : ''} ${className}`}
         {...props}
@@ -81,6 +84,11 @@ export const TextInput = ({
         <span className="absolute right-3 text-xs font-medium text-text-light pointer-events-none">
           {suffix}
         </span>
+      )}
+      {addonRight && (
+        <div className="border-l border-border-color bg-slate-50/80 px-3 py-2 text-xs font-semibold text-text-secondary rounded-r-lg flex-shrink-0 select-none">
+          {addonRight}
+        </div>
       )}
     </div>
   )

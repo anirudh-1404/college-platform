@@ -16,16 +16,16 @@ import {
 } from 'lucide-react'
 
 export const ONBOARDING_STEPS = [
-  { id: 1, label: 'Basic Info', fullTitle: 'Basic Institutional Information', icon: Building2 },
-  { id: 2, label: 'Location & Contact', fullTitle: 'Location & Communication Channels', icon: MapPin },
-  { id: 3, label: 'Courses & Fees', fullTitle: 'Academic Programs & Dynamic Fee Structures', icon: BookOpen },
-  { id: 4, label: 'Admissions', fullTitle: 'Admissions, Eligibility & Process', icon: Compass },
-  { id: 5, label: 'Cutoffs', fullTitle: 'Entrance Examination Cutoff Matrix', icon: Award },
-  { id: 6, label: 'Placements', fullTitle: 'Placement Records & Top Recruiters', icon: TrendingUp },
-  { id: 7, label: 'Rankings', fullTitle: 'NIRF, NAAC & Regulatory Accreditations', icon: Award },
-  { id: 8, label: 'Facilities & ROI', fullTitle: 'Campus Facilities & Hidden Cost Breakdown', icon: Sparkles },
-  { id: 9, label: 'Gallery', fullTitle: 'Campus & Infrastructure Media Manager', icon: ImageIcon },
-  { id: 10, label: 'Review & Submit', fullTitle: 'Live Public Review & Submission for Approval', icon: CheckCircle2 },
+  { id: 1, number: '01', label: 'Basic Information', subtitle: 'College identity and overview', fullTitle: 'Basic Institutional Information', icon: Building2 },
+  { id: 2, number: '02', label: 'Location & Contact', subtitle: 'Address and contact details', fullTitle: 'Location & Communication Channels', icon: MapPin },
+  { id: 3, number: '03', label: 'Courses & Fees', subtitle: 'Add and manage courses', fullTitle: 'Academic Programs & Dynamic Fee Structures', icon: BookOpen },
+  { id: 4, number: '04', label: 'Admissions', subtitle: 'Eligibility and admission process', fullTitle: 'Admissions, Eligibility & Process', icon: Compass },
+  { id: 5, number: '05', label: 'Cutoffs', subtitle: 'Previous year cutoff data', fullTitle: 'Entrance Examination Cutoff Matrix', icon: Award },
+  { id: 6, number: '06', label: 'Placements', subtitle: 'Placement statistics and recruiters', fullTitle: 'Placement Records & Top Recruiters', icon: TrendingUp },
+  { id: 7, number: '07', label: 'Rankings & Accreditations', subtitle: 'Approvals and recognitions', fullTitle: 'NIRF, NAAC & Regulatory Accreditations', icon: Award },
+  { id: 8, number: '08', label: 'Facilities', subtitle: 'Campus facilities and amenities', fullTitle: 'Campus Facilities & Hidden Cost Breakdown', icon: Sparkles },
+  { id: 9, number: '09', label: 'Gallery', subtitle: 'Photos and videos', fullTitle: 'Campus & Infrastructure Media Manager', icon: ImageIcon },
+  { id: 10, number: '10', label: 'Review & Submit', subtitle: 'Review and send for approval', fullTitle: 'Live Public Review & Submission for Approval', icon: CheckCircle2 },
 ]
 
 export const STREAM_OPTIONS = [
@@ -95,8 +95,134 @@ export const COMMON_ENTRANCE_EXAMS = [
 ]
 
 export const DEFAULT_COLLEGE_DATA = {
-  id: 'iit-bombay',
+  id: '',
   // Profile & Basic Details (Step 1)
+  name: '',
+  shortName: '',
+  stream: '',
+  ownership: '',
+  establishmentYear: '',
+  campusArea: '',
+  affiliation: '',
+  university: '',
+  accreditation: '',
+  naacGrade: '',
+  nirfRank: '',
+  nirfCategory: '',
+  seats: '',
+  tags: [],
+  logo: '',
+  image: '',
+  description: '',
+  snapshot: {
+    accreditation: '',
+    genderRatio: '',
+    internationalOffers: '',
+    totalFaculty: '',
+    hostelCapacity: '',
+  },
+
+  // Location & Contact (Step 2)
+  address: '',
+  city: '',
+  state: '',
+  pincode: '',
+  location: '',
+  website: '',
+  admissionEmail: '',
+  helplinePhone: '',
+  tollFreeHelpline: '',
+  googleMapCoordinates: '',
+  locationContact: {
+    address: '',
+    city: '',
+    state: '',
+    pincode: '',
+    websiteUrl: '',
+    admissionEmail: '',
+    helplineNumber: '',
+    alternatePhone: '',
+    mapCoordinates: '',
+  },
+
+  // Dynamic Courses & Fees (Step 3)
+  coursesOffered: [],
+
+  // Admissions & Process (Step 4)
+  admissionStatus: 'Admissions Open',
+  academicYear: '2026 - 2027',
+  applicationStartDate: '',
+  applicationEndDate: '',
+  examAccepted: [],
+  admissionOverview: '',
+  admissionProcessSteps: [],
+  admissionPortalUrl: '',
+
+  // Cutoffs (Step 5)
+  admissionCutoffs: [],
+
+  // Placements (Step 6)
+  avgPackage: '',
+  avgPackageVal: 0,
+  highestPackage: '',
+  totalFees: '',
+  totalFeesVal: 0,
+  feesPeriod: 'Yearly',
+  placementPercent: 0,
+  placements: {
+    placementRate: 0,
+    totalRecruiters: '',
+    highestDomestic: '',
+    highestInternational: '',
+    avgPackage: '',
+    medianPackage: '',
+    totalOffers: '',
+    topRecruiters: [],
+  },
+
+  // Rankings (Step 7)
+  rankings: [],
+
+  // Facilities & ROI / Hidden Costs (Step 8)
+  facilities: [],
+  hostelDetails: {
+    totalHostels: '',
+    totalCapacity: '',
+    boysHostelDetails: '',
+    girlsHostelDetails: '',
+    messFoodType: '',
+    annualHostelMessFee: '',
+  },
+  hiddenCosts: {
+    tuitionFeePerYear: '',
+    hostelRentYearly: '',
+    messChargesYearly: '',
+    cautionDepositOneTime: '',
+    examinationMiscYearly: '',
+    estimatedTotal4Yr: '',
+    notes: '',
+  },
+
+  // Media & Gallery (Step 9)
+  gallery: [],
+
+  // Platform-Generated & Student Data
+  rating: 0,
+  reviewsCount: 0,
+  similarColleges: [],
+  prosAndCons: {
+    pros: [],
+    cons: [],
+  },
+
+  // Profile Lifecycle Status
+  profileStatus: 'draft',
+  lastUpdated: 'Just now',
+  adminFeedback: [],
+}
+
+export const MOCK_IIT_BOMBAY_DATA = {
+  id: 'iit-bombay',
   name: 'Indian Institute of Technology Bombay',
   shortName: 'IIT Bombay',
   stream: 'engineering',
@@ -121,8 +247,6 @@ export const DEFAULT_COLLEGE_DATA = {
     totalFaculty: '680+ PhD Faculty',
     hostelCapacity: '18 Hostels (100% On-Campus Housing)',
   },
-
-  // Location & Contact (Step 2)
   address: 'Main Gate Road, IIT Area, Powai',
   city: 'Mumbai',
   state: 'Maharashtra',
@@ -133,103 +257,14 @@ export const DEFAULT_COLLEGE_DATA = {
   helplinePhone: '+91-22-2572-2545',
   tollFreeHelpline: '1800-223-345',
   googleMapCoordinates: '19.1334° N, 72.9133° E',
-
-  // Dynamic Courses & Fees (Step 3)
-  coursesOffered: [
-    {
-      id: 'course-1',
-      name: 'B.Tech in Computer Science & Engineering',
-      degreeLevel: 'Undergraduate (B.Tech)',
-      duration: '4 Years (8 Semesters)',
-      fee: '₹8.94 Lakhs',
-      annualFee: '₹2.24 Lakhs/Yr',
-      totalFeeNumeric: 8.94,
-      seatIntake: 124,
-      eligibility: '10+2 with Physics, Chemistry, Math (min 75%) + Top Rank in JEE Advanced',
-      avgSalary: '₹32.5 LPA',
-      highestSalary: '₹1.50 Cr PA',
-      overview: 'Flagship undergraduate program focusing on algorithms, theoretical computer science, AI & Machine Learning, distributed systems, and computer architecture.',
-      admissionProcess: 'Admission is conducted strictly through JoSAA Centralized Counseling based on JEE Advanced All India Rank (AIR).',
-      specializations: ['Artificial Intelligence & ML', 'Systems & Architecture', 'Cybersecurity', 'Theoretical Computer Science', 'Data Science'],
-      careerOutcomes: ['Software Development Engineer (SDE)', 'AI/ML Research Scientist', 'Quantitative Finance Developer', 'Systems Architect'],
-    },
-    {
-      id: 'course-2',
-      name: 'B.Tech in Electrical Engineering',
-      degreeLevel: 'Undergraduate (B.Tech)',
-      duration: '4 Years (8 Semesters)',
-      fee: '₹8.94 Lakhs',
-      annualFee: '₹2.24 Lakhs/Yr',
-      totalFeeNumeric: 8.94,
-      seatIntake: 98,
-      eligibility: '10+2 with PCM + JEE Advanced Rank',
-      avgSalary: '₹26.2 LPA',
-      highestSalary: '₹85.0 LPA',
-      overview: 'Comprehensive curriculum covering microelectronics, VLSI design, signal processing, communication theory, and renewable power systems.',
-      admissionProcess: 'JoSAA Centralized Counseling based on JEE Advanced AIR.',
-      specializations: ['VLSI & Microelectronics', 'Signal Processing & Communications', 'Power Systems', 'Control & Robotics'],
-      careerOutcomes: ['VLSI Design Engineer', 'Hardware Systems Engineer', 'Robotics Specialist', 'Quantitative Analyst'],
-    },
-    {
-      id: 'course-3',
-      name: 'B.Tech in Mechanical Engineering',
-      degreeLevel: 'Undergraduate (B.Tech)',
-      duration: '4 Years (8 Semesters)',
-      fee: '₹8.94 Lakhs',
-      annualFee: '₹2.24 Lakhs/Yr',
-      totalFeeNumeric: 8.94,
-      seatIntake: 140,
-      eligibility: '10+2 with PCM + JEE Advanced Rank',
-      avgSalary: '₹19.8 LPA',
-      highestSalary: '₹65.0 LPA',
-      overview: 'Deep foundations in thermodynamics, fluid mechanics, design engineering, robotics, and advanced manufacturing technologies.',
-      admissionProcess: 'JoSAA Centralized Counseling based on JEE Advanced AIR.',
-      specializations: ['Thermal & Fluids Engineering', 'Design Engineering', 'Automated Manufacturing', 'Computational Mechanics'],
-      careerOutcomes: ['Design Engineer', 'Automotive Systems Specialist', 'Management Consultant', 'Supply Chain Analyst'],
-    },
-    {
-      id: 'course-4',
-      name: 'M.Tech in Data Science & Artificial Intelligence',
-      degreeLevel: 'Postgraduate (M.Tech)',
-      duration: '2 Years (4 Semesters)',
-      fee: '₹2.10 Lakhs',
-      annualFee: '₹1.05 Lakhs/Yr',
-      totalFeeNumeric: 2.10,
-      seatIntake: 45,
-      eligibility: 'B.E./B.Tech degree in relevant discipline with valid GATE score + COAP Counseling',
-      avgSalary: '₹23.0 LPA',
-      highestSalary: '₹70.0 LPA',
-      overview: 'Advanced postgraduate specialization offering deep training in deep learning, neural networks, natural language processing, and big data infrastructure.',
-      admissionProcess: 'COAP Portal based on GATE Score followed by departmental written test and interview.',
-      specializations: ['Deep Learning', 'Computer Vision', 'Natural Language Processing', 'Big Data Engineering'],
-      careerOutcomes: ['Senior Data Scientist', 'AI Research Engineer', 'Machine Learning Architect'],
-    },
-  ],
-
-  // Admissions & Process (Step 4)
+  coursesOffered: [],
   admissionStatus: 'Admissions Open (Session 2026-27)',
   academicYear: '2026 - 2027',
   applicationStartDate: '2026-04-15',
   applicationEndDate: '2026-06-30',
   examAccepted: ['JEE Advanced', 'JEE Main', 'GATE', 'CAT', 'CEED / UCEED'],
-  admissionOverview: 'Undergraduate admissions strictly through Joint Entrance Examination (JEE Advanced) counseling conducted via JoSAA. Candidates must be in top 20 percentile in class 12th board or score 75%+ aggregate in PCM.',
-  admissionProcessSteps: [
-    { step: '1', title: 'Appear for Entrance Exam', desc: 'Clear JEE Main (for B.Tech) and qualify for JEE Advanced national examination.' },
-    { step: '2', title: 'JoSAA Counseling Registration', desc: 'Register on the central JoSAA portal and fill IIT Bombay academic branch choices in order of preference.' },
-    { step: '3', title: 'Seat Allotment Rounds', desc: 'Verify seat allocation across 6 rounds of JoSAA seat allotment based on category rank cutoffs.' },
-    { step: '4', title: 'Physical Verification & Fee Settlement', desc: 'Report to IIT Bombay campus for document verification and semester fee settlement.' },
-  ],
-  admissionPortalUrl: 'https://josaa.nic.in',
-
-  // Cutoffs (Step 5)
-  admissionCutoffs: [
-    { id: 'c1', exam: 'JEE Advanced 2025', course: 'Computer Science & Engineering (B.Tech)', generalCutoff: 'AIR 1 - 67', obcCutoff: 'AIR 1 - 32', scStCutoff: 'AIR 1 - 15' },
-    { id: 'c2', exam: 'JEE Advanced 2025', course: 'Electrical Engineering', generalCutoff: 'AIR 120 - 380', obcCutoff: 'AIR 80 - 190', scStCutoff: 'AIR 40 - 110' },
-    { id: 'c3', exam: 'JEE Advanced 2025', course: 'Mechanical Engineering', generalCutoff: 'AIR 650 - 1420', obcCutoff: 'AIR 300 - 620', scStCutoff: 'AIR 150 - 390' },
-    { id: 'c4', exam: 'GATE 2025', course: 'M.Tech Data Science & AI', generalCutoff: 'Score 780+', obcCutoff: 'Score 720+', scStCutoff: 'Score 580+' },
-  ],
-
-  // Placements (Step 6)
+  admissionOverview: 'Undergraduate admissions strictly through Joint Entrance Examination (JEE Advanced) counseling conducted via JoSAA.',
+  admissionCutoffs: [],
   avgPackage: '₹24.5 LPA',
   avgPackageVal: 24.5,
   highestPackage: '₹1.50 Cr PA',
@@ -245,86 +280,11 @@ export const DEFAULT_COLLEGE_DATA = {
     avgPackage: '₹24.5 LPA',
     medianPackage: '₹20.0 LPA',
     totalOffers: '1,850+ Offers',
-    topRecruiters: ['Google', 'Microsoft', 'Apple', 'Goldman Sachs', 'Qualcomm', 'McKinsey & Co', 'Texas Instruments', 'Amazon', 'Rubrik', 'Uber'],
+    topRecruiters: ['Google', 'Microsoft', 'Apple'],
   },
-
-  // Rankings (Step 7)
-  rankings: [
-    { id: 'r1', agency: 'NIRF Engineering', year: '2025', rank: '#3 in India', category: 'Engineering Institutions' },
-    { id: 'r2', agency: 'NIRF Overall', year: '2025', rank: '#4 in India', category: 'All Higher Education Institutions' },
-    { id: 'r3', agency: 'QS World University Rankings', year: '2026', rank: '#118 Worldwide', category: 'Top Ranked in India' },
-    { id: 'r4', agency: 'QS Asian University Rankings', year: '2025', rank: '#35 in Asia', category: 'Regional Ranking' },
-    { id: 'r5', agency: 'India Today Best Colleges', year: '2025', rank: '#1 in India', category: 'Engineering & Technology' },
-  ],
-
-  // Facilities & ROI / Hidden Costs (Step 8)
-  facilities: [
-    'Hostel',
-    'Gym',
-    'Sports',
-    'Wi-Fi',
-    'Library',
-    'Placement Cell',
-    'Cafeterias & Food Courts',
-    '24/7 Medical Hospital',
-    'Startup Incubation Center',
-    'Convocation Auditorium',
-  ],
-  hostelDetails: {
-    totalHostels: '18 Hostels (14 Boys, 3 Girls, 1 Co-ed PG)',
-    totalCapacity: '11,500+ Residents (100% On-Campus Housing)',
-    boysHostelDetails: 'Single & twin occupancy rooms with high-speed LAN, solar water heaters, study lounges, and sports courts.',
-    girlsHostelDetails: 'Dedicated secure premises with biometric access control, attached study lounges, and 24/7 security staff.',
-    messFoodType: 'Student-managed cooperative mess serving multi-cuisine meals.',
-    annualHostelMessFee: '₹64,000 / Year',
-  },
-  hiddenCosts: {
-    tuitionFeePerYear: 200000,
-    hostelRentYearly: 28000,
-    messChargesYearly: 36000,
-    cautionDepositOneTime: 10000,
-    examinationMiscYearly: 12000,
-    estimatedTotal4Yr: '₹11.20 Lakhs',
-    notes: 'Hostel and mess charges are compulsory for resident B.Tech students. Mess charges subject to actual dietary choices.',
-  },
-
-  // Media & Gallery (Step 9)
-  gallery: [
-    'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1521587760476-6c12a4b040da?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?auto=format&fit=crop&w=800&q=80',
-    'https://images.unsplash.com/photo-1581092160607-ee22621dd758?auto=format&fit=crop&w=800&q=80',
-  ],
-
-  // Platform-Generated & Student Data (Read-only for College Dashboard, rendered with Lock)
-  rating: 4.9,
-  reviewsCount: 2450,
-  similarColleges: ['iit-delhi', 'bits-pilani', 'iiit-hyderabad'],
-  prosAndCons: {
-    pros: [
-      'Unmatched peer group and highly competitive coding & research culture',
-      'Top placement packages across Tech, Quantitative Finance, and Consulting',
-      'Lush green 550-acre campus situated right next to Powai Lake',
-      'Strong international alumni network and prestigious brand recognition',
-    ],
-    cons: [
-      'High academic rigor and demanding semester workload',
-      'Strict relative grading policy in core departmental courses',
-    ],
-  },
-
-  // Profile Lifecycle Status
-  profileStatus: 'draft', // 'draft' | 'under_review' | 'changes_requested' | 'published'
-  lastUpdated: new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-  adminFeedback: [
-    {
-      id: 'fb-1',
-      date: '27 Aug 2026, 11:30 AM',
-      comment: 'Please verify the updated NIRF 2025 certification and add specialized career outcomes for M.Tech Data Science program.',
-      requestedBy: 'VidyaScope Verification Officer',
-      resolved: false,
-    },
-  ],
+  rankings: [],
+  facilities: ['Hostel', 'Gym', 'Sports', 'Wi-Fi', 'Library'],
+  gallery: [],
+  profileStatus: 'draft',
+  lastUpdated: 'Just now',
 }

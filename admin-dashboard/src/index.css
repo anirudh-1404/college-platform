@@ -1,36 +1,69 @@
 @import "tailwindcss";
 
 :root {
-  --color-brand-primary: #3B82F6;
-  --color-brand-primary-hover: #2563EB;
-  --color-brand-accent: #EFF6FF;
+  /* Centralized Brand Palette (Matched to VidyaScope Logo Text #033C8D) */
+  --color-brand-primary: #033C8D;
+  --color-brand-primary-hover: #022B66;
+  --color-brand-accent: #EBF2FA;
+  --color-brand-accent-subtle: #F5F8FC;
 
+  /* Neutral Surface & Dark Tones */
+  --color-navy-dark: #090D1A;
+  --color-navy-panel: #0E1528;
+  --color-navy-card: #151F38;
+  --color-navy-card-hover: #1C294A;
+
+  /* Clean Typography Colors */
   --color-text-primary: #0F172A;
-  --color-text-secondary: #475569;
-  --color-text-light: #94A3B8;
+  --color-text-secondary: #334155;
+  --color-text-light: #64748B;
+  --color-text-on-dark: #F8FAFC;
+  --color-text-on-dark-muted: #94A3B8;
 
+  /* Borders */
   --color-border-color: #E2E8F0;
   --color-border-subtle: #F1F5F9;
+  --color-border-dark: #1E293B;
+  --color-border-dark-hover: #334155;
+
+  /* Shadows */
+  --shadow-premium: 0 10px 30px -10px rgba(3, 60, 141, 0.15), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 2px 12px -2px rgba(15, 23, 42, 0.04), 0 1px 2px rgba(15, 23, 42, 0.02);
+  --shadow-card-hover: 0 8px 24px -4px rgba(3, 60, 141, 0.12), 0 2px 6px rgba(15, 23, 42, 0.04);
 }
 
 @theme {
-  --font-sans: Arial, Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: Arial, Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-serif: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 
   --color-brand-primary: var(--color-brand-primary);
   --color-brand-primary-hover: var(--color-brand-primary-hover);
   --color-brand-accent: var(--color-brand-accent);
+  --color-brand-accent-subtle: var(--color-brand-accent-subtle);
+
+  --color-navy-dark: var(--color-navy-dark);
+  --color-navy-panel: var(--color-navy-panel);
+  --color-navy-card: var(--color-navy-card);
+  --color-navy-card-hover: var(--color-navy-card-hover);
 
   --color-text-primary: var(--color-text-primary);
   --color-text-secondary: var(--color-text-secondary);
   --color-text-light: var(--color-text-light);
+  --color-text-on-dark: var(--color-text-on-dark);
+  --color-text-on-dark-muted: var(--color-text-on-dark-muted);
 
   --color-border-color: var(--color-border-color);
   --color-border-subtle: var(--color-border-subtle);
+  --color-border-dark: var(--color-border-dark);
+  --color-border-dark-hover: var(--color-border-dark-hover);
+
+  --shadow-premium: var(--shadow-premium);
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
 }
 
 body, html, *, *::before, *::after {
-  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: Arial, Helvetica, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {

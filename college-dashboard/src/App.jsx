@@ -139,8 +139,19 @@ function App() {
   // Case 5: Authenticated & Approved -> College Dashboard (Onboarding & Profile Manager)
   return (
     <div className="min-h-screen bg-slate-50 text-text-primary flex flex-col">
+      {/* 1. Full-Width Top Header Bar */}
+      <TopBar
+        status={collegeData.profileStatus || 'draft'}
+        collegeName={collegeData.name}
+        user={currentUser}
+        lastUpdated={collegeData.lastUpdated}
+        onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
+        onPreviewPublic={() => setPreviewModalOpen(true)}
+        onLogout={handleLogout}
+      />
+
       <div className="flex-1 flex">
-        {/* 1. Left Sidebar Navigation */}
+        {/* 2. Left Sidebar Navigation */}
         <Sidebar
           activeStep={activeStep}
           onSelectStep={(step) => {
@@ -162,18 +173,8 @@ function App() {
           onCloseMobile={() => setIsMobileSidebarOpen(false)}
         />
 
-        {/* 2. Main Workspace Canvas */}
-        <div className="flex-1 flex flex-col min-w-0 lg:pl-64">
-          {/* Top Header Bar */}
-          <TopBar
-            status={collegeData.profileStatus || 'draft'}
-            collegeName={collegeData.name}
-            user={currentUser}
-            lastUpdated={collegeData.lastUpdated}
-            onOpenMobileSidebar={() => setIsMobileSidebarOpen(true)}
-            onPreviewPublic={() => setPreviewModalOpen(true)}
-          />
-
+        {/* 3. Main Workspace Canvas */}
+        <div className="flex-1 flex flex-col min-w-0 lg:pl-72">
           {/* Dynamic View: Onboarding Wizard vs Student Leads */}
           <main className="flex-1 px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 flex flex-col justify-between">
             {activeView === 'leads' ? (

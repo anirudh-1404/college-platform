@@ -152,6 +152,7 @@ export const ImageUploader = ({
   onChange,
   onRemove,
   label,
+  required = false,
   aspectRatio = 'square', // 'square' | 'video' | 'banner'
   helperText,
   disabled = false,
@@ -185,79 +186,170 @@ export const ImageUploader = ({
     }
   }
 
-  const aspectClass =
-    aspectRatio === 'square'
-      ? 'w-24 h-24 rounded-xl'
-      : aspectRatio === 'banner'
-      ? 'w-full h-36 rounded-xl'
-      : 'w-48 h-32 rounded-xl'
+  // Square Logo Uploader (matches screenshot left box)
+  if (aspectRatio === 'square') {
+    return (
+      <div className="space-y-2">
+        {label && (
+          <label className="block text-xs font-semibold text-text-primary">
+            {label}
+            {required && <span className="text-rose-500 ml-1 font-bold">*</span>}
+          </label>
+        )}
 
-  return (
-    <div className="space-y-2">
-      {label && <label className="block text-xs font-semibold text-text-primary">{label}</label>}
+        <div className="flex items-center gap-4">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            onChange={handleFile}
+            disabled={uploading || disabled}
+            className="hidden"
+          />
 
-      <div className="flex flex-wrap items-center gap-4">
-        <div
-          className={`${aspectClass} overflow-hidden bg-slate-100 border border-border-color flex items-center justify-center relative group flex-shrink-0`}
-        >
-          {uploading ? (
-            <div className="flex flex-col items-center justify-center p-2 text-brand-primary">
-              <Loader2 className="h-6 w-6 animate-spin mb-1" />
-              <span className="text-[10px] font-bold">Uploading...</span>
-            </div>
-          ) : imageUrl ? (
-            <img src={imageUrl} alt="Uploaded preview" className="w-full h-full object-cover" />
-          ) : (
-            <div className="text-center p-2 text-text-light">
-              <ImageIcon className="h-6 w-6 mx-auto mb-1 opacity-60" />
-              <span className="text-[10px]">No image</span>
-            </div>
-          )}
-        </div>
+          {/* Square Logo Box */}
+          <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-dashed border-border-color bg-slate-50/70 p-2 flex items-center justify-center relative flex-shrink-0 group overflow-hidden">
+            {uploading ? (
+              <div className="flex flex-col items-center justify-center p-2 text-brand-primary">
+                <Loader2 className="h-6 w-6 animate-spin mb-1 text-brand-primary" />
+                <span className="text-[10px] font-bold">Uploading...</span>
+              </div>
+            ) : imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="College Logo"
+                className="w-full h-full object-contain"
+              />
+            ) : (
+              <div className="text-center p-2 text-text-light">
+                <ImageIcon className="h-7 w-7 mx-auto mb-1 opacity-50" />
+                <span className="text-[10px] font-medium block">No logo</span>
+              </div>
+            )}
+          </div>
 
-        {!disabled && (
+          {/* Actions & Meta */}
           <div className="space-y-2">
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={handleFile}
-              disabled={uploading}
-              className="hidden"
-            />
-            <div className="flex items-center gap-2">
+            {!disabled && (
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={uploading}
+                  onClick={() => fileInputRef.current?.click()}
+                  className="btn btn-sm btn-outline text-xs font-semibold bg-white hover:bg-slate-50 text-text-primary border-border-color cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                >
+                  {uploading ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-primary" />
+                      <span>Uploading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="h-3.5 w-3.5 text-text-secondary" />
+                      <span>{imageUrl ? 'Upload New Logo' : 'Upload Logo'}</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {helperText && (
+              <p className="text-[11px] text-text-light leading-snug whitespace-pre-line">
+                {helperText}
+              </p>
+            )}
+
+            {imageUrl && !disabled && !uploading && (
               <button
                 type="button"
-                disabled={uploading}
-                onClick={() => fileInputRef.current?.click()}
-                className="btn btn-sm btn-outline text-xs cursor-pointer flex items-center gap-1.5"
+                onClick={onRemove}
+                className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 hover:underline cursor-pointer pt-0.5"
               >
-                {uploading ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin text-brand-primary" />
-                    <span>Uploading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Upload className="h-3.5 w-3.5" />
-                    <span>{imageUrl ? 'Change Image' : 'Upload Image'}</span>
-                  </>
-                )}
+                <X className="h-3 w-3" />
+                <span>Remove</span>
               </button>
-              {imageUrl && !uploading && (
+            )}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Landscape Banner Uploader (matches screenshot right banner)
+  return (
+    <div className="space-y-2">
+      {label && (
+        <label className="block text-xs font-semibold text-text-primary">
+          {label}
+          {required && <span className="text-rose-500 ml-1 font-bold">*</span>}
+        </label>
+      )}
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        disabled={uploading || disabled}
+        className="hidden"
+      />
+
+      <div className="relative w-full h-28 sm:h-32 rounded-xl overflow-hidden bg-slate-100 border border-border-color shadow-2xs group flex items-center justify-center">
+        {uploading ? (
+          <div className="flex flex-col items-center justify-center p-3 text-brand-primary">
+            <Loader2 className="h-7 w-7 animate-spin mb-1 text-brand-primary" />
+            <span className="text-xs font-bold">Uploading banner...</span>
+          </div>
+        ) : imageUrl ? (
+          <>
+            <img
+              src={imageUrl}
+              alt="Campus Banner"
+              className="w-full h-full object-cover"
+            />
+            {/* Overlay actions matching reference screenshot */}
+            {!disabled && (
+              <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-2.5 py-1 rounded-md bg-slate-900/80 hover:bg-slate-900 text-white text-[11px] font-semibold flex items-center gap-1.5 backdrop-blur-xs transition-colors cursor-pointer border border-white/20 shadow-xs"
+                >
+                  <Upload className="h-3 w-3" />
+                  <span>Change Image</span>
+                </button>
                 <button
                   type="button"
                   onClick={onRemove}
-                  className="btn btn-sm text-xs text-rose-600 hover:bg-rose-50 cursor-pointer"
+                  className="p-1.5 rounded-md bg-rose-600/90 hover:bg-rose-600 text-white transition-colors cursor-pointer backdrop-blur-xs shadow-xs"
+                  title="Remove image"
                 >
-                  Remove
+                  <X className="h-3 w-3" />
                 </button>
-              )}
+              </div>
+            )}
+          </>
+        ) : (
+          <div
+            onClick={() => !disabled && fileInputRef.current?.click()}
+            className={`w-full h-full flex flex-col items-center justify-center p-4 text-center cursor-pointer border-2 border-dashed border-border-color rounded-xl hover:bg-slate-50 transition-colors ${
+              disabled ? 'cursor-not-allowed opacity-60' : ''
+            }`}
+          >
+            <div className="w-8 h-8 rounded-full bg-slate-200/80 text-text-secondary flex items-center justify-center mb-1.5">
+              <Upload className="h-4 w-4" />
             </div>
-            {helperText && <p className="text-[11px] text-text-light">{helperText}</p>}
+            <p className="text-xs font-semibold text-text-primary">Click to upload campus banner</p>
+            <p className="text-[10px] text-text-light mt-0.5">PNG, JPG or WebP up to 8MB</p>
           </div>
         )}
       </div>
+
+      {helperText && (
+        <p className="text-[11px] text-text-light leading-snug">
+          {helperText}
+        </p>
+      )}
     </div>
   )
 }

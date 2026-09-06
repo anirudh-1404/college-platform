@@ -1,5 +1,7 @@
 import React, { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { fadeInUp, cardVariant, staggerContainer } from '../utils/animations'
 
 const Testimonials = () => {
   const [openIndex, setOpenIndex] = useState(0)
@@ -24,28 +26,41 @@ const Testimonials = () => {
   ]
 
   return (
-    <section className="py-16 sm:py-20 bg-slate-50/50 border-b border-border-color">
+    <section className="py-16 sm:py-20 bg-slate-50/50 border-b border-border-color overflow-hidden">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Section Heading (No Pill Tags) */}
-        <div className="mb-10 text-center">
+        {/* Section Heading */}
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="mb-10 text-center"
+        >
           <h2 className="text-2xl sm:text-3xl font-bold text-slate-900">
             Frequently Asked Questions
           </h2>
           <p className="text-sm text-slate-500 mt-1 font-normal">
             Everything you need to know about navigating college admissions in India.
           </p>
-        </div>
+        </motion.div>
 
         {/* FAQ Accordion */}
-        <div className="space-y-3">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+          variants={staggerContainer}
+          className="space-y-3"
+        >
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index
 
             return (
-              <div
+              <motion.div
                 key={index}
-                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs"
+                variants={cardVariant}
+                className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs transition-shadow hover:shadow-sm"
               >
                 <button
                   type="button"
@@ -56,21 +71,31 @@ const Testimonials = () => {
                     {faq.q}
                   </span>
                   <ChevronDown
-                    className={`h-4 w-4 text-slate-400 flex-shrink-0 transition-transform ${
+                    className={`h-4 w-4 text-slate-400 flex-shrink-0 transition-transform duration-300 ${
                       isOpen ? 'rotate-180 text-brand-primary' : ''
                     }`}
                   />
                 </button>
 
-                {isOpen && (
-                  <div className="px-4 sm:px-5 pb-4 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 font-normal">
-                    {faq.a}
-                  </div>
-                )}
-              </div>
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                      className="overflow-hidden"
+                    >
+                      <div className="px-4 sm:px-5 pb-4 pt-1 text-xs sm:text-sm text-slate-600 leading-relaxed border-t border-slate-100 font-normal">
+                        {faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
       </div>
     </section>

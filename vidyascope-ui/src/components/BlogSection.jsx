@@ -1,14 +1,22 @@
 import React from 'react'
 import { Clock, ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { blogsData } from '../data/blogsData'
+import { fadeInUp, cardVariant, staggerContainer } from '../utils/animations'
 
 const BlogSection = ({ onNavigate }) => {
   return (
-    <section className="py-14 sm:py-18 bg-slate-50/50 border-b border-border-color">
+    <section className="py-14 sm:py-18 bg-slate-50/50 border-b border-border-color overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 sm:mb-10 gap-3"
+        >
           <div>
             <h2 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
               Latest Guidance & Strategy Articles
@@ -19,18 +27,26 @@ const BlogSection = ({ onNavigate }) => {
           </div>
           <button
             onClick={() => onNavigate && onNavigate('career-guide')}
-            className="text-xs sm:text-sm font-bold text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 cursor-pointer self-start sm:self-auto"
+            className="text-xs sm:text-sm font-bold text-brand-primary hover:text-brand-primary-hover flex items-center gap-1 cursor-pointer self-start sm:self-auto transition-colors"
           >
             <span>View all career guides</span>
             <ArrowRight className="h-4 w-4" />
           </button>
-        </div>
+        </motion.div>
 
         {/* Blog Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-40px' }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 gap-5"
+        >
           {blogsData.map((post) => (
-            <article
+            <motion.article
               key={post.id}
+              variants={cardVariant}
+              whileHover={{ y: -7, transition: { duration: 0.22 } }}
               onClick={() => onNavigate && onNavigate('career-guide')}
               className="bg-white border border-slate-200/90 rounded-2xl overflow-hidden hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group"
             >
@@ -71,9 +87,9 @@ const BlogSection = ({ onNavigate }) => {
                   <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                 </span>
               </div>
-            </article>
+            </motion.article>
           ))}
-        </div>
+        </motion.div>
 
       </div>
     </section>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react'
-import { FileText, ArrowRight, BookOpen, Clock, Award } from 'lucide-react'
+import { FileText, ArrowRight, BookOpen } from 'lucide-react'
+import { motion } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const categoryLabels = {
   engineering: 'Engineering (B.Tech)',
@@ -64,11 +66,17 @@ const TopExamsSection = ({ onNavigateExams }) => {
   ]
 
   return (
-    <section className="py-16 sm:py-20 bg-white border-b border-slate-100 text-center">
+    <section className="py-16 sm:py-20 bg-white border-b border-slate-100 text-center overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Section Header */}
-        <div className="space-y-2 mb-8">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-60px' }}
+          variants={fadeInUp}
+          className="space-y-2 mb-8"
+        >
           <span className="text-brand-primary text-xs font-bold tracking-wider uppercase inline-flex items-center gap-1">
             <span>&gt;&gt;</span>
             <span>Exams</span>
@@ -79,11 +87,17 @@ const TopExamsSection = ({ onNavigateExams }) => {
           <p className="text-xs sm:text-sm text-slate-500 max-w-xl mx-auto">
             Official eligibility guidelines, exam patterns, and admission schedules directly vetted by testing authorities.
           </p>
-        </div>
+        </motion.div>
 
         {/* Dynamic Filter Pills (Only displayed if categories exist in database) */}
         {dynamicCategories.length > 1 && (
-          <div className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 mb-12 flex-wrap justify-center gap-1">
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={fadeInUp}
+            className="inline-flex p-1 bg-slate-100 rounded-full border border-slate-200/80 mb-12 flex-wrap justify-center gap-1"
+          >
             {dynamicCategories.map((cat) => (
               <button
                 key={cat.id}
@@ -98,19 +112,28 @@ const TopExamsSection = ({ onNavigateExams }) => {
                 {cat.label}
               </button>
             ))}
-          </div>
+          </motion.div>
         )}
 
         {/* Live Exams Cards Grid */}
         {displayedExams.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left mb-10">
+          <motion.div
+            key={activeTab}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 text-left mb-10"
+          >
             {displayedExams.map((exam, idx) => {
               const colorClass = badgeColors[idx % badgeColors.length]
               return (
-                <div
+                <motion.div
                   key={exam.id || exam.slug}
+                  variants={cardVariant}
+                  whileHover={{ y: -6, transition: { duration: 0.2 } }}
                   onClick={onNavigateExams}
-                  className="bg-white border border-slate-200/90 rounded-2xl p-6 hover:border-brand-primary hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+                  className="bg-white border border-slate-200/90 rounded-2xl p-6 hover:border-brand-primary hover:shadow-card-hover transition-all flex flex-col justify-between group cursor-pointer"
                 >
                   <div className="space-y-3">
                     {/* Badge Icon & Mode */}
@@ -144,10 +167,10 @@ const TopExamsSection = ({ onNavigateExams }) => {
                     <span>Syllabus &amp; Schedules</span>
                     <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
-                </div>
+                </motion.div>
               )
             })}
-          </div>
+          </motion.div>
         ) : (
           <div className="p-12 mb-8 bg-slate-50 rounded-2xl border border-slate-200 max-w-xl mx-auto space-y-3">
             <BookOpen className="h-8 w-8 text-slate-400 mx-auto" />
