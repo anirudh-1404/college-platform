@@ -6,9 +6,18 @@ import {
   AlertTriangle,
   Eye,
   FileCheck,
+  Building2,
+  MapPin,
+  BookOpen,
+  Award,
+  TrendingUp,
+  RefreshCw,
+  Sparkles,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal } from '../components/common/AdminModal'
+import { CollegeReviewStudio } from '../components/review/CollegeReviewStudio'
+import { adminService } from '../data/adminService'
 
 const CollegeProfilesReviewPage = ({
   profiles = [],
@@ -24,9 +33,9 @@ const CollegeProfilesReviewPage = ({
     setFilterStatus(defaultFilter)
   }, [defaultFilter])
 
-  // Selected Profile for Full 10-Step Review Canvas
+  // Selected Profile for Full 10-Step Review Studio
   const [reviewingProfile, setReviewingProfile] = useState(null)
-  const [activeReviewSection, setActiveReviewSection] = useState('overview')
+  const [isRefreshingProfile, setIsRefreshingProfile] = useState(false)
 
   // Modals State
   const [requestChangesModalOpen, setRequestChangesModalOpen] = useState(false)
@@ -35,18 +44,60 @@ const CollegeProfilesReviewPage = ({
   const [unpublishModalOpen, setUnpublishModalOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
 
+  // Real-time Single Profile Refresher
+  const handleOpenReview = async (profile) => {
+    setReviewingProfile(profile)
+    const collegeId = profile.id || profile.slug || profile._id
+    if (collegeId) {
+      try {
+        setIsRefreshingProfile(true)
+        const fresh = await adminService.getProfileById(collegeId)
+        if (fresh) {
+          setReviewingProfile(fresh)
+        }
+      } catch (err) {
+        console.warn('Real-time single profile fetch error:', err)
+      } finally {
+        setIsRefreshingProfile(false)
+      }
+    }
+  }
+
+  const handleRefreshCurrentProfile = async () => {
+    if (!reviewingProfile) return
+    const collegeId = reviewingProfile.id || reviewingProfile.slug || reviewingProfile._id
+    if (collegeId) {
+      try {
+        setIsRefreshingProfile(true)
+        const fresh = await adminService.getProfileById(collegeId)
+        if (fresh) {
+          setReviewingProfile(fresh)
+        }
+      } catch (err) {
+        console.warn('Refresh current profile error:', err)
+      } finally {
+        setIsRefreshingProfile(false)
+      }
+    }
+  }
+
+  // Filtered Profiles for Queue
   const filteredProfiles = useMemo(() => {
     return profiles.filter((p) => {
       const matchSearch =
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         (p.shortName && p.shortName.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (p.stream && p.stream.toLowerCase().includes(searchQuery.toLowerCase()))
+        (p.stream && p.stream.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.city && p.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (p.locationContact?.city && p.locationContact.city.toLowerCase().includes(searchQuery.toLowerCase()))
 
-      // If 'all', show ONLY submitted/actionable profiles (under_review, changes_requested, published)
-      // Unsubmitted drafts won't clutter the approval review queue unless the 'draft' tab is explicitly clicked
+      // If 'all', show submitted/actionable profiles (under_review, changes_requested, published)
       let matchStatus = false
       if (filterStatus === 'all') {
-        matchStatus = p.profileStatus === 'under_review' || p.profileStatus === 'changes_requested' || p.profileStatus === 'published'
+        matchStatus =
+          p.profileStatus === 'under_review' ||
+          p.profileStatus === 'changes_requested' ||
+          p.profileStatus === 'published'
       } else {
         matchStatus = p.profileStatus === filterStatus
       }
@@ -55,11 +106,30 @@ const CollegeProfilesReviewPage = ({
     })
   }, [profiles, searchQuery, filterStatus])
 
+  // Counts for Badges
+  const counts = useMemo(() => {
+    return {
+      all: profiles.filter(
+        (p) =>
+          p.profileStatus === 'under_review' ||
+          p.profileStatus === 'changes_requested' ||
+          p.profileStatus === 'published'
+      ).length,
+      under_review: profiles.filter((p) => p.profileStatus === 'under_review').length,
+      changes_requested: profiles.filter((p) => p.profileStatus === 'changes_requested').length,
+      published: profiles.filter((p) => p.profileStatus === 'published').length,
+      draft: profiles.filter((p) => p.profileStatus === 'draft' || !p.profileStatus).length,
+      rejected: profiles.filter((p) => p.profileStatus === 'rejected').length,
+    }
+  }, [profiles])
+
+  // Confirmation Handlers
   const handleConfirmPublish = async () => {
     if (!reviewingProfile) return
+    const collegeId = reviewingProfile.id || reviewingProfile.slug || reviewingProfile._id
     setIsProcessing(true)
     try {
-      await onApproveAndPublish(reviewingProfile.id)
+      await onApproveAndPublish(collegeId)
       setApprovePublishModalOpen(false)
       setReviewingProfile(null)
     } finally {
@@ -69,13 +139,14 @@ const CollegeProfilesReviewPage = ({
 
   const handleConfirmRequestChanges = async () => {
     if (!reviewingProfile) return
+    const collegeId = reviewingProfile.id || reviewingProfile.slug || reviewingProfile._id
     if (!feedbackComment.trim()) {
-      alert('Please provide feedback notes for the college.')
+      alert('Please provide specific feedback notes for the college representative.')
       return
     }
     setIsProcessing(true)
     try {
-      await onRequestChanges(reviewingProfile.id, feedbackComment)
+      await onRequestChanges(collegeId, feedbackComment)
       setRequestChangesModalOpen(false)
       setFeedbackComment('')
       setReviewingProfile(null)
@@ -86,9 +157,10 @@ const CollegeProfilesReviewPage = ({
 
   const handleConfirmUnpublish = async () => {
     if (!reviewingProfile) return
+    const collegeId = reviewingProfile.id || reviewingProfile.slug || reviewingProfile._id
     setIsProcessing(true)
     try {
-      await onUnpublish(reviewingProfile.id)
+      await onUnpublish(collegeId)
       setUnpublishModalOpen(false)
       setReviewingProfile(null)
     } finally {
@@ -97,117 +169,222 @@ const CollegeProfilesReviewPage = ({
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      {/* Header */}
+    <div className="space-y-6 max-w-7xl mx-auto">
+      
+      {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-200">
         <div>
-          <h2 className="text-xl font-bold text-slate-900">
-            College Profiles CMS Review
+          <h2 className="font-serif text-xl sm:text-2xl font-bold text-slate-900 flex items-center gap-2.5">
+            <span>College Profiles CMS Review</span>
+            <span className="text-xs px-2.5 py-0.5 rounded-full bg-[#EBF2FA] text-[#033C8D] font-bold border border-[#033C8D]/20">
+              {counts.under_review} Awaiting Approval
+            </span>
           </h2>
-          <p className="text-xs text-slate-500 mt-0.5">
-            Review submitted 10-step institutional data from colleges and approve for live publishing.
+          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+            Inspect submitted 10-step institutional data across programs, cutoffs, placements, rankings, and true costs before live publishing.
           </p>
         </div>
 
-        {/* Filters and Search Bar */}
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
-          {/* Status Tabs */}
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-lg">
-            {[
-              { id: 'all', label: 'All' },
-              { id: 'under_review', label: 'Under Review' },
-              { id: 'changes_requested', label: 'Changes Requested' },
-              { id: 'published', label: 'Published' },
-              { id: 'draft', label: 'Draft' },
-              { id: 'rejected', label: 'Rejected' },
-            ].map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setFilterStatus(tab.id)}
-                className={`px-2.5 py-1 rounded text-xs font-medium cursor-pointer transition-colors ${
-                  filterStatus === tab.id
-                    ? 'bg-white text-slate-900 shadow-2xs font-semibold'
-                    : 'text-slate-600 hover:text-slate-900'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Search Box */}
-          <div className="relative w-full sm:w-56">
-            <Search className="absolute left-2.5 top-2 h-3.5 w-3.5 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search college..."
-              className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#033C8D] focus:border-[#033C8D]"
-            />
-          </div>
+        {/* Search Box */}
+        <div className="relative w-full sm:w-64">
+          <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-slate-400" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by college name, city..."
+            className="w-full pl-9 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-none focus:ring-1 focus:ring-[#033C8D] shadow-2xs"
+          />
         </div>
       </div>
 
-      {/* Profiles Table */}
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-2xs">
+      {/* KPI Overview Strip */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div
+          onClick={() => setFilterStatus('under_review')}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'under_review'
+              ? 'bg-[#EBF2FA] border-[#033C8D]/40 text-[#033C8D]'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Under Review</span>
+            <span className="h-2 w-2 rounded-full bg-[#033C8D]" />
+          </div>
+          <p className="text-xl font-black text-slate-900 mt-1">{counts.under_review}</p>
+          <span className="text-[11px] text-[#033C8D] font-semibold mt-0.5 block">Requires Editorial Audit</span>
+        </div>
+
+        <div
+          onClick={() => setFilterStatus('published')}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'published'
+              ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Published Live</span>
+            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+          </div>
+          <p className="text-xl font-black text-slate-900 mt-1">{counts.published}</p>
+          <span className="text-[11px] text-emerald-600 font-semibold mt-0.5 block">Live in Student Search</span>
+        </div>
+
+        <div
+          onClick={() => setFilterStatus('changes_requested')}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'changes_requested'
+              ? 'bg-amber-50 border-amber-300 text-amber-800'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Changes Requested</span>
+            <span className="h-2 w-2 rounded-full bg-amber-500" />
+          </div>
+          <p className="text-xl font-black text-slate-900 mt-1">{counts.changes_requested}</p>
+          <span className="text-[11px] text-amber-700 font-semibold mt-0.5 block">Returned with Notes</span>
+        </div>
+
+        <div
+          onClick={() => setFilterStatus('all')}
+          className={`p-3.5 rounded-xl border transition-all cursor-pointer shadow-2xs ${
+            filterStatus === 'all'
+              ? 'bg-purple-50 border-purple-300 text-purple-800'
+              : 'bg-white border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Actionable Queue</span>
+            <span className="h-2 w-2 rounded-full bg-purple-500" />
+          </div>
+          <p className="text-xl font-black text-slate-900 mt-1">{counts.all}</p>
+          <span className="text-[11px] text-purple-700 font-semibold mt-0.5 block">Total Tracked Profiles</span>
+        </div>
+      </div>
+
+      {/* Filter Tabs Bar */}
+      <div className="flex items-center gap-1.5 bg-slate-100 p-1 rounded-xl border border-slate-200 overflow-x-auto">
+        {[
+          { id: 'all', label: 'All Actionable', count: counts.all },
+          { id: 'under_review', label: 'Under Review', count: counts.under_review },
+          { id: 'changes_requested', label: 'Changes Requested', count: counts.changes_requested },
+          { id: 'published', label: 'Published', count: counts.published },
+          { id: 'draft', label: 'Draft', count: counts.draft },
+          { id: 'rejected', label: 'Rejected', count: counts.rejected },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setFilterStatus(tab.id)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+              filterStatus === tab.id
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
+            }`}
+          >
+            <span>{tab.label}</span>
+            <span
+              className={`px-1.5 py-0.2 rounded-full text-[10px] font-bold ${
+                filterStatus === tab.id
+                  ? 'bg-[#033C8D] text-white'
+                  : 'bg-slate-200 text-slate-600'
+              }`}
+            >
+              {tab.count}
+            </span>
+          </button>
+        ))}
+      </div>
+
+      {/* Main Review Queue Table */}
+      <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
-            <thead>
-              <tr className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
-                <th className="py-3 px-4 min-w-[200px]">College Name</th>
-                <th className="py-3 px-4 min-w-[120px]">Stream</th>
-                <th className="py-3 px-4 min-w-[100px]">NIRF Rank</th>
-                <th className="py-3 px-4 min-w-[120px]">Avg Package</th>
-                <th className="py-3 px-4 min-w-[120px]">Status</th>
-                <th className="py-3 px-4 text-right">Action</th>
+            <thead className="bg-slate-50/80 border-b border-slate-200 text-slate-700 font-bold">
+              <tr>
+                <th className="py-3.5 px-4 min-w-[240px]">Institution Name & Campus</th>
+                <th className="py-3.5 px-4 min-w-[140px]">Stream & Ownership</th>
+                <th className="py-3.5 px-4 min-w-[100px]">NIRF Rank</th>
+                <th className="py-3.5 px-4 min-w-[120px]">Avg Package</th>
+                <th className="py-3.5 px-4 min-w-[90px]">Programs</th>
+                <th className="py-3.5 px-4 min-w-[130px]">Status</th>
+                <th className="py-3.5 px-4 text-right min-w-[130px]">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredProfiles.map((profile) => (
-                <tr key={profile.id} className="hover:bg-slate-50/70 transition-colors">
-                  <td className="py-3 px-4">
-                    <p className="font-semibold text-slate-900">{profile.name}</p>
-                    <p className="text-[11px] text-slate-500 mt-0.5">{profile.shortName || 'College'}</p>
-                  </td>
+              {filteredProfiles.map((profile) => {
+                const city = profile.locationContact?.city || profile.city || profile.location || 'India'
+                const state = profile.locationContact?.state || profile.state || ''
+                const nirf = profile.rankings?.nirfRank || profile.nirfRank || 'N/A'
+                const avgSalary = profile.placements?.avgPackage || profile.avgPackage || 'Not Specified'
+                const coursesCount = profile.coursesOffered?.length || 0
 
-                  <td className="py-3 px-4 text-slate-700 capitalize">
-                    {profile.stream} ({profile.ownership})
-                  </td>
+                return (
+                  <tr key={profile.id || profile._id} className="hover:bg-slate-50/80 transition-colors">
+                    <td className="py-3.5 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-[#033C8D]/10 text-[#033C8D] flex items-center justify-center font-bold text-xs shrink-0 border border-[#033C8D]/20">
+                          {profile.shortName?.slice(0, 2).toUpperCase() || 'IN'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-slate-900 text-xs sm:text-sm">{profile.name}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-1">
+                            <MapPin className="h-3 w-3 text-slate-400 shrink-0" />
+                            <span>{city}{state ? `, ${state}` : ''}</span>
+                            <span className="mx-1">•</span>
+                            <span className="font-semibold text-slate-700">{profile.shortName}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </td>
 
-                  <td className="py-3 px-4 font-semibold text-slate-900">
-                    #{profile.rankings?.nirfRank || profile.nirfRank || 'N/A'}
-                  </td>
+                    <td className="py-3.5 px-4 text-slate-700 capitalize font-medium">
+                      <p className="text-slate-900 font-semibold">{profile.stream}</p>
+                      <p className="text-[11px] text-slate-400">{profile.ownership || 'Government'}</p>
+                    </td>
 
-                  <td className="py-3 px-4 font-semibold text-emerald-600">
-                    {profile.placements?.avgPackage || profile.avgPackage || 'Not Specified'}
-                  </td>
+                    <td className="py-3.5 px-4 font-bold text-[#033C8D]">
+                      #{nirf}
+                    </td>
 
-                  <td className="py-3 px-4">
-                    <AdminStatusBadge status={profile.profileStatus} />
-                  </td>
+                    <td className="py-3.5 px-4 font-bold text-emerald-600">
+                      {avgSalary}
+                    </td>
 
-                  <td className="py-3 px-4 text-right">
-                    <button
-                      type="button"
-                      onClick={() => setReviewingProfile(profile)}
-                      className="btn btn-secondary btn-sm text-xs cursor-pointer"
-                    >
-                      <Eye className="h-3.5 w-3.5" />
-                      <span>Review</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    <td className="py-3.5 px-4 font-semibold text-slate-700">
+                      <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold border border-purple-200 text-[11px]">
+                        {coursesCount} Courses
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4">
+                      <AdminStatusBadge status={profile.profileStatus} />
+                    </td>
+
+                    <td className="py-3.5 px-4 text-right">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenReview(profile)}
+                        className="btn bg-[#033C8D] hover:bg-[#022B66] text-white btn-sm text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>Inspect & Review</span>
+                      </button>
+                    </td>
+                  </tr>
+                )
+              })}
 
               {filteredProfiles.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-xs text-slate-400 space-y-2">
-                    <FileCheck className="h-8 w-8 text-slate-300 mx-auto" />
-                    <p className="font-semibold text-slate-700">No Profiles Awaiting Review</p>
-                    <p className="text-slate-400 max-w-sm mx-auto">
-                      When an approved college fills in their 10-step profile and clicks "Submit for Review", it will appear here for editorial inspection and live publishing.
+                  <td colSpan={7} className="py-12 text-center text-xs text-slate-400 space-y-2">
+                    <FileCheck className="h-9 w-9 text-slate-300 mx-auto" />
+                    <p className="font-bold text-slate-800 text-sm">No Institutional Profiles in this Filter</p>
+                    <p className="text-slate-500 max-w-sm mx-auto">
+                      Colleges that submit their complete 10-step institutional CMS profile will appear here with full verification controls.
                     </p>
                   </td>
                 </tr>
@@ -217,309 +394,86 @@ const CollegeProfilesReviewPage = ({
         </div>
       </div>
 
-      {/* Comprehensive 10-Section Profile Review Modal */}
+      {/* ================= FULL-SCREEN / EXPANSIVE REVIEW STUDIO ================= */}
       {reviewingProfile && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            onClick={() => setReviewingProfile(null)}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
-          />
-
-          <div className="relative bg-white rounded-xl border border-slate-200 shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto custom-scrollbar p-6 z-10 space-y-5">
-            
-            {/* Modal Header */}
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-slate-900">
-                    {reviewingProfile.name}
-                  </h3>
-                  <AdminStatusBadge status={reviewingProfile.profileStatus} />
-                </div>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  NIRF #{reviewingProfile.rankings?.nirfRank || reviewingProfile.nirfRank || 'N/A'} • {reviewingProfile.locationContact?.city || reviewingProfile.location || 'India'}
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setRequestChangesModalOpen(true)}
-                  className="btn btn-outline text-amber-700 hover:bg-amber-50 btn-sm text-xs cursor-pointer"
-                >
-                  <AlertTriangle className="h-3.5 w-3.5" />
-                  <span>Request Changes</span>
-                </button>
-
-                {reviewingProfile.profileStatus === 'published' ? (
-                  <button
-                    type="button"
-                    onClick={() => setUnpublishModalOpen(true)}
-                    className="btn btn-outline text-red-600 hover:bg-red-50 btn-sm text-xs cursor-pointer"
-                  >
-                    <XCircle className="h-3.5 w-3.5" />
-                    <span>Unpublish</span>
-                  </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => setApprovePublishModalOpen(true)}
-                    className="btn btn-success btn-sm text-xs font-semibold cursor-pointer"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>Approve & Publish</span>
-                  </button>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => setReviewingProfile(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-600 cursor-pointer text-xs ml-2"
-                >
-                  ✕
-                </button>
-              </div>
-            </div>
-
-            {/* Review Section Tabs */}
-            <div className="flex items-center gap-1 border-b border-slate-200 overflow-x-auto pb-2">
-              {[
-                { id: 'overview', label: '1. Basic Info' },
-                { id: 'courses', label: '2. Courses & Fees' },
-                { id: 'cutoffs', label: '3. Cutoff Ranks' },
-                { id: 'placements', label: '4. Placements' },
-                { id: 'roi', label: '5. ROI & Costs' },
-                { id: 'facilities', label: '6. Facilities' },
-                { id: 'rankings', label: '7. Rankings' },
-              ].map((tab) => (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveReviewSection(tab.id)}
-                  className={`px-3 py-1.5 text-xs font-medium rounded-lg whitespace-nowrap cursor-pointer transition-colors ${
-                    activeReviewSection === tab.id
-                      ? 'bg-purple-50 text-purple-700 font-semibold'
-                      : 'text-slate-600 hover:text-slate-900'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Active Review Canvas */}
-            <div className="space-y-4 text-xs">
-              {activeReviewSection === 'overview' && (
-                <div className="space-y-3">
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3.5 bg-slate-50 rounded-lg border border-slate-100">
-                    <div>
-                      <span className="text-slate-400 text-[10px] uppercase font-semibold block">Short Name</span>
-                      <span className="font-bold text-slate-900">{reviewingProfile.shortName || 'College'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[10px] uppercase font-semibold block">Stream</span>
-                      <span className="font-bold text-slate-900 capitalize">{reviewingProfile.stream}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[10px] uppercase font-semibold block">Ownership</span>
-                      <span className="font-bold text-slate-900">{reviewingProfile.ownership}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-400 text-[10px] uppercase font-semibold block">Established</span>
-                      <span className="font-bold text-slate-900">{reviewingProfile.establishmentYear || '1958'}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="text-slate-700 font-semibold block mb-1">About Description</span>
-                    <p className="p-3 bg-slate-50 rounded-lg border border-slate-200 text-slate-600 leading-relaxed">
-                      {reviewingProfile.description || 'Institutional description.'}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {activeReviewSection === 'courses' && (
-                <div className="space-y-2">
-                  <span className="text-slate-700 font-semibold block">
-                    Programs Offered ({reviewingProfile.coursesOffered?.length || 0})
-                  </span>
-                  <div className="divide-y divide-slate-100 border border-slate-200 rounded-lg overflow-hidden">
-                    {(reviewingProfile.coursesOffered || []).map((course, idx) => (
-                      <div key={course.id || idx} className="p-3 bg-white flex items-center justify-between">
-                        <div>
-                          <p className="font-bold text-slate-900">{course.name}</p>
-                          <p className="text-slate-500 text-[11px] mt-0.5">
-                            Level: {course.degreeLevel} • Seats: {course.seatIntake} • Duration: {course.duration}
-                          </p>
-                        </div>
-                        <span className="font-bold text-purple-700 bg-purple-50 px-2 py-1 rounded">
-                          {course.fee} Total
-                        </span>
-                      </div>
-                    ))}
-                    {(reviewingProfile.coursesOffered || []).length === 0 && (
-                      <p className="p-4 text-center text-slate-400">No courses added yet by the college.</p>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {activeReviewSection === 'cutoffs' && (
-                <div className="space-y-2">
-                  <span className="text-slate-700 font-semibold block">Cutoff Ranks Matrix</span>
-                  <div className="border border-slate-200 rounded-lg overflow-hidden">
-                    <table className="w-full text-left text-xs">
-                      <thead className="bg-slate-50 border-b border-slate-200 text-slate-700 font-semibold">
-                        <tr>
-                          <th className="p-2.5">Exam</th>
-                          <th className="p-2.5">Branch</th>
-                          <th className="p-2.5">General Cutoff</th>
-                          <th className="p-2.5">OBC Cutoff</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {(reviewingProfile.admissionCutoffs || []).map((c, idx) => (
-                          <tr key={idx}>
-                            <td className="p-2.5 font-bold text-purple-700">{c.exam}</td>
-                            <td className="p-2.5">{c.course}</td>
-                            <td className="p-2.5 font-semibold text-emerald-600">{c.generalCutoff}</td>
-                            <td className="p-2.5 text-slate-500">{c.obcCutoff}</td>
-                          </tr>
-                        ))}
-                        {(reviewingProfile.admissionCutoffs || []).length === 0 && (
-                          <tr><td colSpan={4} className="p-4 text-center text-slate-400">No cutoffs added yet.</td></tr>
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-
-              {activeReviewSection === 'placements' && (
-                <div className="grid grid-cols-3 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100 text-center">
-                  <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-semibold block">Highest Domestic</span>
-                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.highestDomestic || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-semibold block">Average Package</span>
-                    <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{reviewingProfile.placements?.avgPackage || 'N/A'}</span>
-                  </div>
-                  <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-semibold block">Placement Rate</span>
-                    <span className="font-bold text-slate-900 text-sm mt-0.5 block">{reviewingProfile.placements?.placementRate || 0}%</span>
-                  </div>
-                </div>
-              )}
-
-              {activeReviewSection === 'roi' && (
-                <div className="p-3 bg-slate-50 rounded-lg border border-slate-100 space-y-2">
-                  <span className="text-slate-700 font-semibold block">Annual Cost Breakdown</span>
-                  {reviewingProfile.hiddenCosts ? (
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div>Tuition/Yr: ₹{((reviewingProfile.hiddenCosts.tuitionFeePerYear || 0) / 100000).toFixed(2)} L</div>
-                      <div>Hostel/Yr: ₹{((reviewingProfile.hiddenCosts.hostelRentYearly || 0) / 100000).toFixed(2)} L</div>
-                      <div>Mess/Yr: ₹{((reviewingProfile.hiddenCosts.messChargesYearly || 0) / 100000).toFixed(2)} L</div>
-                      <div>Caution Money: ₹{((reviewingProfile.hiddenCosts.cautionDepositOneTime || 0) / 100000).toFixed(2)} L</div>
-                    </div>
-                  ) : (
-                    <p className="text-slate-400">No cost breakdown submitted.</p>
-                  )}
-                </div>
-              )}
-
-              {activeReviewSection === 'facilities' && (
-                <div className="flex flex-wrap gap-2">
-                  {(reviewingProfile.facilities || []).map((f) => (
-                    <span key={f} className="px-2.5 py-1 bg-slate-100 rounded text-slate-700 text-xs">
-                      ✓ {f}
-                    </span>
-                  ))}
-                  {(reviewingProfile.facilities || []).length === 0 && (
-                    <p className="text-slate-400">No facilities selected.</p>
-                  )}
-                </div>
-              )}
-
-              {activeReviewSection === 'rankings' && (
-                <div className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-lg border border-slate-100">
-                  <div><strong>NIRF Rank:</strong> #{reviewingProfile.rankings?.nirfRank || reviewingProfile.nirfRank || 'N/A'}</div>
-                  <div><strong>NAAC Grade:</strong> {reviewingProfile.rankings?.naacGrade || reviewingProfile.naacGrade || 'N/A'}</div>
-                </div>
-              )}
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-end">
-              <button
-                type="button"
-                onClick={() => setReviewingProfile(null)}
-                className="btn btn-outline btn-md text-xs cursor-pointer"
-              >
-                Close Preview
-              </button>
-            </div>
-
-          </div>
-        </div>
+        <CollegeReviewStudio
+          profile={reviewingProfile}
+          onClose={() => setReviewingProfile(null)}
+          onApproveAndPublish={() => setApprovePublishModalOpen(true)}
+          onRequestChanges={() => setRequestChangesModalOpen(true)}
+          onUnpublish={() => setUnpublishModalOpen(true)}
+          onRefreshProfile={handleRefreshCurrentProfile}
+          isRefreshing={isRefreshingProfile}
+        />
       )}
 
-      {/* Approve & Publish Confirmation Modal */}
+      {/* ================= MODALS ================= */}
+
+      {/* 1. Approve & Publish Live Confirmation Modal */}
       <AdminModal
         isOpen={approvePublishModalOpen}
         onClose={() => setApprovePublishModalOpen(false)}
         onConfirm={handleConfirmPublish}
-        title="Approve & Publish Profile Live"
-        description={`Publish ${reviewingProfile?.name} to VidyaScope public discovery.`}
-        confirmText="Approve & Publish"
+        title="Approve & Publish College Profile Live"
+        description={`Validate and publish ${reviewingProfile?.name} to VidyaScope student discovery platform.`}
+        confirmText="Approve & Publish Live"
         type="success"
         isLoading={isProcessing}
       >
-        <p className="text-slate-600 text-xs">
-          This profile will immediately become live in the public search directory.
-        </p>
+        <div className="space-y-3 text-xs text-slate-600">
+          <p>
+            By publishing this profile, all 10 verified sections (Courses, Cutoffs, Placements, Rankings, Facilities, and Fee Structure) will instantly become searchable and live on VidyaScope website for thousands of prospective students.
+          </p>
+          <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-semibold">
+            ✓ College representative will be notified that their profile has been officially approved and published.
+          </div>
+        </div>
       </AdminModal>
 
-      {/* Request Changes Modal with Feedback Comments */}
+      {/* 2. Request Changes Modal with Custom Feedback */}
       <AdminModal
         isOpen={requestChangesModalOpen}
         onClose={() => setRequestChangesModalOpen(false)}
         onConfirm={handleConfirmRequestChanges}
-        title="Request Profile Changes"
-        description={`Send revision feedback to ${reviewingProfile?.name}.`}
-        confirmText="Send Feedback"
+        title="Request Institutional Profile Revisions"
+        description={`Send specific verification feedback notes to ${reviewingProfile?.name}.`}
+        confirmText="Send Revision Feedback"
         type="warning"
         isLoading={isProcessing}
       >
-        <div className="space-y-1.5">
-          <label className="block text-xs font-semibold text-slate-700">
-            Revision Feedback
+        <div className="space-y-2.5">
+          <label className="block text-xs font-bold text-slate-800">
+            Specific Changes Required by Editorial Council:
           </label>
           <textarea
-            rows={3}
+            rows={4}
             value={feedbackComment}
             onChange={(e) => setFeedbackComment(e.target.value)}
-            placeholder="Specify what needs to be changed..."
-            className="w-full text-xs font-medium text-slate-900 border border-slate-300 rounded-lg p-2.5 focus:outline-none focus:ring-1 focus:ring-purple-600"
+            placeholder="e.g. Please upload latest 2025 NIRF certificate and verify General closing cutoffs for Computer Science..."
+            className="w-full text-xs font-medium text-slate-900 border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-[#033C8D] shadow-2xs leading-relaxed"
           />
+          <p className="text-[11px] text-slate-500">
+            The profile will be unlocked for the college representative to make corrections and re-submit for approval.
+          </p>
         </div>
       </AdminModal>
 
-      {/* Unpublish Modal */}
+      {/* 3. Unpublish Profile Modal */}
       <AdminModal
         isOpen={unpublishModalOpen}
         onClose={() => setUnpublishModalOpen(false)}
         onConfirm={handleConfirmUnpublish}
-        title="Unpublish College Profile"
+        title="Unpublish Institutional Profile"
         description={`Withdraw ${reviewingProfile?.name} from live public search.`}
-        confirmText="Unpublish"
+        confirmText="Unpublish Profile"
         type="danger"
         isLoading={isProcessing}
       >
         <p className="text-slate-600 text-xs">
-          The profile will be reverted to draft mode and hidden from public search until re-approved.
+          The institutional profile will be reverted to draft mode and immediately hidden from student search queries until re-approved.
         </p>
       </AdminModal>
+
     </div>
   )
 }

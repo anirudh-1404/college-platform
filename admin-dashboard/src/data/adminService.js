@@ -103,6 +103,19 @@ export const adminService = {
     return []
   },
 
+  async getProfileById(collegeId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}`, { headers: this.getHeaders() })
+      const data = await res.json()
+      if (res.ok && data.profile) {
+        return { ...data.profile, id: data.profile.slug || data.profile._id }
+      }
+    } catch (e) {
+      console.warn('Profile fetch by ID error:', e)
+    }
+    return null
+  },
+
   async approveAndPublish(collegeId) {
     try {
       const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/publish`, {

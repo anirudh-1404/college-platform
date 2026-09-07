@@ -5,6 +5,7 @@ import {
   approveRegistration,
   rejectRegistration,
   getAllProfiles,
+  getProfileById,
   approveAndPublishProfile,
   requestProfileChanges,
   unpublishProfile,
@@ -42,6 +43,7 @@ router.post("/registrations/:id/reject", rejectRegistration);
 
 // College Profiles CMS Review
 router.get("/profiles", getAllProfiles);
+router.get("/profiles/:id", getProfileById);
 router.post("/profiles/:id/publish", approveAndPublishProfile);
 router.post("/profiles/:id/request-changes", requestProfileChanges);
 router.post("/profiles/:id/unpublish", unpublishProfile);

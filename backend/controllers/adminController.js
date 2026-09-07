@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { User } from "../models/User.js";
 import { College } from "../models/College.js";
 import { Registration } from "../models/Registration.js";
@@ -145,6 +146,30 @@ export const getAllProfiles = async (req, res) => {
     return res.status(200).json({ success: true, profiles: colleges });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch college profiles." });
+  }
+};
+
+export const getProfileById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      college = await College.findById(id);
+    }
+    if (!college) {
+      college = await College.findOne({ slug: id });
+    }
+    if (!college) {
+      college = await College.findOne({ name: id });
+    }
+
+    if (!college) {
+      return res.status(404).json({ success: false, message: "College profile not found." });
+    }
+
+    return res.status(200).json({ success: true, profile: college });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: "Failed to fetch college profile." });
   }
 };
 
