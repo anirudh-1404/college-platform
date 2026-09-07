@@ -136,57 +136,122 @@ const CollegeDetailPage = ({
         </div>
       </div>
 
-      {/* College Header Banner */}
-      <div className="bg-white border-b border-border-color py-6 sm:py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+      {/* LinkedIn-style Hero Banner & Header */}
+      <div className="bg-white border-b border-border-color">
+        
+        {/* Wide Background Banner */}
+        <div className="relative h-48 sm:h-64 md:h-72 w-full overflow-hidden bg-slate-900">
+          <img
+            src={
+              college.image ||
+              (Array.isArray(college.gallery) && college.gallery.length > 0
+                ? (typeof college.gallery[0] === 'string' ? college.gallery[0] : college.gallery[0]?.url)
+                : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
+            }
+            alt={`${college.name} Campus Banner`}
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Ambient Gradient Overlay for high-end aesthetic */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-black/10" />
+
+          {/* Top-Right Badge Overlay on Banner */}
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-8 flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
+              {college.stream || 'Engineering'}
+            </span>
+            {college.ownership && (
+              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold border border-white/30 shadow-sm">
+                {college.ownership}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Content Overlapping Banner */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
+          <div className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-16 sm:-mt-20 md:-mt-24 mb-6">
             
-            {/* Left: Image & Titles */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 flex-shrink-0">
-                <img
-                  src={college.image || college.logo}
-                  alt={college.name}
-                  className="w-full h-full object-cover"
-                />
+            {/* Left: Overlapping Circular Logo Avatar & Titles */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
+              
+              {/* Circular Logo (LinkedIn style) */}
+              <div className="relative w-28 h-28 sm:w-36 sm:h-36 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden flex-shrink-0 z-10 flex items-center justify-center">
+                {college.logo ? (
+                  <img
+                    src={college.logo}
+                    alt={`${college.name} Logo`}
+                    className="w-full h-full object-contain p-2"
+                  />
+                ) : college.image ? (
+                  <img
+                    src={college.image}
+                    alt={`${college.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#033C8D] to-indigo-900 flex items-center justify-center text-white text-2xl font-bold uppercase">
+                    {(college.shortName || college.name || 'VS').slice(0, 4)}
+                  </div>
+                )}
               </div>
 
-              <div>
+              {/* Title & Institutional Badges */}
+              <div className="space-y-1 sm:mb-1">
                 <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                  <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[10px] font-bold uppercase">
-                    NIRF #{college.nirfRank}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[10px] font-semibold">
-                    {college.ownership}
-                  </span>
-                  <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[10px] font-semibold">
-                    Est. {college.establishmentYear}
-                  </span>
+                  {college.nirfRank && (
+                    <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase shadow-2xs">
+                      NIRF #{college.nirfRank}
+                    </span>
+                  )}
+                  {college.ownership && (
+                    <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold border border-slate-200">
+                      {college.ownership}
+                    </span>
+                  )}
+                  {college.establishmentYear && (
+                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                      Est. {college.establishmentYear}
+                    </span>
+                  )}
+                  {college.naacGrade && (
+                    <span className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[11px] font-semibold border border-purple-200">
+                      NAAC {college.naacGrade}
+                    </span>
+                  )}
                 </div>
 
-                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
+                <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary tracking-tight">
                   {college.name}
                 </h1>
 
-                <p className="flex items-center gap-2 text-xs sm:text-sm text-text-light font-medium mt-1">
+                <p className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-text-light font-medium mt-1">
                   <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
                   <span>{college.location}</span>
-                  <span>•</span>
-                  <span>Campus: {college.campusArea || '300+ Acres'}</span>
+                  {college.campusArea && (
+                    <>
+                      <span>•</span>
+                      <span>Campus: {college.campusArea}</span>
+                    </>
+                  )}
+                  {college.affiliation && (
+                    <>
+                      <span>•</span>
+                      <span className="text-text-secondary">{college.affiliation}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
 
             {/* Right Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-center">
+            <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-end sm:mb-2">
               <button
                 onClick={() => onToggleShortlist && onToggleShortlist(college.id)}
                 className={`btn btn-sm ${
                   isShortlisted
                     ? 'bg-rose-50 border-rose-200 text-rose-600 font-bold'
-                    : 'btn-outline'
-                }`}
+                    : 'btn-outline bg-white hover:bg-slate-50'
+                } shadow-2xs cursor-pointer`}
               >
                 <Heart className={`h-3.5 w-3.5 ${isShortlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
                 <span>{isShortlisted ? 'Saved' : 'Save'}</span>
@@ -197,8 +262,8 @@ const CollegeDetailPage = ({
                 className={`btn btn-sm ${
                   isCompared
                     ? 'bg-purple-50 text-brand-primary border-brand-primary/30 font-bold'
-                    : 'btn-outline'
-                }`}
+                    : 'btn-outline bg-white hover:bg-slate-50'
+                } shadow-2xs cursor-pointer`}
               >
                 <Scale className="h-3.5 w-3.5" />
                 <span>{isCompared ? 'Comparing' : 'Compare'}</span>
@@ -206,7 +271,7 @@ const CollegeDetailPage = ({
 
               <button
                 onClick={onOpenCounseling}
-                className="btn btn-primary btn-md text-xs font-bold"
+                className="btn btn-primary btn-md text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
               >
                 <span>Get Free Counseling</span>
               </button>
