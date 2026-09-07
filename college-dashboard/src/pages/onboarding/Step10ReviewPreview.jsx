@@ -190,63 +190,35 @@ const Step10ReviewPreview = ({
             </div>
           </div>
 
-          {/* Profile Content Overlapping Banner */}
+          {/* Profile Content (White Card Area) */}
           <div className="px-4 sm:px-8 pb-6 sm:pb-8">
-            <div className="relative flex flex-col lg:flex-row lg:items-end justify-between gap-6 -mt-14 sm:-mt-16 md:-mt-20 mb-6">
+            
+            {/* Row 1: Circular Avatar (Overlapping Banner) + Action Buttons */}
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-16 md:-mt-20 mb-4">
               
-              {/* Left: Circular Logo & Titles */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-end gap-5">
-                
-                {/* Circular Logo Avatar */}
-                <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden flex-shrink-0 z-10 flex items-center justify-center">
-                  {collegeData.logo ? (
-                    <img
-                      src={collegeData.logo}
-                      alt={`${collegeData.name} Logo`}
-                      className="w-full h-full object-contain p-2"
-                    />
-                  ) : collegeData.image ? (
-                    <img
-                      src={collegeData.image}
-                      alt={`${collegeData.name} Logo`}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-[#033C8D] to-indigo-900 flex items-center justify-center text-white text-2xl font-bold uppercase">
-                      {(collegeData.shortName || collegeData.name || 'VS').slice(0, 4)}
-                    </div>
-                  )}
-                </div>
-
-                {/* Title & Institutional Badges */}
-                <div className="space-y-1 sm:mb-1">
-                  <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                    <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase shadow-2xs">
-                      NIRF #{collegeData.nirfRank || collegeData.rankings?.nirfRank || '3'}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold border border-slate-200">
-                      {collegeData.ownership || 'Government'}
-                    </span>
-                    <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-                      Est. {collegeData.establishmentYear || '1958'}
-                    </span>
+              {/* Circular Logo Avatar */}
+              <div className="relative w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden flex-shrink-0 z-10 flex items-center justify-center">
+                {collegeData.logo ? (
+                  <img
+                    src={collegeData.logo}
+                    alt={`${collegeData.name} Logo`}
+                    className="w-full h-full object-contain p-2"
+                  />
+                ) : collegeData.image ? (
+                  <img
+                    src={collegeData.image}
+                    alt={`${collegeData.name} Logo`}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-[#033C8D] to-indigo-900 flex items-center justify-center text-white text-2xl font-bold uppercase">
+                    {(collegeData.shortName || collegeData.name || 'VS').slice(0, 4)}
                   </div>
-
-                  <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
-                    {collegeData.name}
-                  </h1>
-
-                  <p className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-text-light font-medium mt-1">
-                    <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-                    <span>{collegeData.location || 'Mumbai, Maharashtra'}</span>
-                    <span>•</span>
-                    <span>Campus: {collegeData.campusArea || '550 Acres'}</span>
-                  </p>
-                </div>
+                )}
               </div>
 
-              {/* Right Public Action Buttons Mock */}
-              <div className="flex flex-wrap items-center gap-2.5 self-start lg:self-end sm:mb-2">
+              {/* Right Public Action Buttons Mock (Sitting cleanly in white background) */}
+              <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-end pt-2 sm:pt-0">
                 <div className="btn btn-sm btn-outline pointer-events-none opacity-80 bg-white">
                   <Heart className="h-4 w-4" />
                   <span>Save</span>
@@ -259,6 +231,32 @@ const Step10ReviewPreview = ({
                   <span>Get Free Counseling</span>
                 </div>
               </div>
+            </div>
+
+            {/* Row 2: Title, Badges & Institutional Details (100% inside white card, no collision) */}
+            <div className="space-y-2 mb-6">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase shadow-2xs">
+                  NIRF #{collegeData.nirfRank || collegeData.rankings?.nirfRank || '3'}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold border border-slate-200">
+                  {collegeData.ownership || 'Government'}
+                </span>
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                  Est. {collegeData.establishmentYear || '1958'}
+                </span>
+              </div>
+
+              <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary tracking-tight">
+                {collegeData.name}
+              </h1>
+
+              <p className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-text-light font-medium">
+                <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
+                <span>{collegeData.location || 'Mumbai, Maharashtra'}</span>
+                <span>•</span>
+                <span>Campus: {collegeData.campusArea || '550 Acres'}</span>
+              </p>
             </div>
 
           {/* Quick Metrics Bar */}
