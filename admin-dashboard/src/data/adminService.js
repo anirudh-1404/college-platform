@@ -132,6 +132,10 @@ export const adminService = {
     }
   },
 
+  async approveAndPublishProfile(collegeId) {
+    return this.approveAndPublish(collegeId)
+  },
+
   async requestChanges(collegeId, feedbackComment) {
     try {
       const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/request-changes`, {
@@ -149,6 +153,10 @@ export const adminService = {
     }
   },
 
+  async requestProfileChanges(collegeId, feedbackComment) {
+    return this.requestChanges(collegeId, feedbackComment)
+  },
+
   async unpublish(collegeId) {
     try {
       const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/unpublish`, {
@@ -163,6 +171,10 @@ export const adminService = {
       console.error('unpublish error:', error)
       throw error
     }
+  },
+
+  async unpublishProfile(collegeId) {
+    return this.unpublish(collegeId)
   },
 
   // 4. PLATFORM DATA (Ratings & Pros/Cons)

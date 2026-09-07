@@ -176,9 +176,15 @@ export const getProfileById = async (req, res) => {
 export const approveAndPublishProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    let college = await College.findById(id);
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      college = await College.findById(id);
+    }
     if (!college) {
       college = await College.findOne({ slug: id });
+    }
+    if (!college) {
+      college = await College.findOne({ name: id });
     }
 
     if (!college) {
@@ -220,9 +226,15 @@ export const requestProfileChanges = async (req, res) => {
     const { id } = req.params;
     const { feedbackComment } = req.body;
 
-    let college = await College.findById(id);
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      college = await College.findById(id);
+    }
     if (!college) {
       college = await College.findOne({ slug: id });
+    }
+    if (!college) {
+      college = await College.findOne({ name: id });
     }
 
     if (!college) {
@@ -269,9 +281,15 @@ export const requestProfileChanges = async (req, res) => {
 export const unpublishProfile = async (req, res) => {
   try {
     const { id } = req.params;
-    let college = await College.findById(id);
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      college = await College.findById(id);
+    }
     if (!college) {
       college = await College.findOne({ slug: id });
+    }
+    if (!college) {
+      college = await College.findOne({ name: id });
     }
 
     if (!college) {

@@ -42,6 +42,7 @@ import {
   Percent,
 } from 'lucide-react'
 import AdminStatusBadge from '../common/AdminStatusBadge'
+import ErrorBoundary from '../common/ErrorBoundary'
 
 export const CollegeReviewStudio = ({
   profile,
@@ -138,15 +139,29 @@ export const CollegeReviewStudio = ({
     nirfYear: profile.rankings?.nirfYear || 2025,
     naacGrade: profile.rankings?.naacGrade || profile.naacGrade || 'A++ (3.88 CGPA)',
     naacCgpa: profile.rankings?.naacCgpa || '3.88',
-    additionalRankings: Array.isArray(profile.additionalRankings) && profile.additionalRankings.length > 0
-      ? profile.additionalRankings
-      : (Array.isArray(profile.rankings?.otherRankings)
-          ? profile.rankings.otherRankings.map((r) =>
-              typeof r === 'string'
-                ? { agency: r.split(':')[0]?.trim() || r, rank: r.split(':').slice(1).join(':').trim() || '#1', category: 'General', year: '2025' }
-                : r
-            )
-          : []),
+    additionalRankings: (
+      Array.isArray(profile.additionalRankings) && profile.additionalRankings.length > 0
+        ? profile.additionalRankings
+        : (Array.isArray(profile.rankings?.otherRankings) ? profile.rankings.otherRankings : [])
+    ).map((r, idx) => {
+      if (typeof r === 'string') {
+        const parts = r.split(':')
+        return {
+          id: `rank_${idx}`,
+          agency: parts[0]?.trim() || r,
+          rank: parts.slice(1).join(':').trim() || '#1',
+          category: 'General',
+          year: '2025',
+        }
+      }
+      return {
+        id: r?.id || `rank_${idx}`,
+        agency: r?.agency || r?.name || 'Ranking Agency',
+        rank: r?.rank || '#1',
+        category: r?.category || 'General',
+        year: r?.year || '2025',
+      }
+    }),
   }
 
   const facilities = Array.isArray(profile.facilities) ? profile.facilities : []
@@ -525,7 +540,7 @@ export const CollegeReviewStudio = ({
 
               {/* RIGHT MAIN CANVAS: Active Step Detailed Inspection */}
               <main className="flex-1 bg-slate-50 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
-                
+                <ErrorBoundary>
                 {/* ---------------- STEP 1: BASIC INFORMATION ---------------- */}
                 {activeStep === 1 && (
                   <div className="space-y-6 max-w-5xl">
@@ -546,35 +561,35 @@ export const CollegeReviewStudio = ({
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Short Name / Code</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5">{basic.shortName}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5">{String(basic.shortName || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Academic Stream</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5 capitalize">{basic.stream}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5 capitalize">{String(basic.stream || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Ownership Structure</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5">{basic.ownership}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5">{String(basic.ownership || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Established Year</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5">{basic.establishmentYear}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5">{String(basic.establishmentYear || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Campus Area</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5">{basic.campusArea} Acres</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5">{String(basic.campusArea || '')} Acres</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Affiliated University</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5 truncate" title={basic.affiliation}>{basic.affiliation}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5 truncate" title={basic.affiliation}>{String(basic.affiliation || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Accreditation Badges</span>
-                        <p className="font-bold text-slate-900 text-sm mt-0.5">{basic.accreditation}</p>
+                        <p className="font-bold text-slate-900 text-sm mt-0.5">{String(basic.accreditation || '')}</p>
                       </div>
                       <div className="p-3.5 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">NAAC Grade</span>
-                        <p className="font-bold text-emerald-700 text-sm mt-0.5">{rankings.naacGrade}</p>
+                        <p className="font-bold text-emerald-700 text-sm mt-0.5">{String(rankings.naacGrade || '')}</p>
                       </div>
                     </div>
 
@@ -585,11 +600,11 @@ export const CollegeReviewStudio = ({
                           Official Institutional Narrative / Overview
                         </h3>
                         <span className="text-[11px] text-slate-400 font-medium">
-                          {basic.description.length} Characters
+                          {String(basic.description || '').length} Characters
                         </span>
                       </div>
                       <p className="text-xs sm:text-sm text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50/70 p-4 rounded-lg border border-slate-200">
-                        {basic.description}
+                        {String(basic.description || '')}
                       </p>
                     </div>
 
@@ -602,7 +617,7 @@ export const CollegeReviewStudio = ({
                         <div className="flex flex-wrap gap-2">
                           {basic.tags.map((tag, idx) => (
                             <span key={idx} className="px-2.5 py-1 rounded-md bg-purple-50 text-purple-700 border border-purple-200 text-xs font-bold">
-                              #{tag}
+                              #{typeof tag === 'string' ? tag : (tag?.name || JSON.stringify(tag))}
                             </span>
                           ))}
                         </div>
@@ -634,12 +649,12 @@ export const CollegeReviewStudio = ({
                         <span>Official Physical Campus Address</span>
                       </div>
                       <p className="text-xs sm:text-sm text-slate-700 bg-slate-50 p-3.5 rounded-lg border border-slate-200">
-                        {contact.address}
+                        {typeof contact.address === 'string' ? contact.address : JSON.stringify(contact.address || '')}
                       </p>
                       <div className="grid grid-cols-3 gap-3 text-xs pt-1">
-                        <div><span className="text-slate-400 font-medium">City:</span> <strong className="text-slate-900">{contact.city}</strong></div>
-                        <div><span className="text-slate-400 font-medium">State:</span> <strong className="text-slate-900">{contact.state}</strong></div>
-                        <div><span className="text-slate-400 font-medium">Postal Pincode:</span> <strong className="text-slate-900">{contact.pincode || 'N/A'}</strong></div>
+                        <div><span className="text-slate-400 font-medium">City:</span> <strong className="text-slate-900">{typeof contact.city === 'string' ? contact.city : String(contact.city || '')}</strong></div>
+                        <div><span className="text-slate-400 font-medium">State:</span> <strong className="text-slate-900">{typeof contact.state === 'string' ? contact.state : String(contact.state || '')}</strong></div>
+                        <div><span className="text-slate-400 font-medium">Postal Pincode:</span> <strong className="text-slate-900">{typeof contact.pincode === 'string' ? contact.pincode : String(contact.pincode || 'N/A')}</strong></div>
                       </div>
                     </div>
 
@@ -655,7 +670,7 @@ export const CollegeReviewStudio = ({
                           </span>
                           <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">Verified</span>
                         </div>
-                        <p className="text-sm font-bold text-slate-900">{contact.admissionEmail || 'Not Provided'}</p>
+                        <p className="text-sm font-bold text-slate-900">{typeof contact.admissionEmail === 'string' ? contact.admissionEmail : 'Not Provided'}</p>
                         {contact.admissionEmail && (
                           <a
                             href={`mailto:${contact.admissionEmail}`}
@@ -673,7 +688,7 @@ export const CollegeReviewStudio = ({
                           <Phone className="h-3.5 w-3.5 text-emerald-600" />
                           Primary Helpline Telephone
                         </span>
-                        <p className="text-sm font-bold text-slate-900">{contact.helplineNumber || 'Not Provided'}</p>
+                        <p className="text-sm font-bold text-slate-900">{typeof contact.helplineNumber === 'string' ? contact.helplineNumber : 'Not Provided'}</p>
                         {contact.helplineNumber && (
                           <a
                             href={`tel:${contact.helplineNumber}`}
@@ -691,7 +706,7 @@ export const CollegeReviewStudio = ({
                           <Phone className="h-3.5 w-3.5 text-purple-600" />
                           Toll-Free / Alternate Helpline
                         </span>
-                        <p className="text-sm font-bold text-slate-900">{contact.alternatePhone || 'None Provided'}</p>
+                        <p className="text-sm font-bold text-slate-900">{typeof contact.alternatePhone === 'string' ? contact.alternatePhone : 'None Provided'}</p>
                       </div>
 
                       {/* Official Website */}
@@ -703,11 +718,11 @@ export const CollegeReviewStudio = ({
                           </span>
                         </div>
                         <p className="text-sm font-bold text-slate-900 truncate" title={contact.websiteUrl}>
-                          {contact.websiteUrl || 'Not Provided'}
+                          {typeof contact.websiteUrl === 'string' ? contact.websiteUrl : 'Not Provided'}
                         </p>
                         {contact.websiteUrl && (
                           <a
-                            href={contact.websiteUrl.startsWith('http') ? contact.websiteUrl : `https://${contact.websiteUrl}`}
+                            href={String(contact.websiteUrl).startsWith('http') ? contact.websiteUrl : `https://${contact.websiteUrl}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1 text-xs text-[#033C8D] font-bold hover:underline"
@@ -724,9 +739,9 @@ export const CollegeReviewStudio = ({
                     <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex items-center justify-between">
                       <div>
                         <span className="text-xs font-bold text-slate-800">Map Coordinates / Geolocation</span>
-                        <p className="text-xs text-slate-500 mt-0.5 font-mono">{contact.mapCoordinates || 'Coordinates not provided'}</p>
+                        <p className="text-xs text-slate-500 font-mono mt-0.5">{typeof contact.mapCoordinates === 'string' ? contact.mapCoordinates : 'Coordinates not provided'}</p>
                       </div>
-                      {contact.mapCoordinates && (
+                      {contact.mapCoordinates && typeof contact.mapCoordinates === 'string' && (
                         <a
                           href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(contact.mapCoordinates)}`}
                           target="_blank"
@@ -791,30 +806,32 @@ export const CollegeReviewStudio = ({
                             {filteredCourses.map((c, idx) => (
                               <tr key={c.id || idx} className="hover:bg-slate-50/70 transition-colors">
                                 <td className="py-3 px-4">
-                                  <p className="font-bold text-slate-900">{c.name}</p>
-                                  {c.department && <p className="text-[11px] text-slate-400 mt-0.5">{c.department}</p>}
+                                  <p className="font-bold text-slate-900">{typeof c.name === 'string' ? c.name : String(c.name || '')}</p>
+                                  {c.department && <p className="text-[11px] text-slate-400 mt-0.5">{String(c.department)}</p>}
                                 </td>
                                 <td className="py-3 px-4 font-semibold text-slate-700">
-                                  {c.degreeLevel || 'B.Tech'}
+                                  {typeof c.degreeLevel === 'string' ? c.degreeLevel : 'B.Tech'}
                                 </td>
                                 <td className="py-3 px-4 text-slate-600">
-                                  {c.duration || '4 Years'}
+                                  {typeof c.duration === 'string' ? c.duration : '4 Years'}
                                 </td>
                                 <td className="py-3 px-4">
                                   <span className="font-bold text-[#033C8D] bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
-                                    {c.fee || '₹2.5 L/yr'}
+                                    {typeof c.fee === 'string' ? c.fee : '₹2.5 L/yr'}
                                   </span>
                                 </td>
                                 <td className="py-3 px-4 font-bold text-slate-700">
-                                  {c.seatIntake || '120'}
+                                  {String(c.seatIntake || '120')}
                                 </td>
                                 <td className="py-3 px-4">
-                                  <p className="text-slate-700 font-medium truncate max-w-xs" title={c.eligibility}>
-                                    {c.eligibility || 'Class 12th with PCM ≥ 75%'}
+                                  <p className="text-slate-700 font-medium truncate max-w-xs" title={typeof c.eligibility === 'string' ? c.eligibility : ''}>
+                                    {typeof c.eligibility === 'string' ? c.eligibility : 'Class 12th with PCM ≥ 75%'}
                                   </p>
                                   {c.examAccepted && (
                                     <span className="text-[10px] text-purple-700 font-bold block mt-0.5">
-                                      Exams: {c.examAccepted}
+                                      Exams: {Array.isArray(c.examAccepted)
+                                        ? c.examAccepted.map((e) => (typeof e === 'string' ? e : (e?.name || e?.exam || JSON.stringify(e)))).join(', ')
+                                        : (typeof c.examAccepted === 'string' ? c.examAccepted : '')}
                                     </span>
                                   )}
                                 </td>
@@ -856,20 +873,20 @@ export const CollegeReviewStudio = ({
                       <div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Admission Status</span>
                         <span className="inline-block mt-1 px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-xs font-bold">
-                          {admissions.status}
+                          {String(admissions.status || 'Admissions Open')}
                         </span>
                       </div>
                       <div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Academic Year</span>
-                        <span className="font-bold text-slate-900 text-sm mt-1 block">{admissions.academicYear}</span>
+                        <span className="font-bold text-slate-900 text-sm mt-1 block">{String(admissions.academicYear || '')}</span>
                       </div>
                       <div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Applications Open</span>
-                        <span className="font-bold text-slate-900 text-sm mt-1 block">{admissions.applicationStart || 'Rolling'}</span>
+                        <span className="font-bold text-slate-900 text-sm mt-1 block">{String(admissions.applicationStart || 'Rolling')}</span>
                       </div>
                       <div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Application Deadline</span>
-                        <span className="font-bold text-rose-600 text-sm mt-1 block">{admissions.applicationEnd || 'Rolling Basis'}</span>
+                        <span className="font-bold text-rose-600 text-sm mt-1 block">{String(admissions.applicationEnd || 'Rolling Basis')}</span>
                       </div>
                     </div>
 
@@ -882,7 +899,7 @@ export const CollegeReviewStudio = ({
                         {admissions.examAccepted.map((ex, idx) => (
                           <span key={idx} className="px-3 py-1.5 rounded-lg bg-blue-50 text-[#033C8D] border border-blue-200 text-xs font-bold flex items-center gap-1.5">
                             <Award className="h-3.5 w-3.5 text-[#033C8D]" />
-                            <span>{ex}</span>
+                            <span>{typeof ex === 'string' ? ex : (ex?.name || ex?.exam || ex?.label || JSON.stringify(ex))}</span>
                           </span>
                         ))}
                         {admissions.examAccepted.length === 0 && (
@@ -896,10 +913,10 @@ export const CollegeReviewStudio = ({
                       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex items-center justify-between">
                         <div>
                           <span className="text-xs font-bold text-slate-800">Online Admission Application Portal</span>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{admissions.portalUrl}</p>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{String(admissions.portalUrl)}</p>
                         </div>
                         <a
-                          href={admissions.portalUrl.startsWith('http') ? admissions.portalUrl : `https://${admissions.portalUrl}`}
+                          href={String(admissions.portalUrl).startsWith('http') ? admissions.portalUrl : `https://${admissions.portalUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="btn btn-outline btn-sm text-xs font-bold"
@@ -917,17 +934,22 @@ export const CollegeReviewStudio = ({
                       </h3>
 
                       <div className="space-y-3">
-                        {admissions.steps.map((st, idx) => (
-                          <div key={idx} className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
-                            <span className="h-7 w-7 rounded-lg bg-[#033C8D] text-white text-xs font-bold flex items-center justify-center shrink-0">
-                              {st.step || idx + 1}
-                            </span>
-                            <div>
-                              <h4 className="font-bold text-xs sm:text-sm text-slate-900">{st.title || `Stage ${idx + 1}`}</h4>
-                              <p className="text-xs text-slate-600 mt-1 leading-relaxed">{st.desc || st.description || ''}</p>
+                        {admissions.steps.map((st, idx) => {
+                          const stepNumber = typeof st === 'object' ? (st?.step || idx + 1) : idx + 1
+                          const title = typeof st === 'object' ? (st?.title || `Stage ${idx + 1}`) : (typeof st === 'string' ? st.split(':')[0] : `Stage ${idx + 1}`)
+                          const desc = typeof st === 'object' ? (st?.desc || st?.description || '') : (typeof st === 'string' ? st.split(':').slice(1).join(':').trim() : '')
+                          return (
+                            <div key={idx} className="flex items-start gap-3.5 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                              <span className="h-7 w-7 rounded-lg bg-[#033C8D] text-white text-xs font-bold flex items-center justify-center shrink-0">
+                                {stepNumber}
+                              </span>
+                              <div>
+                                <h4 className="font-bold text-xs sm:text-sm text-slate-900">{title}</h4>
+                                <p className="text-xs text-slate-600 mt-1 leading-relaxed">{desc}</p>
+                              </div>
                             </div>
-                          </div>
-                        ))}
+                          )
+                        })}
 
                         {admissions.steps.length === 0 && (
                           <p className="text-xs text-slate-400 text-center py-4">No admission process stages entered.</p>
@@ -984,26 +1006,34 @@ export const CollegeReviewStudio = ({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {filteredCutoffs.map((row, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                                <td className="py-3 px-4 font-bold text-[#033C8D]">{row.exam}</td>
-                                <td className="py-3 px-4 font-semibold text-slate-900">{row.course}</td>
-                                <td className="py-3 px-4 text-slate-600">{row.quota || 'All India'}</td>
-                                <td className="py-3 px-4 text-slate-500 font-bold">Round {row.round || 1}</td>
-                                <td className="py-3 px-4 font-bold text-emerald-700 bg-emerald-50/50">
-                                  #{row.generalCutoff || row.general || 'N/A'}
-                                </td>
-                                <td className="py-3 px-4 font-bold text-blue-700">
-                                  #{row.obcCutoff || row.obc || 'N/A'}
-                                </td>
-                                <td className="py-3 px-4 text-slate-600">
-                                  #{row.scCutoff || row.sc || 'N/A'}
-                                </td>
-                                <td className="py-3 px-4 text-slate-600">
-                                  #{row.stCutoff || row.st || 'N/A'}
-                                </td>
-                              </tr>
-                            ))}
+                            {filteredCutoffs.map((row, idx) => {
+                              const formatCutoff = (val) => {
+                                if (!val) return 'N/A'
+                                if (typeof val === 'object') return val.rank || val.cutoff || JSON.stringify(val)
+                                const s = String(val)
+                                return s.startsWith('#') ? s : `#${s}`
+                              }
+                              return (
+                                <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                                  <td className="py-3 px-4 font-bold text-[#033C8D]">{String(row.exam || '')}</td>
+                                  <td className="py-3 px-4 font-semibold text-slate-900">{String(row.course || '')}</td>
+                                  <td className="py-3 px-4 text-slate-600">{String(row.quota || 'All India')}</td>
+                                  <td className="py-3 px-4 text-slate-500 font-bold">Round {String(row.round || 1)}</td>
+                                  <td className="py-3 px-4 font-bold text-emerald-700 bg-emerald-50/50">
+                                    {formatCutoff(row.generalCutoff || row.general)}
+                                  </td>
+                                  <td className="py-3 px-4 font-bold text-blue-700">
+                                    {formatCutoff(row.obcCutoff || row.obc)}
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600">
+                                    {formatCutoff(row.scCutoff || row.sc)}
+                                  </td>
+                                  <td className="py-3 px-4 text-slate-600">
+                                    {formatCutoff(row.stCutoff || row.st)}
+                                  </td>
+                                </tr>
+                              )
+                            })}
 
                             {filteredCutoffs.length === 0 && (
                               <tr>
@@ -1039,19 +1069,19 @@ export const CollegeReviewStudio = ({
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
                       <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Average Salary CTC</span>
-                        <p className="font-extrabold text-emerald-600 text-lg mt-1">{placements.avgPackage}</p>
+                        <p className="font-extrabold text-emerald-600 text-lg mt-1">{String(placements.avgPackage || 'N/A')}</p>
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Median Salary CTC</span>
-                        <p className="font-extrabold text-slate-900 text-lg mt-1">{placements.medianPackage}</p>
+                        <p className="font-extrabold text-slate-900 text-lg mt-1">{String(placements.medianPackage || 'N/A')}</p>
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Highest Domestic CTC</span>
-                        <p className="font-extrabold text-[#033C8D] text-lg mt-1">{placements.highestDomestic}</p>
+                        <p className="font-extrabold text-[#033C8D] text-lg mt-1">{String(placements.highestDomestic || 'N/A')}</p>
                       </div>
                       <div className="p-4 bg-white rounded-xl border border-slate-200 shadow-2xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Placement Success Rate</span>
-                        <p className="font-extrabold text-purple-700 text-lg mt-1">{placements.placementRate}%</p>
+                        <p className="font-extrabold text-purple-700 text-lg mt-1">{String(placements.placementRate || 0)}%</p>
                       </div>
                     </div>
 
@@ -1066,7 +1096,7 @@ export const CollegeReviewStudio = ({
                             key={idx}
                             className="px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-800 shadow-2xs"
                           >
-                            {rec}
+                            {typeof rec === 'string' ? rec : (rec?.name || rec?.company || JSON.stringify(rec))}
                           </span>
                         ))}
                         {placements.topRecruiters.length === 0 && (
@@ -1080,7 +1110,7 @@ export const CollegeReviewStudio = ({
                       <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-2xs flex items-center justify-between">
                         <div>
                           <span className="text-xs font-bold text-slate-800">Official Placement Report / Brochure</span>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{placements.placementReportUrl}</p>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{String(placements.placementReportUrl)}</p>
                         </div>
                         <a
                           href={placements.placementReportUrl}
@@ -1119,8 +1149,8 @@ export const CollegeReviewStudio = ({
                       <div className="p-4 bg-gradient-to-br from-blue-50 to-white rounded-xl border border-blue-200 shadow-2xs space-y-1">
                         <span className="text-[10px] font-bold text-blue-600 uppercase tracking-wider">NIRF All India Rank</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-black text-[#033C8D]">#{rankings.nirfRank}</span>
-                          <span className="text-xs font-bold text-slate-500">in {rankings.nirfCategory} ({rankings.nirfYear})</span>
+                          <span className="text-2xl font-black text-[#033C8D]">#{String(rankings.nirfRank || '')}</span>
+                          <span className="text-xs font-bold text-slate-500">in {String(rankings.nirfCategory || 'Engineering')} ({String(rankings.nirfYear || 2025)})</span>
                         </div>
                       </div>
 
@@ -1128,8 +1158,8 @@ export const CollegeReviewStudio = ({
                       <div className="p-4 bg-gradient-to-br from-emerald-50 to-white rounded-xl border border-emerald-200 shadow-2xs space-y-1">
                         <span className="text-[10px] font-bold text-emerald-600 uppercase tracking-wider">NAAC Accreditation</span>
                         <div className="flex items-baseline gap-2">
-                          <span className="text-2xl font-black text-emerald-700">{rankings.naacGrade}</span>
-                          <span className="text-xs font-bold text-slate-500">({rankings.naacCgpa} CGPA)</span>
+                          <span className="text-2xl font-black text-emerald-700">{String(rankings.naacGrade || '')}</span>
+                          <span className="text-xs font-bold text-slate-500">({String(rankings.naacCgpa || '')} CGPA)</span>
                         </div>
                       </div>
 
@@ -1137,7 +1167,7 @@ export const CollegeReviewStudio = ({
                       <div className="p-4 bg-gradient-to-br from-purple-50 to-white rounded-xl border border-purple-200 shadow-2xs space-y-1">
                         <span className="text-[10px] font-bold text-purple-600 uppercase tracking-wider">Statutory Recognition</span>
                         <div className="text-sm font-extrabold text-purple-900 mt-1">
-                          {basic.accreditation || 'AICTE / UGC / MHRD'}
+                          {String(basic.accreditation || 'AICTE / UGC / MHRD')}
                         </div>
                       </div>
 
@@ -1160,16 +1190,18 @@ export const CollegeReviewStudio = ({
                             </tr>
                           </thead>
                           <tbody className="divide-y divide-slate-100">
-                            {rankings.additionalRankings.map((r, idx) => (
-                              <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
-                                <td className="py-2.5 px-4 font-bold text-slate-900">{r.agency || r.name}</td>
-                                <td className="py-2.5 px-4 font-bold text-[#033C8D]">
-                                  {String(r.rank).startsWith('#') ? r.rank : `#${r.rank}`}
-                                </td>
-                                <td className="py-2.5 px-4 text-slate-600">{r.category || 'Overall / Engineering'}</td>
-                                <td className="py-2.5 px-4 text-slate-500 font-semibold">{r.year || '2025'}</td>
-                              </tr>
-                            ))}
+                            {rankings.additionalRankings.map((r, idx) => {
+                              const agency = r?.agency || r?.name || 'Agency'
+                              const rankStr = r?.rank ? (String(r.rank).startsWith('#') ? r.rank : `#${r.rank}`) : '#1'
+                              return (
+                                <tr key={idx} className="hover:bg-slate-50/70 transition-colors">
+                                  <td className="py-2.5 px-4 font-bold text-slate-900">{agency}</td>
+                                  <td className="py-2.5 px-4 font-bold text-[#033C8D]">{rankStr}</td>
+                                  <td className="py-2.5 px-4 text-slate-600">{String(r?.category || 'Overall / Engineering')}</td>
+                                  <td className="py-2.5 px-4 text-slate-500 font-semibold">{String(r?.year || '2025')}</td>
+                                </tr>
+                              )
+                            })}
 
                             {rankings.additionalRankings.length === 0 && (
                               <tr>
@@ -1213,7 +1245,7 @@ export const CollegeReviewStudio = ({
                             className="px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold flex items-center gap-1.5"
                           >
                             <Check className="h-3.5 w-3.5 text-emerald-600" />
-                            <span>{f}</span>
+                            <span>{typeof f === 'string' ? f : (f?.name || f?.title || JSON.stringify(f))}</span>
                           </span>
                         ))}
                         {facilities.length === 0 && (
@@ -1231,19 +1263,19 @@ export const CollegeReviewStudio = ({
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                           <span className="text-slate-400 text-[10px] uppercase font-bold block">Total Hostels</span>
-                          <strong className="text-slate-900 text-sm mt-0.5 block">{hostel.totalHostels || '17 Halls of Residence'}</strong>
+                          <strong className="text-slate-900 text-sm mt-0.5 block">{String(hostel.totalHostels || '17 Halls of Residence')}</strong>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                           <span className="text-slate-400 text-[10px] uppercase font-bold block">Total Capacity</span>
-                          <strong className="text-slate-900 text-sm mt-0.5 block">{hostel.totalCapacity || '10,000+ Students'}</strong>
+                          <strong className="text-slate-900 text-sm mt-0.5 block">{String(hostel.totalCapacity || '10,000+ Students')}</strong>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                           <span className="text-slate-400 text-[10px] uppercase font-bold block">Mess Food Type</span>
-                          <strong className="text-slate-900 text-sm mt-0.5 block">{hostel.messFoodType || 'Veg & Non-Veg Multi-Cuisine'}</strong>
+                          <strong className="text-slate-900 text-sm mt-0.5 block">{String(hostel.messFoodType || 'Veg & Non-Veg Multi-Cuisine')}</strong>
                         </div>
                         <div className="p-3 bg-slate-50 rounded-lg border border-slate-100">
                           <span className="text-slate-400 text-[10px] uppercase font-bold block">Annual Hostel + Mess Fee</span>
-                          <strong className="text-emerald-700 text-sm mt-0.5 block">{hostel.annualHostelMessFee || '₹85,000 / Year'}</strong>
+                          <strong className="text-emerald-700 text-sm mt-0.5 block">{String(hostel.annualHostelMessFee || '₹85,000 / Year')}</strong>
                         </div>
                       </div>
                     </div>
@@ -1328,7 +1360,7 @@ export const CollegeReviewStudio = ({
                             <Video className="h-4 w-4 text-purple-600" />
                             Campus 360 Virtual Tour / Drone Video Tour
                           </span>
-                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{virtualTourUrl}</p>
+                          <p className="text-xs text-slate-500 font-mono mt-0.5 truncate">{String(virtualTourUrl)}</p>
                         </div>
                         <a
                           href={virtualTourUrl}
@@ -1345,9 +1377,9 @@ export const CollegeReviewStudio = ({
                     {/* Photo Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                       {gallery.map((img, idx) => {
-                        const imgUrl = typeof img === 'string' ? img : img.url
-                        const caption = typeof img === 'object' ? img.caption : `Campus Photo ${idx + 1}`
-                        const category = typeof img === 'object' ? img.category : 'Campus'
+                        const imgUrl = typeof img === 'string' ? img : (img?.url || img?.src || '')
+                        const caption = typeof img === 'object' ? (img?.caption || `Campus Photo ${idx + 1}`) : `Campus Photo ${idx + 1}`
+                        const category = typeof img === 'object' ? (img?.category || 'Campus') : 'Campus'
                         return (
                           <div
                             key={idx}
@@ -1459,8 +1491,8 @@ export const CollegeReviewStudio = ({
                       </div>
                     </div>
 
-                    {/* Administrative Verdict Action Cards */}
-                    <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-2xs space-y-4">
+                    {/* Verdict Decision Panel */}
+                    <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-2xs space-y-4">
                       <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
                         Administrative Verdict Actions
                       </h3>
@@ -1508,7 +1540,7 @@ export const CollegeReviewStudio = ({
 
                   </div>
                 )}
-
+                </ErrorBoundary>
               </main>
             </>
           )}
@@ -1700,7 +1732,7 @@ export const CollegeReviewStudio = ({
                           <div className="flex flex-wrap gap-2">
                             {placements.topRecruiters.map((r, idx) => (
                               <span key={idx} className="px-2.5 py-1 rounded bg-slate-100 text-xs font-bold text-slate-700">
-                                {r}
+                                {typeof r === 'string' ? r : (r?.name || r?.company || JSON.stringify(r))}
                               </span>
                             ))}
                           </div>
@@ -1730,7 +1762,7 @@ export const CollegeReviewStudio = ({
                           <div className="flex flex-wrap gap-2">
                             {facilities.map((f, idx) => (
                               <span key={idx} className="px-2.5 py-1 rounded-md bg-slate-100 text-xs text-slate-700">
-                                ✓ {f}
+                                ✓ {typeof f === 'string' ? f : (f?.name || f?.title || JSON.stringify(f))}
                               </span>
                             ))}
                           </div>

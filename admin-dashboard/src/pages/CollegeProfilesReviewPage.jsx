@@ -132,6 +132,9 @@ const CollegeProfilesReviewPage = ({
       await onApproveAndPublish(collegeId)
       setApprovePublishModalOpen(false)
       setReviewingProfile(null)
+    } catch (err) {
+      console.error('Failed to approve profile:', err)
+      alert(err.message || 'Failed to approve and publish profile. Please try again.')
     } finally {
       setIsProcessing(false)
     }
@@ -150,6 +153,9 @@ const CollegeProfilesReviewPage = ({
       setRequestChangesModalOpen(false)
       setFeedbackComment('')
       setReviewingProfile(null)
+    } catch (err) {
+      console.error('Failed to request changes:', err)
+      alert(err.message || 'Failed to request changes. Please try again.')
     } finally {
       setIsProcessing(false)
     }
@@ -163,6 +169,9 @@ const CollegeProfilesReviewPage = ({
       await onUnpublish(collegeId)
       setUnpublishModalOpen(false)
       setReviewingProfile(null)
+    } catch (err) {
+      console.error('Failed to unpublish profile:', err)
+      alert(err.message || 'Failed to unpublish profile. Please try again.')
     } finally {
       setIsProcessing(false)
     }
