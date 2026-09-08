@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import {
   Compass,
   Search,
@@ -8,7 +8,12 @@ import {
   Layers,
   ArrowRight,
   Sparkles,
+  Upload,
+  Image as ImageIcon,
+  X,
+  Loader2,
 } from 'lucide-react'
+import { adminService } from '../data/adminService'
 import { AdminModal } from '../components/common/AdminModal'
 
 const CATEGORIES = [
@@ -33,11 +38,14 @@ const CareerGuidesManagementPage = ({
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [selectedGuide, setSelectedGuide] = useState(null)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [uploadingImage, setUploadingImage] = useState(false)
+  const fileInputRef = useRef(null)
 
   // Form State
   const [formData, setFormData] = useState({
     title: '',
     category: 'Engineering & Technology',
+    image: '',
     shortDescription: '',
     averageSalary: '₹12 - 25 LPA',
     eligibility: '10+2 with relevant subjects',
@@ -64,6 +72,32 @@ const CareerGuidesManagementPage = ({
     })
   }, [guides, searchQuery, categoryFilter])
 
+  const handleImageUpload = async (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select a valid image file (PNG, JPG, WebP, etc.).')
+      return
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Image size exceeds 10MB limit.')
+      return
+    }
+
+    setUploadingImage(true)
+    try {
+      const url = await adminService.uploadImage(file, 'vidyascope/career_guides')
+      setFormData((prev) => ({ ...prev, image: url }))
+    } catch (err) {
+      alert(err.message || 'Image upload failed. Please try pasting a direct image URL.')
+    } finally {
+      setUploadingImage(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
+    }
+  }
+
   const handleConfirmAdd = async (e) => {
     e.preventDefault()
     if (!formData.title.trim()) {
@@ -76,6 +110,7 @@ const CareerGuidesManagementPage = ({
       await onAddGuide({
         title: formData.title.trim(),
         category: formData.category,
+        image: formData.image.trim(),
         shortDescription: formData.shortDescription.trim(),
         averageSalary: formData.averageSalary.trim(),
         eligibility: formData.eligibility.trim(),
@@ -109,6 +144,7 @@ const CareerGuidesManagementPage = ({
       setFormData({
         title: '',
         category: 'Engineering & Technology',
+        image: '',
         shortDescription: '',
         averageSalary: '₹12 - 25 LPA',
         eligibility: '10+2 with relevant subjects',
@@ -211,10 +247,30 @@ const CareerGuidesManagementPage = ({
               {filteredGuides.map((guide) => (
                 <tr key={guide.id} className="hover:bg-slate-50/70 transition-colors">
                   <td className="py-3 px-4">
-                    <p className="font-semibold text-slate-900">{guide.title}</p>
-                    <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                      {guide.shortDescription || 'Educational roadmap.'}
-                    </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-9 rounded-md bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                        {guide.image ? (
+                          <img
+                            src={guide.image}
+                            alt={guide.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none'
+                            }}
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-slate-400">
+                            <Compass className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-semibold text-slate-900">{guide.title}</p>
+                        <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                          {guide.shortDescription || 'Educational roadmap.'}
+                        </p>
+                      </div>
+                    </div>
                   </td>
 
                   <td className="py-3 px-4 text-slate-700 font-medium">
@@ -339,6 +395,98 @@ const CareerGuidesManagementPage = ({
                   placeholder="Overview of the career path, core responsibilities, and industry impact..."
                   className="w-full border border-slate-300 rounded-lg p-2 focus:outline-none focus:ring-1 focus:ring-purple-600"
                 />
+              </div>
+
+              {/* Cover Picture / Banner Image */}
+              <div className="space-y-2 p-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <div className="flex items-center justify-between">
+                  <label className="block font-semibold text-slate-700">
+                    Career Cover Picture / Banner
+                  </label>
+                  <span className="text-[11px] text-slate-400">
+                    Displayed on homepage cards & reader view
+                  </span>
+                </div>
+
+                <div className="flex flex-col sm:flex-row gap-3 items-start">
+                  {/* Live Image Preview */}
+                  {formData.image ? (
+                    <div className="relative w-full sm:w-44 aspect-[16/9] rounded-lg overflow-hidden border border-purple-200 bg-white shadow-2xs group shrink-0">
+                      <img
+                        src={formData.image}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.onerror = null
+                          e.currentTarget.src =
+                            'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80'
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, image: '' })}
+                        className="absolute top-1.5 right-1.5 p-1 bg-slate-900/70 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer"
+                        title="Remove image"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div
+                      onClick={() => fileInputRef.current?.click()}
+                      className="w-full sm:w-44 aspect-[16/9] rounded-lg border-2 border-dashed border-slate-300 hover:border-purple-400 bg-white flex flex-col items-center justify-center text-slate-400 hover:text-purple-600 transition-colors cursor-pointer shrink-0"
+                    >
+                      {uploadingImage ? (
+                        <div className="flex flex-col items-center gap-1">
+                          <Loader2 className="w-5 h-5 animate-spin text-purple-600" />
+                          <span className="text-[10px] font-semibold text-slate-600">Uploading...</span>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col items-center gap-1">
+                          <Upload className="w-5 h-5 text-slate-400" />
+                          <span className="text-[10px] font-semibold">Upload Photo</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* URL and Upload Controls */}
+                  <div className="flex-1 w-full space-y-2">
+                    <div className="flex gap-2">
+                      <input
+                        type="url"
+                        value={formData.image}
+                        onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                        placeholder="Paste image URL (e.g. Unsplash or hosted photo link)..."
+                        className="flex-1 border border-slate-300 rounded-lg p-2 text-xs focus:outline-none focus:ring-1 focus:ring-purple-600 bg-white"
+                      />
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        disabled={uploadingImage}
+                        onClick={() => fileInputRef.current?.click()}
+                        className="px-3 py-2 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-lg text-xs font-semibold flex items-center gap-1.5 cursor-pointer disabled:opacity-50 transition-colors shrink-0"
+                      >
+                        {uploadingImage ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Upload className="w-3.5 h-3.5" />
+                        )}
+                        <span>{uploadingImage ? 'Uploading...' : 'Browse'}</span>
+                      </button>
+                    </div>
+
+                    <p className="text-[10px] text-slate-400 leading-tight">
+                      Supported formats: PNG, JPG, WebP (up to 10MB). Or paste any direct HTTPS image URL.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -20,6 +20,28 @@ export const adminService = {
     }
   },
 
+  // UPLOAD IMAGE
+  async uploadImage(file, folder = 'vidyascope/career_guides') {
+    const token = adminAuthService.getToken()
+    const uploadEndpoint = `${API_BASE_URL.replace(/\/admin\/?$/, '')}/upload`
+
+    const formData = new FormData()
+    formData.append('image', file)
+    formData.append('folder', folder)
+
+    const res = await fetch(uploadEndpoint, {
+      method: 'POST',
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    })
+
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.message || 'Image upload failed')
+    return data.url
+  },
+
   // 1. ANALYTICS
   async getAnalytics() {
     try {
