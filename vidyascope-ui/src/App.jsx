@@ -79,7 +79,7 @@ const App = () => {
   }, [location.pathname])
 
   // Navigation Handlers
-  const handleNavigate = (page) => {
+  const handleNavigate = (page, param) => {
     switch (page) {
       case 'home':
         navigate('/')
@@ -91,7 +91,7 @@ const App = () => {
         navigate('/categories')
         break
       case 'college-detail':
-        navigate(`/colleges/${selectedCollegeId || 'iit-bombay'}`)
+        navigate(`/colleges/${param || selectedCollegeId || 'iit-bombay'}`)
         break
       case 'courses':
         navigate('/courses')
@@ -106,7 +106,11 @@ const App = () => {
         navigate('/shortlist')
         break
       case 'career-guide':
-        navigate('/career-guide')
+        if (param) {
+          navigate(`/career-guide?id=${encodeURIComponent(param)}`)
+        } else {
+          navigate('/career-guide')
+        }
         break
       case 'counseling':
         navigate('/counseling')

@@ -17,15 +17,29 @@ const careerGuideSchema = new mongoose.Schema(
     category: {
       type: String,
       required: [true, "Category is required"],
-      enum: [
-        "Engineering & Technology",
-        "Management & Finance",
-        "Medical & Healthcare",
-        "Law & Legal",
-        "Design & Architecture",
-        "Applied Sciences",
-      ],
       default: "Engineering & Technology",
+      trim: true,
+    },
+    badge: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    image: {
+      type: String,
+      default: "",
+    },
+    readTime: {
+      type: String,
+      default: "5 min read",
+    },
+    author: {
+      type: String,
+      default: "VidyaScope Editorial Team",
+    },
+    summary: {
+      type: String,
+      default: "",
     },
     shortDescription: {
       type: String,
@@ -59,6 +73,10 @@ const careerGuideSchema = new mongoose.Schema(
         duration: { type: String, default: "1-2 Years" },
       },
     ],
+    content: {
+      type: String,
+      default: "",
+    },
     published: {
       type: Boolean,
       default: true,
@@ -68,3 +86,4 @@ const careerGuideSchema = new mongoose.Schema(
 );
 
 export const CareerGuide = mongoose.model("CareerGuide", careerGuideSchema);
+

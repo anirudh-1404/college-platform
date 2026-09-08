@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import {
   ChevronRight,
   Home,
@@ -30,9 +31,12 @@ const CareerGuidePage = ({
   onNavigateColleges,
   onOpenCounseling,
 }) => {
+  const [searchParams, setSearchParams] = useSearchParams()
+  const guideParam = searchParams.get('id') || searchParams.get('guide')
+
   const [guides, setGuides] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedGuideId, setSelectedGuideId] = useState(null)
+  const [selectedGuideId, setSelectedGuideId] = useState(guideParam || null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('All Disciplines')
 
@@ -52,6 +56,22 @@ const CareerGuidePage = ({
     fetchGuides()
   }, [])
 
+  // Sync guideParam from URL with selectedGuideId
+  useEffect(() => {
+    if (guideParam) {
+      setSelectedGuideId(guideParam)
+    }
+  }, [guideParam])
+
+  const handleSelectGuide = (id) => {
+    setSelectedGuideId(id)
+    if (id) {
+      setSearchParams({ id })
+    } else {
+      setSearchParams({})
+    }
+  }
+
   // Filtered guides based on search query and category
   const filteredGuides = useMemo(() => {
     return guides.filter((guide) => {
@@ -61,7 +81,8 @@ const CareerGuidePage = ({
       const matchSearch =
         searchQuery.trim() === '' ||
         guide.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        guide.shortDescription.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (guide.shortDescription && guide.shortDescription.toLowerCase().includes(searchQuery.toLowerCase())) ||
+        (guide.summary && guide.summary.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (guide.requiredDegrees || []).some((d) =>
           d.toLowerCase().includes(searchQuery.toLowerCase())
         ) ||
@@ -76,7 +97,14 @@ const CareerGuidePage = ({
   // Active guide for Reader / Detail view
   const currentGuide = useMemo(() => {
     if (!selectedGuideId) return null
-    return guides.find((g) => g.id === selectedGuideId || g.slug === selectedGuideId) || null
+    return (
+      guides.find(
+        (g) =>
+          g.id === selectedGuideId ||
+          g.slug === selectedGuideId ||
+          g._id === selectedGuideId
+      ) || null
+    )
   }, [guides, selectedGuideId])
 
   return (
@@ -94,7 +122,7 @@ const CareerGuidePage = ({
             </button>
             <ChevronRight className="h-3 w-3 text-slate-400" />
             <button
-              onClick={() => setSelectedGuideId(null)}
+              onClick={() => handleSelectGuide(null)}
               className={`hover:text-brand-primary cursor-pointer ${
                 !currentGuide ? 'text-text-primary font-bold' : ''
               }`}
@@ -122,7 +150,7 @@ const CareerGuidePage = ({
           <div className="max-w-4xl mx-auto space-y-6">
             <button
               type="button"
-              onClick={() => setSelectedGuideId(null)}
+              onClick={() => handleSelectGuide(null)}
               className="inline-flex items-center gap-2 text-xs font-bold text-brand-primary hover:text-brand-primary-hover cursor-pointer"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -130,16 +158,56 @@ const CareerGuidePage = ({
             </button>
 
             <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
+              {/* Featured Banner Image */}
+              {currentGuide.image && (
+                <div className="relative rounded-xl overflow-hidden aspect-[21/9] max-h-72 bg-slate-100">
+                  <img
+                    src={currentGuide.image}
+                    alt={currentGuide.title}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null
+                      e.currentTarget.src =
+                        'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80'
+                    }}
+                    className="w-full h-full object-cover"
+                  />
+                  {currentGuide.badge && (
+                    <span className="absolute top-3 left-3 bg-white/95 backdrop-blur-xs text-brand-primary text-xs font-bold px-2.5 py-1 rounded-md shadow-xs uppercase">
+                      {currentGuide.badge}
+                    </span>
+                  )}
+                </div>
+              )}
+
               {/* Header */}
               <div className="space-y-2 pb-6 border-b border-slate-100">
-                <span className="text-xs font-semibold text-slate-500 block">
-                  {currentGuide.category}
-                </span>
+                <div className="flex items-center gap-2 text-xs text-slate-500 flex-wrap">
+                  <span className="font-semibold text-brand-primary">{currentGuide.category}</span>
+                  {currentGuide.date && (
+                    <>
+                      <span>•</span>
+                      <span>{currentGuide.date}</span>
+                    </>
+                  )}
+                  {currentGuide.readTime && (
+                    <>
+                      <span>•</span>
+                      <span>{currentGuide.readTime}</span>
+                    </>
+                  )}
+                  {currentGuide.author && (
+                    <>
+                      <span>•</span>
+                      <span>By {currentGuide.author}</span>
+                    </>
+                  )}
+                </div>
                 <h1 className="font-serif text-3xl sm:text-4xl font-bold text-text-primary">
                   {currentGuide.title}
                 </h1>
                 <p className="text-sm text-text-secondary leading-relaxed pt-1">
-                  {currentGuide.shortDescription ||
+                  {currentGuide.summary ||
+                    currentGuide.shortDescription ||
                     'Comprehensive educational roadmap and industry entrance strategy.'}
                 </p>
               </div>
@@ -303,26 +371,49 @@ const CareerGuidePage = ({
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                 {filteredGuides.map((guide) => (
                   <div
-                    key={guide.id}
-                    onClick={() => setSelectedGuideId(guide.id)}
-                    className="bg-white border border-slate-200 rounded-xl p-5 hover:border-brand-primary/50 hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group space-y-4"
+                    key={guide.id || guide.slug || guide._id}
+                    onClick={() => handleSelectGuide(guide.slug || guide.id || guide._id)}
+                    className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-primary/50 hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group"
                   >
-                    <div className="space-y-2.5">
-                      <span className="text-[11px] font-semibold text-slate-400 block">
-                        {guide.category}
-                      </span>
+                    <div>
+                      {guide.image && (
+                        <div className="relative overflow-hidden aspect-[16/9] bg-slate-100">
+                          <img
+                            src={guide.image}
+                            alt={guide.title}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null
+                              e.currentTarget.src =
+                                'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80'
+                            }}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                          />
+                          <span className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-xs text-brand-primary text-[10px] font-bold px-2 py-0.5 rounded-md uppercase shadow-2xs">
+                            {guide.badge || guide.category}
+                          </span>
+                        </div>
+                      )}
 
-                      <h3 className="font-serif text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-1">
-                        {guide.title}
-                      </h3>
+                      <div className="p-5 space-y-2.5">
+                        {!guide.image && (
+                          <span className="text-[11px] font-semibold text-slate-400 block">
+                            {guide.category}
+                          </span>
+                        )}
 
-                      <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-normal">
-                        {guide.shortDescription ||
-                          'Step-by-step career milestones, salary benchmarks, and target exams.'}
-                      </p>
+                        <h3 className="font-serif text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors line-clamp-1">
+                          {guide.title}
+                        </h3>
+
+                        <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed font-normal">
+                          {guide.summary ||
+                            guide.shortDescription ||
+                            'Step-by-step career milestones, salary benchmarks, and target exams.'}
+                        </p>
+                      </div>
                     </div>
 
-                    <div className="space-y-3 pt-2">
+                    <div className="p-5 pt-0 space-y-3">
                       <div className="grid grid-cols-2 gap-2 p-2.5 bg-slate-50 rounded-lg border border-slate-100 text-xs">
                         <div>
                           <span className="text-[10px] text-slate-400 uppercase font-semibold block">

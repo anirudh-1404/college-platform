@@ -184,7 +184,7 @@ export const getPublicCareerGuides = async (req, res) => {
     const { category, query } = req.query;
     const filter = { published: true };
 
-    if (category && category !== "all") {
+    if (category && category !== "all" && category !== "All Disciplines") {
       filter.category = category;
     }
 
@@ -193,6 +193,8 @@ export const getPublicCareerGuides = async (req, res) => {
       filter.$or = [
         { title: regex },
         { shortDescription: regex },
+        { summary: regex },
+        { badge: regex },
         { requiredDegrees: regex },
         { targetExams: regex },
       ];
@@ -202,17 +204,31 @@ export const getPublicCareerGuides = async (req, res) => {
 
     const formatted = guides.map((g) => ({
       id: g.slug || g._id,
+      _id: g._id,
       slug: g.slug,
       title: g.title,
       category: g.category,
-      shortDescription: g.shortDescription,
+      badge: g.badge || g.category,
+      image: g.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+      readTime: g.readTime || "5 min read",
+      author: g.author || "VidyaScope Editorial Team",
+      summary: g.summary || g.shortDescription || "",
+      shortDescription: g.shortDescription || g.summary || "",
       averageSalary: g.averageSalary,
       eligibility: g.eligibility,
       requiredDegrees: g.requiredDegrees || [],
       targetExams: g.targetExams || [],
       topRecruiters: g.topRecruiters || [],
       roadmapSteps: g.roadmapSteps || [],
+      content: g.content || "",
       published: g.published,
+      date: g.createdAt
+        ? new Date(g.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          })
+        : "Aug 2026",
       createdAt: g.createdAt,
     }));
 
@@ -233,7 +249,7 @@ export const getPublicCareerGuideDetail = async (req, res) => {
     const { slugOrId } = req.params;
 
     let guide = await CareerGuide.findOne({ slug: slugOrId, published: true });
-    if (!guide) {
+    if (!guide && slugOrId.match(/^[0-9a-fA-F]{24}$/)) {
       guide = await CareerGuide.findById(slugOrId);
     }
 
@@ -245,17 +261,31 @@ export const getPublicCareerGuideDetail = async (req, res) => {
       success: true,
       guide: {
         id: guide.slug || guide._id,
+        _id: guide._id,
         slug: guide.slug,
         title: guide.title,
         category: guide.category,
-        shortDescription: guide.shortDescription,
+        badge: guide.badge || guide.category,
+        image: guide.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
+        readTime: guide.readTime || "5 min read",
+        author: guide.author || "VidyaScope Editorial Team",
+        summary: guide.summary || guide.shortDescription || "",
+        shortDescription: guide.shortDescription || guide.summary || "",
         averageSalary: guide.averageSalary,
         eligibility: guide.eligibility,
         requiredDegrees: guide.requiredDegrees || [],
         targetExams: guide.targetExams || [],
         topRecruiters: guide.topRecruiters || [],
         roadmapSteps: guide.roadmapSteps || [],
+        content: guide.content || "",
         published: guide.published,
+        date: guide.createdAt
+          ? new Date(guide.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            })
+          : "Aug 2026",
         createdAt: guide.createdAt,
       },
     });

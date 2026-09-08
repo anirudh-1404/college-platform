@@ -463,6 +463,11 @@ export const createAdminCareerGuide = async (req, res) => {
     const {
       title,
       category,
+      badge,
+      image,
+      readTime,
+      author,
+      summary,
       shortDescription,
       averageSalary,
       eligibility,
@@ -470,6 +475,7 @@ export const createAdminCareerGuide = async (req, res) => {
       targetExams,
       topRecruiters,
       roadmapSteps,
+      content,
       published,
     } = req.body;
 
@@ -493,13 +499,19 @@ export const createAdminCareerGuide = async (req, res) => {
       title: title.trim(),
       slug,
       category: category || "Engineering & Technology",
-      shortDescription: shortDescription || "",
+      badge: badge || "",
+      image: image || "",
+      readTime: readTime || "5 min read",
+      author: author || "VidyaScope Editorial Team",
+      summary: summary || shortDescription || "",
+      shortDescription: shortDescription || summary || "",
       averageSalary: averageSalary || "₹12 - 25 LPA",
       eligibility: eligibility || "10+2 with relevant subjects",
       requiredDegrees: requiredDegrees || [],
       targetExams: targetExams || [],
       topRecruiters: topRecruiters || [],
       roadmapSteps: roadmapSteps || [],
+      content: content || "",
       published: published !== undefined ? published : true,
     });
 
