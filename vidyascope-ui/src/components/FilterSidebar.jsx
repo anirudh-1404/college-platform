@@ -1,21 +1,33 @@
 import React, { useState } from 'react'
-import { Filter, X, Search, RotateCcw, ChevronDown, ChevronUp, Star } from 'lucide-react'
-import {
-  locationOptions,
-  ownershipOptions,
-  examOptions,
-  facilityOptions,
-  packageOptions,
-} from '../data/collegesData'
+import { Filter, RotateCcw, ChevronDown, Search, X, Check } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
-const streamList = [
+export const streamList = [
   { id: 'all', label: 'All Disciplines' },
-  { id: 'engineering', label: 'Engineering (B.Tech)' },
-  { id: 'management', label: 'Management (MBA)' },
-  { id: 'medical', label: 'Medical (MBBS)' },
-  { id: 'law', label: 'Law (LLB / LLM)' },
-  { id: 'design', label: 'Design & Architecture' },
-  { id: 'applied-sciences', label: 'Applied Sciences' },
+  { id: 'engineering', label: 'Engineering (B.Tech/M.Tech)' },
+  { id: 'management', label: 'Management (MBA/BBA)' },
+  { id: 'medical', label: 'Medical (MBBS/MD)' },
+  { id: 'law', label: 'Law (LLB/LLM)' },
+  { id: 'science', label: 'Pure Sciences (B.Sc)' },
+  { id: 'arts', label: 'Humanities & Arts' },
+]
+
+export const ownershipList = [
+  'Government',
+  'Private',
+  'Autonomous',
+  'Deemed',
+]
+
+export const defaultLocations = [
+  'Maharashtra',
+  'Delhi NCR',
+  'Karnataka',
+  'Tamil Nadu',
+  'Uttar Pradesh',
+  'West Bengal',
+  'Telangana',
+  'Gujarat',
 ]
 
 const FilterSidebar = ({
@@ -29,10 +41,17 @@ const FilterSidebar = ({
   totalResults,
 }) => {
   const [locationQuery, setLocationQuery] = useState('')
-  const [collapsedSections, setCollapsedSections] = useState({})
+  
+  // All sections CLOSED by default as requested!
+  const [openSections, setOpenSections] = useState({
+    stream: false,
+    ownership: false,
+    location: false,
+    fees: false,
+  })
 
   const toggleSection = (sectionKey) => {
-    setCollapsedSections((prev) => ({
+    setOpenSections((prev) => ({
       ...prev,
       [sectionKey]: !prev[sectionKey],
     }))
@@ -46,371 +65,318 @@ const FilterSidebar = ({
     onFilterChange(category, updated)
   }
 
-  const filteredLocations = locationOptions.filter((loc) =>
+  const filteredLocations = defaultLocations.filter((loc) =>
     loc.toLowerCase().includes(locationQuery.toLowerCase())
   )
 
+  const isStreamActive = activeStream && activeStream !== 'all'
+  const isOwnershipActive = filters.ownerships && filters.ownerships.length > 0
+  const isLocationActive = filters.locations && filters.locations.length > 0
+  const isFeesActive = filters.maxFees && filters.maxFees < 30
+
   const filterContent = (
-    <div className="space-y-6">
+    <div className="space-y-4 select-none">
       {/* Sidebar Header */}
-      <div className="flex items-center justify-between pb-4 border-b border-border-color">
+      <div className="flex items-center justify-between pb-3 border-b border-border-color">
         <div className="flex items-center gap-2">
           <Filter className="h-4.5 w-4.5 text-brand-primary" />
-          <h3 className="font-serif text-lg font-bold text-text-primary">Filters</h3>
+          <h3 className="font-serif text-base font-bold text-text-primary">Filters</h3>
         </div>
         <button
           onClick={onResetFilters}
           className="flex items-center gap-1 text-xs font-bold text-brand-primary hover:text-brand-primary-hover hover:underline transition-all cursor-pointer"
         >
           <RotateCcw className="h-3.5 w-3.5" />
-          <span>Clear All</span>
+          <span>Reset All</span>
         </button>
       </div>
 
-      {/* 0. Academic Stream / Discipline Filter */}
+      {/* 1. Academic Discipline / Stream Filter */}
       {onStreamChange && (
-        <>
-          <div className="space-y-3">
-            <button
-              onClick={() => toggleSection('stream')}
-              className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-            >
+        <div className="border-b border-slate-100 pb-3">
+          <button
+            type="button"
+            onClick={() => toggleSection('stream')}
+            className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-text-primary hover:text-brand-primary text-left cursor-pointer transition-colors group"
+          >
+            <div className="flex items-center gap-2">
               <span>Academic Discipline</span>
-              {collapsedSections.stream ? (
-                <ChevronDown className="h-4 w-4 text-text-light" />
-              ) : (
-                <ChevronUp className="h-4 w-4 text-text-light" />
+              {isStreamActive && (
+                <span className="w-2 h-2 rounded-full bg-brand-primary" />
               )}
-            </button>
+            </div>
+            <ChevronDown
+              className={`h-4 w-4 text-text-light transition-transform duration-200 ${
+                openSections.stream ? 'rotate-180 text-brand-primary' : 'group-hover:text-text-primary'
+              }`}
+            />
+          </button>
 
-            {!collapsedSections.stream && (
-              <div className="space-y-2 pt-1">
-                {streamList.map((st) => {
-                  const checked = activeStream === st.id
+          <AnimatePresence initial={false}>
+            {openSections.stream && (
+              <motion.div
+                key="stream-content"
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
+              >
+                <div className="space-y-2 pt-2 pb-1">
+                  {streamList.map((st) => {
+                    const checked = activeStream === st.id
+                    return (
+                      <label
+                        key={st.id}
+                        className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
+                      >
+                        <input
+                          type="radio"
+                          name="streamFilter"
+                          checked={checked}
+                          onChange={() => onStreamChange(st.id)}
+                          className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
+                        />
+                        <span className={checked ? 'text-brand-primary font-bold' : ''}>
+                          {st.label}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+
+      {/* 2. Institute Type / Ownership */}
+      <div className="border-b border-slate-100 pb-3">
+        <button
+          type="button"
+          onClick={() => toggleSection('ownership')}
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-text-primary hover:text-brand-primary text-left cursor-pointer transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <span>Institute Type</span>
+            {isOwnershipActive && (
+              <span className="px-1.5 py-0.2 rounded-full bg-brand-accent text-brand-primary text-[10px] font-bold">
+                {filters.ownerships.length}
+              </span>
+            )}
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 text-text-light transition-transform duration-200 ${
+              openSections.ownership ? 'rotate-180 text-brand-primary' : 'group-hover:text-text-primary'
+            }`}
+          />
+        </button>
+
+        <AnimatePresence initial={false}>
+          {openSections.ownership && (
+            <motion.div
+              key="ownership-content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-2 pt-2 pb-1">
+                {ownershipList.map((type) => {
+                  const checked = (filters.ownerships || []).includes(type)
                   return (
                     <label
-                      key={st.id}
+                      key={type}
                       className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
                     >
                       <input
-                        type="radio"
-                        name="streamFilter"
+                        type="checkbox"
                         checked={checked}
-                        onChange={() => onStreamChange(st.id)}
-                        className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
+                        onChange={() => handleCheckboxToggle('ownerships', type)}
+                        className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
                       />
-                      <span>{st.label}</span>
+                      <span className={checked ? 'text-brand-primary font-bold' : ''}>
+                        {type}
+                      </span>
                     </label>
                   )
                 })}
               </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* 3. Location / State */}
+      <div className="border-b border-slate-100 pb-3">
+        <button
+          type="button"
+          onClick={() => toggleSection('location')}
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-text-primary hover:text-brand-primary text-left cursor-pointer transition-colors group"
+        >
+          <div className="flex items-center gap-2">
+            <span>State / Region</span>
+            {isLocationActive && (
+              <span className="px-1.5 py-0.2 rounded-full bg-brand-accent text-brand-primary text-[10px] font-bold">
+                {filters.locations.length}
+              </span>
             )}
           </div>
-
-          <div className="h-[1px] bg-slate-100" />
-        </>
-      )}
-
-      {/* 1. Location Filter */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('location')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>Location</span>
-          {collapsedSections.location ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
+          <ChevronDown
+            className={`h-4 w-4 text-text-light transition-transform duration-200 ${
+              openSections.location ? 'rotate-180 text-brand-primary' : 'group-hover:text-text-primary'
+            }`}
+          />
         </button>
 
-        {!collapsedSections.location && (
-          <div className="space-y-2.5 pt-1">
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="absolute left-3 top-2.5 h-3.5 w-3.5 text-text-light" />
-              <input
-                type="text"
-                placeholder="Search city..."
-                value={locationQuery}
-                onChange={(e) => setLocationQuery(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-border-color rounded-xl text-xs font-medium text-text-primary outline-none focus:border-brand-primary transition-colors"
-              />
-            </div>
-            {/* Checkbox List */}
-            <div className="max-h-40 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
-              {filteredLocations.map((loc) => {
-                const checked = (filters.locations || []).includes(loc)
-                return (
-                  <label
-                    key={loc}
-                    className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => handleCheckboxToggle('locations', loc)}
-                      className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                    />
-                    <span>{loc}</span>
-                  </label>
-                )
-              })}
-            </div>
-          </div>
-        )}
+        <AnimatePresence initial={false}>
+          {openSections.location && (
+            <motion.div
+              key="location-content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-2.5 pt-2 pb-1">
+                {/* Search Input */}
+                <div className="relative">
+                  <Search className="absolute left-2.5 top-2.5 h-3 w-3 text-text-light" />
+                  <input
+                    type="text"
+                    placeholder="Search state..."
+                    value={locationQuery}
+                    onChange={(e) => setLocationQuery(e.target.value)}
+                    className="w-full pl-7 pr-3 py-1.5 bg-slate-50 border border-border-color rounded-xl text-xs font-medium text-text-primary outline-none focus:border-brand-primary transition-colors"
+                  />
+                </div>
+                {/* State Checkbox List */}
+                <div className="space-y-1.5 pt-1">
+                  {filteredLocations.map((loc) => {
+                    const checked = (filters.locations || []).includes(loc)
+                    return (
+                      <label
+                        key={loc}
+                        className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => handleCheckboxToggle('locations', loc)}
+                          className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
+                        />
+                        <span className={checked ? 'text-brand-primary font-bold' : ''}>
+                          {loc}
+                        </span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 2. Fees Range Slider & Tiers */}
-      <div className="space-y-3">
+      {/* 4. Maximum Fees Slider */}
+      <div>
         <button
+          type="button"
           onClick={() => toggleSection('fees')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
+          className="w-full flex items-center justify-between py-1.5 text-xs font-bold text-text-primary hover:text-brand-primary text-left cursor-pointer transition-colors group"
         >
-          <span>Max Fees (Per Year)</span>
-          {collapsedSections.fees ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
+          <div className="flex items-center gap-2">
+            <span>Maximum Fees</span>
+            {isFeesActive && (
+              <span className="w-2 h-2 rounded-full bg-brand-primary" />
+            )}
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 text-text-light transition-transform duration-200 ${
+              openSections.fees ? 'rotate-180 text-brand-primary' : 'group-hover:text-text-primary'
+            }`}
+          />
         </button>
 
-        {!collapsedSections.fees && (
-          <div className="space-y-3 pt-1">
-            <div className="flex items-center justify-between text-xs font-bold text-brand-primary">
-              <span>Up to ₹{filters.maxFees || 25} Lakhs</span>
-            </div>
-            <input
-              type="range"
-              min="2"
-              max="25"
-              step="1"
-              value={filters.maxFees || 25}
-              onChange={(e) => onFilterChange('maxFees', Number(e.target.value))}
-              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-primary"
-            />
-            <div className="flex justify-between text-[10px] font-semibold text-text-light">
-              <span>₹2L</span>
-              <span>₹25L+</span>
-            </div>
-          </div>
-        )}
-      </div>
+        <AnimatePresence initial={false}>
+          {openSections.fees && (
+            <motion.div
+              key="fees-content"
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: 'auto', opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.22, ease: [0.16, 1, 0.3, 1] }}
+              className="overflow-hidden"
+            >
+              <div className="space-y-2.5 pt-2 pb-1">
+                <div className="flex items-center justify-between text-xs font-bold text-brand-primary">
+                  <span>
+                    {filters.maxFees && filters.maxFees < 30
+                      ? `Up to ₹${filters.maxFees} Lakhs`
+                      : 'Any Fee (No Limit)'}
+                  </span>
+                  {filters.maxFees && filters.maxFees < 30 && (
+                    <button
+                      type="button"
+                      onClick={() => onFilterChange('maxFees', 30)}
+                      className="text-[10px] text-slate-400 hover:text-brand-primary font-semibold cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                <input
+                  type="range"
+                  min="2"
+                  max="30"
+                  step="1"
+                  value={filters.maxFees || 30}
+                  onChange={(e) => onFilterChange('maxFees', Number(e.target.value))}
+                  className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-brand-primary"
+                />
+                <div className="flex justify-between text-[10px] font-semibold text-text-light">
+                  <span>₹2L</span>
+                  <span>₹15L</span>
+                  <span>₹30L+</span>
+                </div>
 
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 3. Average Package */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('package')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>Average Package</span>
-          {collapsedSections.package ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
+                {/* Quick Fee Presets */}
+                <div className="flex flex-wrap gap-1.5 pt-1">
+                  {[
+                    { label: 'Under ₹5L', val: 5 },
+                    { label: 'Under ₹10L', val: 10 },
+                    { label: 'Under ₹20L', val: 20 },
+                  ].map((preset) => (
+                    <button
+                      key={preset.val}
+                      type="button"
+                      onClick={() => onFilterChange('maxFees', preset.val)}
+                      className={`px-2 py-0.5 rounded-md text-[10px] font-bold border transition-colors cursor-pointer ${
+                        filters.maxFees === preset.val
+                          ? 'bg-brand-primary text-white border-brand-primary'
+                          : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                      }`}
+                    >
+                      {preset.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
           )}
-        </button>
-
-        {!collapsedSections.package && (
-          <div className="space-y-2 pt-1">
-            {packageOptions.map((pkg) => {
-              const checked = (filters.minPackage || 0) === pkg.value
-              return (
-                <label
-                  key={pkg.label}
-                  className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
-                  <input
-                    type="radio"
-                    name="minPackage"
-                    checked={checked}
-                    onChange={() => onFilterChange('minPackage', pkg.value)}
-                    className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                  />
-                  <span>{pkg.label}</span>
-                </label>
-              )
-            })}
-          </div>
-        )}
+        </AnimatePresence>
       </div>
 
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 4. Ownership */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('ownership')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>Institute Type</span>
-          {collapsedSections.ownership ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
-        </button>
-
-        {!collapsedSections.ownership && (
-          <div className="space-y-2 pt-1">
-            {ownershipOptions.map((type) => {
-              const checked = (filters.ownerships || []).includes(type)
-              return (
-                <label
-                  key={type}
-                  className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => handleCheckboxToggle('ownerships', type)}
-                    className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                  />
-                  <span>{type}</span>
-                </label>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 5. Minimum Rating */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('rating')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>User Rating</span>
-          {collapsedSections.rating ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
-        </button>
-
-        {!collapsedSections.rating && (
-          <div className="space-y-2 pt-1">
-            {[4.5, 4.0, 3.5].map((rate) => {
-              const checked = (filters.minRating || 0) === rate
-              return (
-                <label
-                  key={rate}
-                  className="flex items-center justify-between text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="minRating"
-                      checked={checked}
-                      onChange={() =>
-                        onFilterChange('minRating', checked ? 0 : rate)
-                      }
-                      className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                    />
-                    <div className="flex items-center gap-1">
-                      <span>{rate} & above</span>
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                    </div>
-                  </div>
-                </label>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 6. Exams Accepted */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('exam')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>Exams Accepted</span>
-          {collapsedSections.exam ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
-        </button>
-
-        {!collapsedSections.exam && (
-          <div className="space-y-2 pt-1">
-            {examOptions.map((exam) => {
-              const checked = (filters.exams || []).includes(exam)
-              return (
-                <label
-                  key={exam}
-                  className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => handleCheckboxToggle('exams', exam)}
-                    className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                  />
-                  <span>{exam}</span>
-                </label>
-              )
-            })}
-          </div>
-        )}
-      </div>
-
-      <div className="h-[1px] bg-slate-100" />
-
-      {/* 7. Facilities */}
-      <div className="space-y-3">
-        <button
-          onClick={() => toggleSection('facilities')}
-          className="w-full flex items-center justify-between text-sm font-bold text-text-primary text-left cursor-pointer"
-        >
-          <span>Facilities</span>
-          {collapsedSections.facilities ? (
-            <ChevronDown className="h-4 w-4 text-text-light" />
-          ) : (
-            <ChevronUp className="h-4 w-4 text-text-light" />
-          )}
-        </button>
-
-        {!collapsedSections.facilities && (
-          <div className="space-y-2 pt-1">
-            {facilityOptions.map((fac) => {
-              const checked = (filters.facilities || []).includes(fac)
-              return (
-                <label
-                  key={fac}
-                  className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={checked}
-                    onChange={() => handleCheckboxToggle('facilities', fac)}
-                    className="w-4 h-4 rounded text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                  />
-                  <span>{fac}</span>
-                </label>
-              )
-            })}
-          </div>
-        )}
-      </div>
     </div>
   )
 
   return (
     <>
-      {/* Desktop Sticky Container */}
-      <aside className="hidden lg:block w-72 flex-shrink-0">
-        <div className="bg-white rounded-2xl border border-border-color shadow-card p-5 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar">
+      {/* Desktop Sticky Container with Ultra-Smooth Native Scrolling */}
+      <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-20 self-start">
+        <div className="bg-white rounded-2xl border border-border-color shadow-sm p-5 max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain custom-scrollbar">
           {filterContent}
         </div>
       </aside>
@@ -432,18 +398,20 @@ const FilterSidebar = ({
               </span>
               <button
                 onClick={onCloseMobile}
-                className="p-1.5 rounded-xl text-text-secondary hover:bg-slate-100"
+                className="p-1.5 rounded-xl text-text-secondary hover:bg-slate-100 cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            {filterContent}
+            <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
+              {filterContent}
+            </div>
 
-            <div className="pt-6 border-t border-border-color mt-6">
+            <div className="pt-4 border-t border-border-color mt-4">
               <button
                 onClick={onCloseMobile}
-                className="w-full py-3 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-text-on-dark font-bold text-sm shadow-premium"
+                className="w-full py-2.5 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-text-on-dark font-bold text-sm shadow-sm cursor-pointer"
               >
                 Show {totalResults} Colleges
               </button>

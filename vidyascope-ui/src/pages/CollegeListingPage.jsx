@@ -7,6 +7,18 @@ import SortBar from '../components/SortBar'
 import CollegeCard from '../components/CollegeCard'
 import CompareTray from '../components/CompareTray'
 
+const parseFeeInLakhs = (feeStr) => {
+  if (!feeStr) return 0
+  if (typeof feeStr === 'number') return feeStr
+  const match = String(feeStr).match(/[\d.]+/)
+  if (!match) return 0
+  const num = parseFloat(match[0])
+  if (/cr/i.test(feeStr)) return num * 100
+  if (/lakh|lac|lpa|l\b/i.test(feeStr)) return num
+  if (num > 1000) return num / 100000
+  return num
+}
+
 const CollegeListingPage = ({
   onNavigateHome,
   selectedStream = 'all',
@@ -23,7 +35,6 @@ const CollegeListingPage = ({
 }) => {
   // Page State
   const [viewMode, setViewMode] = useState('list')
-  const [sortBy, setSortBy] = useState('popularity')
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState(initialSearchQuery)
   const [activeStream, setActiveStream] = useState(selectedStream || 'all')
@@ -32,15 +43,11 @@ const CollegeListingPage = ({
   const [colleges, setColleges] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Filter State
+  // 4 Core Streamlined Filters: Stream, Ownership, Location, MaxFees
   const [filters, setFilters] = useState({
     locations: [],
-    maxFees: 50,
-    minPackage: 0,
+    maxFees: 30, // 30 represents "Any Fee / No Limit"
     ownerships: [],
-    minRating: 0,
-    exams: [],
-    facilities: [],
   })
 
   // Fetch Live Published Colleges from Backend
@@ -51,9 +58,8 @@ const CollegeListingPage = ({
         const data = await publicApi.getColleges({
           stream: activeStream,
           query: searchQuery,
-          sort: sortBy,
         })
-        setColleges(data)
+        setColleges(Array.isArray(data) ? data : [])
       } catch (e) {
         console.error(e)
       } finally {
@@ -62,7 +68,14 @@ const CollegeListingPage = ({
     }
 
     fetchLiveColleges()
-  }, [activeStream, searchQuery, sortBy])
+  }, [activeStream, searchQuery])
+
+  // Keep activeStream synced with incoming prop
+  useEffect(() => {
+    if (selectedStream) {
+      setActiveStream(selectedStream)
+    }
+  }, [selectedStream])
 
   // Handlers
   const handleFilterChange = (key, value) => {
@@ -75,52 +88,119 @@ const CollegeListingPage = ({
   const handleResetFilters = () => {
     setSearchQuery('')
     setActiveStream('all')
+    if (onSelectStream) onSelectStream('all')
     setFilters({
       locations: [],
-      maxFees: 50,
-      minPackage: 0,
+      maxFees: 30,
       ownerships: [],
-      minRating: 0,
-      exams: [],
-      facilities: [],
     })
   }
 
   const handleRemoveChip = (type, value) => {
     if (type === 'searchQuery') {
       setSearchQuery('')
-    } else if (
-      type === 'locations' ||
-      type === 'ownerships' ||
-      type === 'exams' ||
-      type === 'facilities'
-    ) {
+    } else if (type === 'stream') {
+      setActiveStream('all')
+      if (onSelectStream) onSelectStream('all')
+    } else if (type === 'locations' || type === 'ownerships') {
       setFilters((prev) => ({
         ...prev,
         [type]: (prev[type] || []).filter((item) => item !== value),
       }))
+    } else if (type === 'maxFees') {
+      setFilters((prev) => ({
+        ...prev,
+        maxFees: 30,
+      }))
     }
   }
+
+  // Active Filter Chips for Quick Dismissal
+  const activeFilterChips = useMemo(() => {
+    const chips = []
+    if (activeStream && activeStream !== 'all') {
+      const streamLabel = activeStream.charAt(0).toUpperCase() + activeStream.slice(1)
+      chips.push({
+        type: 'stream',
+        value: activeStream,
+        label: `Stream: ${streamLabel}`,
+      })
+    }
+    if (filters.ownerships && filters.ownerships.length > 0) {
+      filters.ownerships.forEach((own) => {
+        chips.push({
+          type: 'ownerships',
+          value: own,
+          label: own,
+        })
+      })
+    }
+    if (filters.locations && filters.locations.length > 0) {
+      filters.locations.forEach((loc) => {
+        chips.push({
+          type: 'locations',
+          value: loc,
+          label: loc,
+        })
+      })
+    }
+    if (filters.maxFees && filters.maxFees < 30) {
+      chips.push({
+        type: 'maxFees',
+        value: filters.maxFees,
+        label: `Max Fee: ₹${filters.maxFees}L`,
+      })
+    }
+    if (searchQuery && searchQuery.trim()) {
+      chips.push({
+        type: 'searchQuery',
+        value: searchQuery,
+        label: `Search: "${searchQuery}"`,
+      })
+    }
+    return chips
+  }, [activeStream, filters, searchQuery])
 
   // Filter computed on dynamically returned colleges
   const filteredColleges = useMemo(() => {
     return colleges.filter((college) => {
-      // Ownership filter
-      if (filters.ownerships.length > 0 && !filters.ownerships.includes(college.ownership)) {
-        return false
+      // 1. Discipline / Stream filter
+      if (activeStream && activeStream !== 'all') {
+        const streamMatch = (college.stream || '').toLowerCase() === activeStream.toLowerCase()
+        if (!streamMatch) return false
       }
-      // Rating filter
-      if (filters.minRating > 0 && college.rating < filters.minRating) {
-        return false
+
+      // 2. Ownership / Institute Type filter
+      if (filters.ownerships && filters.ownerships.length > 0) {
+        if (!filters.ownerships.includes(college.ownership)) {
+          return false
+        }
       }
-      // Locations filter
-      if (filters.locations.length > 0) {
-        const match = filters.locations.some((loc) => (college.location || '').toLowerCase().includes(loc.toLowerCase()))
+
+      // 3. Location / State filter
+      if (filters.locations && filters.locations.length > 0) {
+        const match = filters.locations.some((loc) => {
+          const l = loc.toLowerCase()
+          const collegeLoc = (college.location || '').toLowerCase()
+          const city = (college.locationContact?.city || '').toLowerCase()
+          const state = (college.locationContact?.state || '').toLowerCase()
+          return collegeLoc.includes(l) || city.includes(l) || state.includes(l)
+        })
         if (!match) return false
       }
+
+      // 4. Maximum Fees filter
+      if (filters.maxFees && filters.maxFees < 30) {
+        const feeStr = college.totalFees || college.coursesOffered?.[0]?.fee || ''
+        const feeNum = parseFeeInLakhs(feeStr)
+        if (feeNum > 0 && feeNum > filters.maxFees) {
+          return false
+        }
+      }
+
       return true
     })
-  }, [colleges, filters])
+  }, [colleges, activeStream, filters])
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
@@ -164,19 +244,14 @@ const CollegeListingPage = ({
           {/* Right Content Stream */}
           <div className="flex-1 min-w-0 space-y-4">
             
-            {/* Sort & Search Bar */}
+            {/* Controls Bar & Filter Chips */}
             <SortBar
               totalCount={filteredColleges.length}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
               viewMode={viewMode}
               onViewModeChange={setViewMode}
               onOpenMobileFilter={() => setIsMobileFilterOpen(true)}
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              activeFilters={filters}
+              activeFilterChips={activeFilterChips}
               onRemoveChip={handleRemoveChip}
-              onResetFilters={handleResetFilters}
             />
 
             {/* Colleges Listing Grid/List */}

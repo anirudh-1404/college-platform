@@ -181,10 +181,15 @@ html.lenis, html.lenis body {
   border-radius: 0.625rem;
 }
 
-/* Minimal Custom Scrollbar */
+/* Minimal Ultra-Light Custom Scrollbar */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #E2E8F0 transparent;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -192,12 +197,12 @@ html.lenis, html.lenis body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #E2E8F0;
   border-radius: 9999px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #94A3B8;
+  background: #CBD5E1;
 }
 
 /* Continuous Editorial Ticker */

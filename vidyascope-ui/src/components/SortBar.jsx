@@ -2,15 +2,16 @@ import React from 'react'
 import { LayoutGrid, List, Filter, X, ArrowUpDown } from 'lucide-react'
 
 const SortBar = ({
-  sortBy,
-  onSortChange,
   viewMode,
   onViewModeChange,
   activeFilterChips,
   onRemoveChip,
   onOpenMobileFilters,
+  onOpenMobileFilter,
   totalCount,
 }) => {
+  const handleOpenFilters = onOpenMobileFilters || onOpenMobileFilter
+
   return (
     <div className="bg-white rounded-2xl border border-border-color shadow-sm p-4 space-y-3 mb-6">
       {/* Top Controls Row */}
@@ -19,7 +20,7 @@ const SortBar = ({
         {/* Left Side: Mobile Filter Trigger & Counter */}
         <div className="flex items-center gap-3">
           <button
-            onClick={onOpenMobileFilters}
+            onClick={handleOpenFilters}
             className="lg:hidden flex items-center gap-2 px-3.5 py-2 bg-brand-accent border border-brand-primary/20 text-brand-primary rounded-xl font-bold text-xs hover:bg-brand-primary hover:text-white transition-all cursor-pointer"
           >
             <Filter className="h-4 w-4" />
@@ -31,28 +32,8 @@ const SortBar = ({
           </span>
         </div>
 
-        {/* Right Side: Sort Selector & Grid/List View Toggles */}
-        <div className="flex items-center gap-3 ml-auto">
-          {/* Sort Selector */}
-          <div className="flex items-center gap-2 bg-slate-50 border border-border-color rounded-xl px-3 py-1.5">
-            <ArrowUpDown className="h-3.5 w-3.5 text-text-light" />
-            <span className="hidden sm:inline text-xs font-bold text-text-light uppercase tracking-wider">
-              Sort by:
-            </span>
-            <select
-              value={sortBy}
-              onChange={(e) => onSortChange(e.target.value)}
-              className="bg-transparent text-xs font-bold text-text-primary outline-none cursor-pointer pr-1"
-            >
-              <option value="popularity">Popularity</option>
-              <option value="rating">Rating: High to Low</option>
-              <option value="nirf">NIRF Rank: Top First</option>
-              <option value="fees-low">Fees: Low to High</option>
-              <option value="fees-high">Fees: High to Low</option>
-              <option value="package-high">Package: High to Low</option>
-            </select>
-          </div>
-
+        {/* Right Side: Grid/List View Toggles */}
+        <div className="flex items-center gap-2 ml-auto">
           {/* Grid/List View Mode Buttons */}
           <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
