@@ -80,7 +80,7 @@ const ExploreByGoal = ({ onSelectStream, onNavigateListing }) => {
             onClick={() => onNavigateListing && onNavigateListing()}
             className="text-xs font-bold text-slate-900 hover:text-brand-primary flex items-center gap-1.5 transition-colors cursor-pointer self-start md:self-auto"
           >
-            <span>View All 1,280+ Campuses</span>
+            <span>Explore All Colleges</span>
             <ArrowRight className="h-4 w-4" />
           </button>
         </div>

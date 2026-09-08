@@ -47,7 +47,7 @@ const Hero = ({ onNavigateListing, onNavigateCompare }) => {
                 onClick={() => onNavigateListing && onNavigateListing()}
                 className="btn btn-primary btn-lg shadow-md cursor-pointer flex items-center gap-2 text-sm font-bold"
               >
-                <span>Explore 1,280+ Colleges</span>
+                <span>Find Your College</span>
                 <ArrowRight className="h-4 w-4" />
               </motion.button>
 
@@ -69,8 +69,8 @@ const Hero = ({ onNavigateListing, onNavigateCompare }) => {
               className="pt-4 border-t border-slate-100 flex items-center gap-8 text-left"
             >
               <div>
-                <p className="text-xl sm:text-2xl font-extrabold text-slate-900">1,280+</p>
-                <p className="text-xs text-slate-500 font-medium">Verified Campuses</p>
+                <p className="text-xl sm:text-2xl font-extrabold text-slate-900">NIRF & NAAC</p>
+                <p className="text-xs text-slate-500 font-medium">Verified Data</p>
               </div>
               <div className="border-l border-slate-200 pl-6">
                 <p className="text-xl sm:text-2xl font-extrabold text-brand-primary">450+</p>
@@ -118,7 +118,7 @@ const Hero = ({ onNavigateListing, onNavigateCompare }) => {
                   <GraduationCap className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className="text-xs font-bold text-slate-900 leading-tight">1,280+ Colleges</p>
+                  <p className="text-xs font-bold text-slate-900 leading-tight">Verified Institutes</p>
                   <p className="text-[10px] text-slate-500">Government & Top Private</p>
                 </div>
               </motion.div>
