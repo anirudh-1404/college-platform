@@ -8,7 +8,7 @@ const featuresData = {
     {
       id: 'c1',
       title: 'Find Colleges',
-      description: 'Discover 1,200+ premier institutions with verified cutoffs, NAAC grades, and audited placement benchmarks.',
+      description: 'Discover premier institutions with verified cutoffs, NAAC grades, and audited placement benchmarks.',
       icon: Building2,
       iconColor: 'bg-brand-accent text-brand-primary',
       action: 'listing',

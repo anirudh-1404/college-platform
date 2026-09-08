@@ -4,7 +4,7 @@ import Navbar from './components/Navbar'
 import LiveAlertTicker from './components/LiveAlertTicker'
 import Hero from './components/Hero'
 import FeaturesTailored from './components/FeaturesTailored'
-import ExploreCities from './components/ExploreCities'
+import ExploreStreams from './components/ExploreStreams'
 import TopColleges from './components/TopColleges'
 import TopExamsSection from './components/TopExamsSection'
 import WhyVidyaScope from './components/WhyVidyaScope'
@@ -32,6 +32,7 @@ const HomePage = ({
   onOpenCounseling,
   handleHeroSearch,
   handleNavigate,
+  handleSelectCategory,
 }) => (
   <>
     <Hero
@@ -44,8 +45,9 @@ const HomePage = ({
       onNavigateCompare={onNavigateCompare}
       onOpenCounseling={onOpenCounseling}
     />
-    <ExploreCities
-      onSelectCity={(cityName) => handleHeroSearch({ query: cityName })}
+    <ExploreStreams
+      onSelectStream={handleSelectCategory}
+      onNavigateListing={onNavigateListing}
     />
     <TopColleges
       onSelectCollege={onSelectCollege}
@@ -204,6 +206,7 @@ const App = () => {
                   onOpenCounseling={() => setIsCounselingModalOpen(true)}
                   handleHeroSearch={handleHeroSearch}
                   handleNavigate={handleNavigate}
+                  handleSelectCategory={handleSelectCategory}
                 />
               }
             />
