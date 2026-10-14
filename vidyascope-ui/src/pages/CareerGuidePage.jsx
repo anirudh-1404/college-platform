@@ -14,7 +14,9 @@ import {
   Building,
   Sparkles,
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const CATEGORIES = [
   'All Disciplines',
@@ -144,20 +146,27 @@ const CareerGuidePage = ({
 
       {/* 2. Main Body Canvas */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* VIEW 1: SINGLE CAREER ROADMAP DETAIL READER */}
-        {currentGuide ? (
-          <div className="max-w-4xl mx-auto space-y-6">
-            <button
-              type="button"
-              onClick={() => handleSelectGuide(null)}
-              className="inline-flex items-center gap-2 text-xs font-bold text-brand-primary hover:text-brand-primary-hover cursor-pointer"
+        <AnimatePresence mode="wait">
+          {/* VIEW 1: SINGLE CAREER ROADMAP DETAIL READER */}
+          {currentGuide ? (
+            <motion.div
+              key={`guide-${currentGuide.id || currentGuide.slug}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="max-w-4xl mx-auto space-y-6"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Back to all career roadmaps</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleSelectGuide(null)}
+                className="inline-flex items-center gap-2 text-xs font-bold text-brand-primary hover:text-brand-primary-hover cursor-pointer"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                <span>Back to all career roadmaps</span>
+              </button>
 
-            <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
+              <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
               {/* Featured Banner Image */}
               {currentGuide.image && (
                 <div className="relative rounded-xl overflow-hidden aspect-[21/9] max-h-72 bg-slate-100">
@@ -324,10 +333,17 @@ const CareerGuidePage = ({
                 </button>
               </div>
             </div>
-          </div>
+          </motion.div>
         ) : (
           /* VIEW 2: ALL CAREER ROADMAPS LISTING */
-          <div className="space-y-8">
+          <motion.div
+            key="all-guides"
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+            className="space-y-8"
+          >
             {/* Header Banner */}
             <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 space-y-4 shadow-card">
               <div className="max-w-2xl">
@@ -368,12 +384,19 @@ const CareerGuidePage = ({
 
             {/* Career Roadmaps Grid */}
             {filteredGuides.length > 0 ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+              >
                 {filteredGuides.map((guide) => (
-                  <div
+                  <motion.div
                     key={guide.id || guide.slug || guide._id}
+                    variants={cardVariant}
+                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
                     onClick={() => handleSelectGuide(guide.slug || guide.id || guide._id)}
-                    className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-primary/50 hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group"
+                    className="bg-white border border-slate-200 rounded-xl overflow-hidden hover:border-brand-primary/50 shadow-2xs hover:shadow-card transition-all cursor-pointer flex flex-col justify-between group"
                   >
                     <div>
                       {guide.image && (
@@ -438,9 +461,9 @@ const CareerGuidePage = ({
                         <ArrowRight className="h-4 w-4 text-brand-primary group-hover:translate-x-1 transition-transform" />
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
+              </motion.div>
             ) : (
               <div className="p-16 text-center bg-white border border-slate-200 rounded-2xl shadow-2xs space-y-3">
                 <Compass className="h-10 w-10 text-slate-300 mx-auto" />
@@ -454,9 +477,9 @@ const CareerGuidePage = ({
                 </p>
               </div>
             )}
-          </div>
+          </motion.div>
         )}
-
+      </AnimatePresence>
       </div>
     </div>
   )

@@ -4,12 +4,24 @@
  */
 
 export const fadeInUp = {
-  hidden: { opacity: 0, y: 32 },
+  hidden: { opacity: 0, y: 28 },
   visible: {
     opacity: 1,
     y: 0,
     transition: {
-      duration: 0.55,
+      duration: 0.5,
+      ease: [0.22, 1, 0.36, 1],
+    },
+  },
+}
+
+export const fadeInDown = {
+  hidden: { opacity: 0, y: -20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: {
+      duration: 0.45,
       ease: [0.22, 1, 0.36, 1],
     },
   },
@@ -20,8 +32,21 @@ export const fadeIn = {
   visible: {
     opacity: 1,
     transition: {
-      duration: 0.5,
+      duration: 0.4,
       ease: [0.22, 1, 0.36, 1],
+    },
+  },
+}
+
+export const scaleUp = {
+  hidden: { opacity: 0, scale: 0.94 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: {
+      type: 'spring',
+      stiffness: 350,
+      damping: 25,
     },
   },
 }
@@ -31,23 +56,44 @@ export const staggerContainer = {
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.09,
-      delayChildren: 0.05,
+      staggerChildren: 0.08,
+      delayChildren: 0.04,
+    },
+  },
+}
+
+export const staggerFast = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.05,
+      delayChildren: 0.02,
     },
   },
 }
 
 export const cardVariant = {
-  hidden: { opacity: 0, y: 28, scale: 0.98 },
+  hidden: { opacity: 0, y: 24, scale: 0.98 },
   visible: {
     opacity: 1,
     y: 0,
     scale: 1,
     transition: {
-      duration: 0.5,
-      ease: [0.22, 1, 0.36, 1],
+      type: 'spring',
+      stiffness: 300,
+      damping: 24,
     },
   },
+}
+
+export const hoverLift = {
+  whileHover: {
+    y: -8,
+    scale: 1.015,
+    transition: { type: 'spring', stiffness: 400, damping: 22 },
+  },
+  whileTap: { scale: 0.98 },
 }
 
 export const badgeFloat = {
@@ -55,9 +101,10 @@ export const badgeFloat = {
   animate: {
     y: [-3, 3, -3],
     transition: {
-      duration: 4,
+      duration: 3.5,
       repeat: Infinity,
       ease: 'easeInOut',
     },
   },
 }
+

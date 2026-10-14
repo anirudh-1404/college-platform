@@ -1,7 +1,10 @@
+import mongoose from "mongoose";
 import { College } from "../models/College.js";
 import { CareerGuide } from "../models/CareerGuide.js";
 import { Exam } from "../models/Exam.js";
 import { Inquiry } from "../models/Inquiry.js";
+import { LiveIntel } from "../models/LiveIntel.js";
+import { Blog } from "../models/Blog.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
 export const getPublicColleges = async (req, res) => {
@@ -95,7 +98,7 @@ export const getPublicCollegeDetail = async (req, res) => {
     const { id } = req.params;
 
     let college = await College.findOne({ slug: id });
-    if (!college) {
+    if (!college && mongoose.Types.ObjectId.isValid(id)) {
       college = await College.findById(id);
     }
 
@@ -457,3 +460,130 @@ export const createPublicInquiry = async (req, res) => {
     });
   }
 };
+
+// 7. GET LIVE INTEL ALERTS (Active only for Topbar Ticker)
+export const getPublicLiveIntel = async (req, res) => {
+  try {
+    const alerts = await LiveIntel.find({ isActive: true }).sort({ priority: -1, createdAt: -1 });
+    return res.status(200).json({ success: true, alerts });
+  } catch (error) {
+    console.error("getPublicLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch live intel." });
+  }
+};
+
+// 8. GET ALL PUBLISHED BLOGS
+export const getPublicBlogs = async (req, res) => {
+  try {
+    const { category, query, limit } = req.query;
+    const filter = { status: "published" };
+
+    if (category && category !== "all" && category !== "All Categories") {
+      filter.category = category;
+    }
+
+    if (query && query.trim() !== "") {
+      const regex = new RegExp(query.trim(), "i");
+      filter.$or = [
+        { title: regex },
+        { excerpt: regex },
+        { content: regex },
+        { tags: regex },
+        { "author.name": regex },
+      ];
+    }
+
+    let queryBuilder = Blog.find(filter).sort({ publishedAt: -1, createdAt: -1 });
+
+    if (limit && !isNaN(Number(limit))) {
+      queryBuilder = queryBuilder.limit(Number(limit));
+    }
+
+    const blogs = await queryBuilder;
+
+    const formatted = blogs.map((b) => ({
+      id: b.slug || b._id,
+      _id: b._id,
+      slug: b.slug,
+      title: b.title,
+      category: b.category,
+      badge: b.badge,
+      coverImage: b.coverImage,
+      readTime: b.readTime,
+      author: b.author,
+      excerpt: b.excerpt,
+      content: b.content,
+      tags: b.tags || [],
+      status: b.status,
+      views: b.views || 0,
+      publishedAt: b.publishedAt || b.createdAt,
+      date: (b.publishedAt || b.createdAt)
+        ? new Date(b.publishedAt || b.createdAt).toLocaleDateString("en-US", {
+            month: "short",
+            day: "2-digit",
+            year: "numeric",
+          })
+        : "Recent",
+    }));
+
+    return res.status(200).json({
+      success: true,
+      count: formatted.length,
+      blogs: formatted,
+    });
+  } catch (error) {
+    console.error("getPublicBlogs error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch blogs." });
+  }
+};
+
+// 9. GET SINGLE PUBLIC BLOG DETAIL
+export const getPublicBlogDetail = async (req, res) => {
+  try {
+    const { slugOrId } = req.params;
+
+    let blog = await Blog.findOne({ slug: slugOrId, status: "published" });
+    if (!blog && slugOrId.match(/^[0-9a-fA-F]{24}$/)) {
+      blog = await Blog.findById(slugOrId);
+    }
+
+    if (!blog || blog.status !== "published") {
+      return res.status(404).json({ success: false, message: "Blog article not found." });
+    }
+
+    // Increment view count asynchronously
+    Blog.findByIdAndUpdate(blog._id, { $inc: { views: 1 } }).catch(() => {});
+
+    return res.status(200).json({
+      success: true,
+      blog: {
+        id: blog.slug || blog._id,
+        _id: blog._id,
+        slug: blog.slug,
+        title: blog.title,
+        category: blog.category,
+        badge: blog.badge,
+        coverImage: blog.coverImage,
+        readTime: blog.readTime,
+        author: blog.author,
+        excerpt: blog.excerpt,
+        content: blog.content,
+        tags: blog.tags || [],
+        status: blog.status,
+        views: (blog.views || 0) + 1,
+        publishedAt: blog.publishedAt || blog.createdAt,
+        date: (blog.publishedAt || blog.createdAt)
+          ? new Date(blog.publishedAt || blog.createdAt).toLocaleDateString("en-US", {
+              month: "short",
+              day: "2-digit",
+              year: "numeric",
+            })
+          : "Recent",
+      },
+    });
+  } catch (error) {
+    console.error("getPublicBlogDetail error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch blog details." });
+  }
+};
+

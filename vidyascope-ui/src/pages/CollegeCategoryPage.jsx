@@ -1,5 +1,7 @@
 import React from 'react'
 import { GraduationCap, Briefcase, Stethoscope, FlaskConical, Scale, Palette, Home, ChevronRight, ArrowRight } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const CollegeCategoryPage = ({ onSelectCategory, onNavigateHome }) => {
   const categories = [
@@ -90,26 +92,39 @@ const CollegeCategoryPage = ({ onSelectCategory, onNavigateHome }) => {
         </nav>
 
         {/* Page Heading & Header Details */}
-        <div className="mb-10 text-center sm:text-left">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={fadeInUp}
+          className="mb-10 text-center sm:text-left"
+        >
           <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-extrabold text-text-primary tracking-tight">
             Explore Colleges by Stream
           </h1>
           <p className="text-xs sm:text-sm md:text-base text-text-secondary font-medium mt-2 leading-relaxed max-w-3xl">
             Choose a professional domain to check verified NIRF rankings, exam cutoff scores, placement statistics, course details, and total fees.
           </p>
-        </div>
+        </motion.div>
 
         {/* Category Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8"
+        >
           {categories.map((category) => {
             const IconComponent = category.icon
             return (
-              <div
+              <motion.div
                 key={category.id}
+                variants={cardVariant}
+                whileHover={category.isActive ? { y: -6, transition: { duration: 0.2 } } : {}}
+                whileTap={category.isActive ? { scale: 0.98 } : {}}
                 onClick={() => category.isActive && onSelectCategory(category.id)}
                 className={`relative group bg-white border border-border-color rounded-2xl p-6 sm:p-7 shadow-sm transition-all duration-300 flex flex-col justify-between h-[340px] ${
                   category.isActive
-                    ? 'hover:shadow-premium hover:border-brand-primary/20 hover:-translate-y-1 cursor-pointer'
+                    ? 'hover:shadow-card-hover hover:border-brand-primary/40 cursor-pointer'
                     : 'opacity-75 cursor-not-allowed select-none'
                 }`}
               >
@@ -117,7 +132,7 @@ const CollegeCategoryPage = ({ onSelectCategory, onNavigateHome }) => {
                 <div>
                   <div className="flex items-center justify-between gap-4 mb-5">
                     {/* Icon Card wrapper */}
-                    <div className={`p-3 rounded-xl border ${category.bgAccent} flex items-center justify-center`}>
+                    <div className={`p-3 rounded-xl border ${category.bgAccent} flex items-center justify-center transition-transform group-hover:scale-105`}>
                       <IconComponent className="h-6 w-6" />
                     </div>
 
@@ -160,10 +175,10 @@ const CollegeCategoryPage = ({ onSelectCategory, onNavigateHome }) => {
                     </button>
                   )}
                 </div>
-              </div>
+              </motion.div>
             )
           })}
-        </div>
+        </motion.div>
 
       </div>
     </div>

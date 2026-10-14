@@ -12,7 +12,7 @@ import {
   MapPin,
   Star,
 } from 'lucide-react'
-import { collegesData } from '../data/collegesData'
+import { publicApi } from '../api/publicApi'
 import { coursesData } from '../data/coursesData'
 import { examsData } from '../data/examsData'
 import { careersData } from '../data/careersData'
@@ -28,7 +28,26 @@ const SearchPanel = ({
 }) => {
   const [query, setQuery] = useState('')
   const [activeTab, setActiveTab] = useState('all') // 'all' | 'colleges' | 'courses' | 'exams' | 'careers'
+  const [liveColleges, setLiveColleges] = useState([])
   const inputRef = useRef(null)
+
+  useEffect(() => {
+    let isMounted = true
+    const fetchLive = async () => {
+      try {
+        const data = await publicApi.getColleges()
+        if (isMounted && Array.isArray(data)) {
+          setLiveColleges(data)
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    fetchLive()
+    return () => {
+      isMounted = false
+    }
+  }, [])
 
   useEffect(() => {
     if (isOpen) {
@@ -46,13 +65,13 @@ const SearchPanel = ({
     const q = query.trim().toLowerCase()
     if (!q) return { colleges: [], courses: [], exams: [], careers: [] }
 
-    const matchedColleges = collegesData
+    const matchedColleges = liveColleges
       .filter(
         (c) =>
           c.name.toLowerCase().includes(q) ||
-          c.shortName.toLowerCase().includes(q) ||
-          c.location.toLowerCase().includes(q) ||
-          c.stream.toLowerCase().includes(q)
+          (c.shortName && c.shortName.toLowerCase().includes(q)) ||
+          (c.location && c.location.toLowerCase().includes(q)) ||
+          (c.stream && c.stream.toLowerCase().includes(q))
       )
       .slice(0, 4)
 
@@ -99,11 +118,11 @@ const SearchPanel = ({
     results.careers.length
 
   const quickTrending = [
-    { label: 'IIT Bombay', type: 'college', action: () => onSelectCollege && onSelectCollege('iit-bombay') },
+    { label: 'IIT Bombay', type: 'college', action: () => onSelectCollege && onSelectCollege('indian-institute-of-technology-bombay') },
+    { label: 'AIIMS Delhi', type: 'college', action: () => onSelectCollege && onSelectCollege('all-india-institute-of-medical-sciences-new-delhi') },
+    { label: 'IIT Delhi', type: 'college', action: () => onSelectCollege && onSelectCollege('indian-institute-of-technology-delhi') },
     { label: 'B.Tech CSE', type: 'course', action: () => onSelectCourse && onSelectCourse('btech-cs') },
     { label: 'JEE Main', type: 'exam', action: () => onSelectExam && onSelectExam('jee-main') },
-    { label: 'Software Engineer', type: 'career', action: () => onSelectCareer && onSelectCareer('software-engineer') },
-    { label: 'IIM Ahmedabad', type: 'college', action: () => onSelectCollege && onSelectCollege('iim-ahmedabad') },
     { label: 'NEET UG', type: 'exam', action: () => onSelectExam && onSelectExam('neet-ug') },
   ]
 

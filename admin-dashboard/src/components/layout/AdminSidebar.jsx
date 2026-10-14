@@ -15,6 +15,8 @@ import {
   ArrowLeft,
   ExternalLink,
   Sparkles,
+  Radio,
+  BookOpen,
   X,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
@@ -94,6 +96,18 @@ const AdminSidebar = ({
           id: 'exams',
           label: 'Entrance Exams',
           icon: FileText,
+          badge: null,
+        },
+        {
+          id: 'blogs',
+          label: 'Blogs & Articles',
+          icon: BookOpen,
+          badge: null,
+        },
+        {
+          id: 'live-intel',
+          label: 'Live Intel Ticker',
+          icon: Radio,
           badge: null,
         },
         {

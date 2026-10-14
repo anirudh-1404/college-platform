@@ -117,8 +117,10 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
           {dynamicCategories.length > 1 && (
             <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pt-6">
               {dynamicCategories.map((cat) => (
-                <button
+                <motion.button
                   key={cat.id}
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => {
                     setCategoryFilter(cat.id)
                     const matching =
@@ -132,7 +134,7 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
                   }`}
                 >
                   {cat.label}
-                </button>
+                </motion.button>
               ))}
             </div>
           )}
@@ -149,51 +151,55 @@ const ExamsPage = ({ onNavigateHome, onNavigateColleges, onOpenCounseling }) => 
                 Select an Examination ({filteredExams.length})
               </h2>
 
-              {filteredExams.map((exam) => {
-                const isSelected = currentExam?.id === exam.id
-                return (
-                  <button
-                    key={exam.id}
-                    onClick={() => setSelectedExamId(exam.id)}
-                    className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group ${
-                      isSelected
-                        ? 'bg-white border-brand-primary shadow-xs ring-1 ring-brand-primary'
-                        : 'bg-white border-border-color hover:border-brand-primary/40 hover:bg-slate-50/70'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2 mb-1.5">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 capitalize">
-                        {exam.category}
-                      </span>
-                      <span className="text-[11px] text-text-light font-medium">
-                        {exam.frequency || 'Once a year'}
-                      </span>
-                    </div>
+              <div className="space-y-3">
+                {filteredExams.map((exam) => {
+                  const isSelected = currentExam?.id === exam.id
+                  return (
+                    <motion.button
+                      key={exam.id}
+                      whileHover={{ x: 4, transition: { duration: 0.18 } }}
+                      whileTap={{ scale: 0.99 }}
+                      onClick={() => setSelectedExamId(exam.id)}
+                      className={`w-full text-left p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group shadow-2xs ${
+                        isSelected
+                          ? 'bg-white border-brand-primary shadow-xs ring-1 ring-brand-primary'
+                          : 'bg-white border-border-color hover:border-brand-primary/40 hover:bg-slate-50/70'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2 mb-1.5">
+                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded bg-slate-100 text-slate-700 capitalize">
+                          {exam.category}
+                        </span>
+                        <span className="text-[11px] text-text-light font-medium">
+                          {exam.frequency || 'Once a year'}
+                        </span>
+                      </div>
 
-                    <h3 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
-                      {exam.shortName || exam.name}
-                    </h3>
+                      <h3 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
+                        {exam.shortName || exam.name}
+                      </h3>
 
-                    <p className="text-xs text-text-secondary line-clamp-2 mt-1 font-normal">
-                      {exam.name}
-                    </p>
+                      <p className="text-xs text-text-secondary line-clamp-2 mt-1 font-normal">
+                        {exam.name}
+                      </p>
 
-                    <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                      <span className="text-text-light font-medium truncate max-w-[180px]">
-                        {exam.conductingBody}
-                      </span>
-                      <span
-                        className={`font-bold flex items-center gap-0.5 ${
-                          isSelected ? 'text-brand-primary' : 'text-text-light'
-                        }`}
-                      >
-                        <span>View Details</span>
-                        <ArrowRight className="h-3 w-3" />
-                      </span>
-                    </div>
-                  </button>
-                )
-              })}
+                      <div className="pt-2 mt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span className="text-text-light font-medium truncate max-w-[180px]">
+                          {exam.conductingBody}
+                        </span>
+                        <span
+                          className={`font-bold flex items-center gap-0.5 ${
+                            isSelected ? 'text-brand-primary' : 'text-text-light'
+                          }`}
+                        >
+                          <span>View Details</span>
+                          <ArrowRight className="h-3 w-3" />
+                        </span>
+                      </div>
+                    </motion.button>
+                  )
+                })}
+              </div>
             </div>
 
             {/* Right Column: Comprehensive Exam Profile (Span 8) */}

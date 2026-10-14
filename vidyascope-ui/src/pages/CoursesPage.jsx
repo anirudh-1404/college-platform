@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
+import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
 const CoursesPage = ({
   onNavigateHome,
@@ -148,240 +149,275 @@ const CoursesPage = ({
 
       {/* Main Content Area */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        
-        {/* STEP 1: ALL COLLEGES LIST VIEW */}
-        {!selectedCollege && (
-          <div className="space-y-6">
-            {/* Header Banner */}
-            <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 space-y-4 shadow-card">
-              <div className="max-w-2xl">
-                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
-                  Browse Courses by Published Institution
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                  Explore degree programs, seat capacities, fee structures, and average salary outcomes from live published institutions.
-                </p>
-              </div>
-
-              {/* Search & Stream Filter Controls */}
-              <div className="pt-2 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between border-t border-slate-100">
-                <div className="relative flex-1 max-w-md">
-                  <Search className="absolute left-3.5 top-3 h-4 w-4 text-text-light" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by college name, course or city..."
-                    className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-border-color rounded-xl text-xs font-medium text-text-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary"
-                  />
+        <AnimatePresence mode="wait">
+          {/* STEP 1: ALL COLLEGES LIST VIEW */}
+          {!selectedCollege && (
+            <motion.div
+              key="step-1-colleges"
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-6"
+            >
+              {/* Header Banner */}
+              <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 space-y-4 shadow-card">
+                <div className="max-w-2xl">
+                  <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
+                    Browse Courses by Published Institution
+                  </h1>
+                  <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                    Explore degree programs, seat capacities, fee structures, and average salary outcomes from live published institutions.
+                  </p>
                 </div>
 
-                <div className="flex items-center gap-1.5 overflow-x-auto">
-                  {streamOptions.map((st) => (
-                    <button
-                      key={st.id}
-                      onClick={() => setStreamFilter(st.id)}
-                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
-                        streamFilter === st.id
-                          ? 'bg-brand-primary text-white font-bold'
-                          : 'bg-slate-100 text-text-secondary hover:bg-slate-200'
-                      }`}
+                {/* Search & Stream Filter Controls */}
+                <div className="pt-2 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between border-t border-slate-100">
+                  <div className="relative flex-1 max-w-md">
+                    <Search className="absolute left-3.5 top-3 h-4 w-4 text-text-light" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by college name, course or city..."
+                      className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-border-color rounded-xl text-xs font-medium text-text-primary focus:bg-white focus:outline-none focus:ring-1 focus:ring-brand-primary"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-1.5 overflow-x-auto">
+                    {streamOptions.map((st) => (
+                      <button
+                        key={st.id}
+                        onClick={() => setStreamFilter(st.id)}
+                        className={`px-3 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap cursor-pointer transition-colors ${
+                          streamFilter === st.id
+                            ? 'bg-brand-primary text-white font-bold shadow-xs'
+                            : 'bg-slate-100 text-text-secondary hover:bg-slate-200'
+                        }`}
+                      >
+                        {st.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Colleges Grid */}
+              {loading ? (
+                <div className="p-12 text-center bg-white border border-slate-200 rounded-2xl">
+                  <p className="text-xs font-semibold text-slate-500 animate-pulse">
+                    Loading courses directory...
+                  </p>
+                </div>
+              ) : filteredColleges.length > 0 ? (
+                <motion.div
+                  variants={staggerContainer}
+                  initial="hidden"
+                  animate="visible"
+                  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"
+                >
+                  {filteredColleges.map((college) => (
+                    <motion.div
+                      key={college.id}
+                      variants={cardVariant}
+                      whileHover={{ y: -6, transition: { duration: 0.2 } }}
+                      onClick={() => handleSelectCollege(college.id)}
+                      className="bg-white border border-slate-200/90 rounded-2xl p-5 hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group space-y-4 shadow-2xs"
                     >
-                      {st.label}
-                    </button>
+                      <div>
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-text-secondary px-2 py-0.5 rounded">
+                            NIRF #{college.nirfRank}
+                          </span>
+                          <span className="text-xs font-bold text-brand-primary bg-brand-accent px-2 py-0.5 rounded">
+                            {college.coursesOffered?.length || 0} Courses
+                          </span>
+                        </div>
+
+                        <h3 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
+                          {college.name}
+                        </h3>
+                        <p className="text-xs text-text-light flex items-center gap-1 mt-1">
+                          <MapPin className="h-3 w-3 text-brand-primary" />
+                          <span>{college.location}</span>
+                        </p>
+                      </div>
+
+                      <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                        <span className="text-text-secondary">Explore Curricula</span>
+                        <ArrowRight className="h-4 w-4 text-brand-primary group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </motion.div>
                   ))}
+                </motion.div>
+              ) : (
+                <div className="p-16 text-center bg-white border border-slate-200/80 rounded-2xl space-y-2">
+                  <Building className="h-10 w-10 text-slate-300 mx-auto" />
+                  <h3 className="font-serif text-base font-bold text-slate-800">
+                    No Published Courses Found
+                  </h3>
+                  <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                    Institutions and courses published from the Admin Dashboard will appear here dynamically.
+                  </p>
+                </div>
+              )}
+            </motion.div>
+          )}
+
+          {/* STEP 2: COURSES FOR SELECTED COLLEGE */}
+          {selectedCollege && !selectedCourse && (
+            <motion.div
+              key={`step-2-${selectedCollege.id}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-6"
+            >
+              <button
+                onClick={handleBackToColleges}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-primary cursor-pointer transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>Back to all institutions</span>
+              </button>
+
+              <div className="bg-white border border-border-color rounded-2xl p-6 shadow-card space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">
+                      {selectedCollege.stream} Programs
+                    </span>
+                    <h2 className="font-serif text-2xl font-bold text-text-primary mt-1">
+                      {selectedCollege.name} — Courses & Degrees
+                    </h2>
+                  </div>
+                  <button
+                    onClick={() => onSelectCollegeDetail(selectedCollege.id)}
+                    className="btn btn-outline btn-sm text-xs cursor-pointer hover:border-brand-primary"
+                  >
+                    View Full College Intel
+                  </button>
                 </div>
               </div>
-            </div>
 
-            {/* Colleges Grid */}
-            {loading ? (
-              <div className="p-12 text-center bg-white border border-slate-200 rounded-2xl">
-                <p className="text-xs font-semibold text-slate-500 animate-pulse">
-                  Loading courses directory...
-                </p>
-              </div>
-            ) : filteredColleges.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                {filteredColleges.map((college) => (
-                  <div
-                    key={college.id}
-                    onClick={() => handleSelectCollege(college.id)}
-                    className="bg-white border border-slate-200/90 rounded-2xl p-5 hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group space-y-4"
+              <motion.div
+                variants={staggerContainer}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              >
+                {(selectedCollege.coursesOffered || []).map((course) => (
+                  <motion.div
+                    key={course.id || course.name}
+                    variants={cardVariant}
+                    whileHover={{ y: -5, transition: { duration: 0.2 } }}
+                    onClick={() => handleSelectCourse(course.id || course.name)}
+                    className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group space-y-3 shadow-2xs"
                   >
                     <div>
-                      <div className="flex items-center justify-between gap-2 mb-2">
-                        <span className="text-[10px] font-bold uppercase tracking-wider bg-slate-100 text-text-secondary px-2 py-0.5 rounded">
-                          NIRF #{college.nirfRank}
+                      <div className="flex items-center justify-between gap-2 mb-1">
+                        <span className="text-[10px] font-bold uppercase text-brand-primary">
+                          {course.degreeLevel || 'Degree'}
                         </span>
-                        <span className="text-xs font-bold text-brand-primary bg-brand-accent px-2 py-0.5 rounded">
-                          {college.coursesOffered?.length || 0} Courses
+                        <span className="text-xs font-bold text-text-primary bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                          {course.fee}
                         </span>
                       </div>
 
-                      <h3 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
-                        {college.name}
-                      </h3>
-                      <p className="text-xs text-text-light flex items-center gap-1 mt-1">
-                        <MapPin className="h-3 w-3 text-brand-primary" />
-                        <span>{college.location}</span>
-                      </p>
+                      <h4 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
+                        {course.name}
+                      </h4>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary pt-2 mt-2 border-t border-slate-100">
+                        <div><strong>Duration:</strong> {course.duration}</div>
+                        <div><strong>Seats:</strong> {course.seatIntake}</div>
+                        <div><strong>Avg Salary:</strong> {course.avgSalary}</div>
+                      </div>
                     </div>
 
-                    <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
-                      <span className="text-text-secondary">Explore Curricula</span>
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                      <span className="text-brand-primary font-bold">Inspect Syllabus & Details</span>
                       <ArrowRight className="h-4 w-4 text-brand-primary group-hover:translate-x-1 transition-transform" />
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
-              </div>
-            ) : (
-              <div className="p-16 text-center bg-white border border-slate-200/80 rounded-2xl space-y-2">
-                <Building className="h-10 w-10 text-slate-300 mx-auto" />
-                <h3 className="font-serif text-base font-bold text-slate-800">
-                  No Published Courses Found
-                </h3>
-                <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                  Institutions and courses published from the Admin Dashboard will appear here dynamically.
-                </p>
-              </div>
-            )}
-          </div>
-        )}
+              </motion.div>
+            </motion.div>
+          )}
 
-        {/* STEP 2: COURSES FOR SELECTED COLLEGE */}
-        {selectedCollege && !selectedCourse && (
-          <div className="space-y-6">
-            <button
-              onClick={handleBackToColleges}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-primary cursor-pointer"
+          {/* STEP 3: SINGLE COURSE DETAIL */}
+          {selectedCollege && selectedCourse && (
+            <motion.div
+              key={`step-3-${selectedCourse.id || selectedCourse.name}`}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="space-y-6"
             >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to all institutions</span>
-            </button>
+              <button
+                onClick={handleBackToCourses}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-primary cursor-pointer transition-colors"
+              >
+                <ArrowLeft className="h-3.5 w-3.5" />
+                <span>Back to {selectedCollege.shortName || selectedCollege.name} courses</span>
+              </button>
 
-            <div className="bg-white border border-border-color rounded-2xl p-6 shadow-card space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+              <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
                 <div>
-                  <span className="text-xs font-bold text-brand-primary uppercase tracking-wider">
-                    {selectedCollege.stream} Programs
-                  </span>
-                  <h2 className="font-serif text-2xl font-bold text-text-primary mt-1">
-                    {selectedCollege.name} — Courses & Degrees
-                  </h2>
+                  <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
+                    {selectedCourse.name}
+                  </h1>
+                  <p className="text-xs sm:text-sm text-text-secondary mt-1">
+                    Level: {selectedCourse.degreeLevel} • Offered by {selectedCollege.name} • {selectedCollege.location}
+                  </p>
                 </div>
-                <button
-                  onClick={() => onSelectCollegeDetail(selectedCollege.id)}
-                  className="btn btn-outline btn-sm text-xs cursor-pointer"
-                >
-                  View Full College Intel
-                </button>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {(selectedCollege.coursesOffered || []).map((course) => (
-                <div
-                  key={course.id || course.name}
-                  onClick={() => handleSelectCourse(course.id || course.name)}
-                  className="bg-white border border-slate-200 rounded-2xl p-5 hover:border-brand-primary/40 hover:shadow-card-hover transition-all cursor-pointer flex flex-col justify-between group space-y-3"
-                >
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs">
                   <div>
-                    <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-[10px] font-bold uppercase text-brand-primary">
-                        {course.degreeLevel || 'Degree'}
-                      </span>
-                      <span className="text-xs font-bold text-text-primary bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
-                        {course.fee}
-                      </span>
-                    </div>
-
-                    <h4 className="font-serif text-base font-bold text-text-primary group-hover:text-brand-primary transition-colors">
-                      {course.name}
-                    </h4>
-
-                    <div className="grid grid-cols-2 gap-2 text-xs text-text-secondary pt-2 mt-2 border-t border-slate-100">
-                      <div><strong>Duration:</strong> {course.duration}</div>
-                      <div><strong>Seats:</strong> {course.seatIntake}</div>
-                      <div><strong>Avg Salary:</strong> {course.avgSalary}</div>
-                    </div>
+                    <span className="text-text-light uppercase font-semibold block text-[10px]">Duration</span>
+                    <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.duration}</span>
                   </div>
-
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                    <span className="text-brand-primary font-bold">Inspect Syllabus & Details</span>
-                    <ArrowRight className="h-4 w-4 text-brand-primary group-hover:translate-x-1 transition-transform" />
+                  <div>
+                    <span className="text-text-light uppercase font-semibold block text-[10px]">Tuition Fee</span>
+                    <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.fee}</span>
+                  </div>
+                  <div>
+                    <span className="text-text-light uppercase font-semibold block text-[10px]">Seat Capacity</span>
+                    <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.seatIntake} Seats</span>
+                  </div>
+                  <div>
+                    <span className="text-text-light uppercase font-semibold block text-[10px]">Avg Package</span>
+                    <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{selectedCourse.avgSalary}</span>
                   </div>
                 </div>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* STEP 3: SINGLE COURSE DETAIL */}
-        {selectedCollege && selectedCourse && (
-          <div className="space-y-6">
-            <button
-              onClick={handleBackToCourses}
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-primary cursor-pointer"
-            >
-              <ArrowLeft className="h-3.5 w-3.5" />
-              <span>Back to {selectedCollege.shortName || selectedCollege.name} courses</span>
-            </button>
+                <div className="space-y-2">
+                  <h3 className="font-serif text-sm font-bold text-text-primary">Eligibility Criteria</h3>
+                  <p className="text-xs text-text-secondary leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
+                    {selectedCourse.eligibility}
+                  </p>
+                </div>
 
-            <div className="bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-card space-y-6">
-              <div>
-                <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
-                  {selectedCourse.name}
-                </h1>
-                <p className="text-xs sm:text-sm text-text-secondary mt-1">
-                  Level: {selectedCourse.degreeLevel} • Offered by {selectedCollege.name} • {selectedCollege.location}
-                </p>
-              </div>
-
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 rounded-xl border border-slate-100 text-xs">
-                <div>
-                  <span className="text-text-light uppercase font-semibold block text-[10px]">Duration</span>
-                  <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.duration}</span>
-                </div>
-                <div>
-                  <span className="text-text-light uppercase font-semibold block text-[10px]">Tuition Fee</span>
-                  <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.fee}</span>
-                </div>
-                <div>
-                  <span className="text-text-light uppercase font-semibold block text-[10px]">Seat Capacity</span>
-                  <span className="font-bold text-text-primary text-sm mt-0.5 block">{selectedCourse.seatIntake} Seats</span>
-                </div>
-                <div>
-                  <span className="text-text-light uppercase font-semibold block text-[10px]">Avg Package</span>
-                  <span className="font-bold text-emerald-600 text-sm mt-0.5 block">{selectedCourse.avgSalary}</span>
+                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
+                  <button
+                    onClick={() => onSelectCollegeDetail(selectedCollege.id)}
+                    className="btn btn-outline btn-md text-xs cursor-pointer"
+                  >
+                    View College Profile
+                  </button>
+                  <button
+                    onClick={onOpenCounseling}
+                    className="btn btn-primary btn-md text-xs font-bold cursor-pointer"
+                  >
+                    Apply & Get Counseling
+                  </button>
                 </div>
               </div>
-
-              <div className="space-y-2">
-                <h3 className="font-serif text-sm font-bold text-text-primary">Eligibility Criteria</h3>
-                <p className="text-xs text-text-secondary leading-relaxed bg-slate-50 p-3 rounded-xl border border-slate-100">
-                  {selectedCourse.eligibility}
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                <button
-                  onClick={() => onSelectCollegeDetail(selectedCollege.id)}
-                  className="btn btn-outline btn-md text-xs cursor-pointer"
-                >
-                  View College Profile
-                </button>
-                <button
-                  onClick={onOpenCounseling}
-                  className="btn btn-primary btn-md text-xs font-bold cursor-pointer"
-                >
-                  Apply & Get Counseling
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   )

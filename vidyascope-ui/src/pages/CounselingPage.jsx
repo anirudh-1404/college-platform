@@ -3,7 +3,9 @@ import {
   ChevronRight, Home, ShieldCheck, CheckCircle2, Phone, Mail,
   UserCheck, Clock, Send, PhoneCall, Lock, Loader2
 } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
+import { fadeInUp } from '../utils/animations'
 
 const CounselingPage = ({ onNavigateHome }) => {
   const [submitted, setSubmitted] = useState(false)
@@ -70,7 +72,12 @@ const CounselingPage = ({ onNavigateHome }) => {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           
           {/* Left Column: Counseling Request Form (Span 7) */}
-          <div className="lg:col-span-7 bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-xs">
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+            className="lg:col-span-7 bg-white border border-border-color rounded-2xl p-6 sm:p-8 shadow-xs"
+          >
             
             <h1 className="font-serif text-2xl sm:text-3xl font-bold text-text-primary">
               Personalized Admissions Guidance
@@ -79,39 +86,58 @@ const CounselingPage = ({ onNavigateHome }) => {
               Share your score and target branch to receive an objective college roadmap and 1-on-1 counseling from verified alumni.
             </p>
 
-            {submitted ? (
-              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center space-y-3">
-                <div className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto">
-                  <CheckCircle2 className="h-6 w-6" />
-                </div>
-                <h3 className="font-serif text-xl font-bold text-emerald-950">
-                  Counseling Request Received
-                </h3>
-                <p className="text-xs text-emerald-800 max-w-sm mx-auto leading-relaxed">
-                  Thank you, <strong className="text-emerald-950">{formData.fullName}</strong>. An advisor will contact you on <strong className="text-emerald-950">{formData.phone}</strong> within 2 business hours with your personalized cutoff and college report.
-                </p>
-                <button
-                  onClick={() => {
-                    setSubmitted(false)
-                    setFormData({
-                      fullName: '',
-                      phone: '',
-                      email: '',
-                      stream: 'engineering',
-                      targetScore: '',
-                      preferredLocation: '',
-                      budgetRange: 'under-10',
-                      admissionYear: '2025',
-                      notes: '',
-                    })
-                  }}
-                  className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors cursor-pointer"
+            <AnimatePresence mode="wait">
+              {submitted ? (
+                <motion.div
+                  key="success-box"
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="bg-emerald-50 border border-emerald-200 rounded-xl p-8 text-center space-y-3"
                 >
-                  Submit Another Query
-                </button>
-              </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ type: 'spring', stiffness: 400, damping: 20 }}
+                    className="w-12 h-12 rounded-full bg-emerald-600 text-white flex items-center justify-center mx-auto"
+                  >
+                    <CheckCircle2 className="h-6 w-6" />
+                  </motion.div>
+                  <h3 className="font-serif text-xl font-bold text-emerald-950">
+                    Counseling Request Received
+                  </h3>
+                  <p className="text-xs text-emerald-800 max-w-sm mx-auto leading-relaxed">
+                    Thank you, <strong className="text-emerald-950">{formData.fullName}</strong>. An advisor will contact you on <strong className="text-emerald-950">{formData.phone}</strong> within 2 business hours with your personalized cutoff and college report.
+                  </p>
+                  <button
+                    onClick={() => {
+                      setSubmitted(false)
+                      setFormData({
+                        fullName: '',
+                        phone: '',
+                        email: '',
+                        stream: 'engineering',
+                        targetScore: '',
+                        preferredLocation: '',
+                        budgetRange: 'under-10',
+                        admissionYear: '2025',
+                        notes: '',
+                      })
+                    }}
+                    className="px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Submit Another Query
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.form
+                  key="form-box"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onSubmit={handleSubmit}
+                  className="space-y-4"
+                >
                 <div>
                   <label className="block text-xs font-bold text-text-primary uppercase tracking-wider mb-1">
                     Student Full Name *
@@ -242,10 +268,11 @@ const CounselingPage = ({ onNavigateHome }) => {
                   <Lock className="h-3 w-3" />
                   <span>Your information is kept 100% confidential. No spam or promotional calls.</span>
                 </p>
-              </form>
+              </motion.form>
             )}
+            </AnimatePresence>
 
-          </div>
+          </motion.div>
 
           {/* Right Column: Trust Proof & Direct Helpline (Span 5) */}
           <div className="lg:col-span-5 space-y-6">

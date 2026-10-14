@@ -11,6 +11,8 @@ import ExamManagementPage from './pages/ExamManagementPage'
 import PlatformDataManagementPage from './pages/PlatformDataManagementPage'
 import AuditLogPage from './pages/AuditLogPage'
 import ContactInquiriesPage from './pages/ContactInquiriesPage'
+import LiveIntelManagementPage from './pages/LiveIntelManagementPage'
+import BlogsManagementPage from './pages/BlogsManagementPage'
 import SettingsPage from './pages/SettingsPage'
 import { adminService } from './data/adminService'
 import { adminAuthService } from './data/adminAuthService'
@@ -29,6 +31,7 @@ function App() {
   const [users, setUsers] = useState([])
   const [careerGuides, setCareerGuides] = useState([])
   const [exams, setExams] = useState([])
+  const [liveIntelAlerts, setLiveIntelAlerts] = useState([])
   const [auditLogs, setAuditLogs] = useState([])
   const [analytics, setAnalytics] = useState({
     totalColleges: 0,
@@ -42,7 +45,7 @@ function App() {
 
   // Reload handler
   const reloadData = async () => {
-    const [regs, profs, usrs, guides, exms, logs, anal] = await Promise.all([
+    const [regs, profs, usrs, guides, exms, logs, anal, intel] = await Promise.all([
       adminService.getRegistrations(),
       adminService.getAllProfiles(),
       adminService.getUsers(),
@@ -50,6 +53,7 @@ function App() {
       adminService.getExams(),
       adminService.getAuditLogs(),
       adminService.getAnalytics(),
+      adminService.getLiveIntel(),
     ])
     setRegistrations(regs)
     setProfiles(profs)
@@ -58,6 +62,7 @@ function App() {
     setExams(exms)
     setAuditLogs(logs)
     setAnalytics(anal)
+    setLiveIntelAlerts(intel)
   }
 
   // Load data on mount & subscribe to changes
@@ -123,6 +128,11 @@ function App() {
     reloadData()
   }
 
+  const handleUpdateCollegeProfile = async (collegeId, updates) => {
+    await adminService.updateCollegeProfile(collegeId, updates)
+    reloadData()
+  }
+
   // Action Handlers for Admin Users
   const handleAddUser = async (userData) => {
     await adminService.addUser(userData)
@@ -179,6 +189,10 @@ function App() {
         return 'Career Roadmaps & Guidance Management'
       case 'exams':
         return 'Entrance Examinations Management'
+      case 'blogs':
+        return 'Blogs & Articles CMS'
+      case 'live-intel':
+        return 'Live Intel Ticker Management'
       case 'platform-data':
         return 'Platform Data & Ratings Management'
       case 'audit-logs':
@@ -270,6 +284,7 @@ function App() {
               onApproveAndPublish={handleApproveAndPublishProfile}
               onRequestChanges={handleRequestProfileChanges}
               onUnpublish={handleUnpublishProfile}
+              onUpdateCollege={handleUpdateCollegeProfile}
             />
           )}
 
@@ -294,6 +309,36 @@ function App() {
               exams={exams}
               onAddExam={handleAddExam}
               onDeleteExam={handleDeleteExam}
+            />
+          )}
+
+          {activePage === 'blogs' && (
+            <BlogsManagementPage />
+          )}
+
+          {activePage === 'live-intel' && (
+            <LiveIntelManagementPage
+              alerts={liveIntelAlerts}
+              onAddAlert={async (payload) => {
+                const res = await adminService.createLiveIntel(payload)
+                reloadData()
+                return res
+              }}
+              onUpdateAlert={async (id, payload) => {
+                const res = await adminService.updateLiveIntel(id, payload)
+                reloadData()
+                return res
+              }}
+              onToggleAlert={async (id) => {
+                const res = await adminService.toggleLiveIntel(id)
+                reloadData()
+                return res
+              }}
+              onDeleteAlert={async (id) => {
+                const res = await adminService.deleteLiveIntel(id)
+                reloadData()
+                return res
+              }}
             />
           )}
 

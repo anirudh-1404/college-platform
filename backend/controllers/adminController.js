@@ -6,6 +6,8 @@ import { AuditLog } from "../models/AuditLog.js";
 import { CareerGuide } from "../models/CareerGuide.js";
 import { Exam } from "../models/Exam.js";
 import { Inquiry } from "../models/Inquiry.js";
+import { LiveIntel } from "../models/LiveIntel.js";
+import { Blog } from "../models/Blog.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -314,6 +316,97 @@ export const unpublishProfile = async (req, res) => {
     });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to unpublish profile." });
+  }
+};
+
+// 3.5 UPDATE COLLEGE PROFILE DETAILS (BY ADMIN)
+export const updateCollegeByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(id)) {
+      college = await College.findById(id);
+    }
+    if (!college) {
+      college = await College.findOne({ slug: id });
+    }
+    if (!college) {
+      college = await College.findOne({ name: id });
+    }
+
+    if (!college) {
+      return res.status(404).json({ success: false, message: "College profile not found." });
+    }
+
+    // Merge updates
+    Object.keys(updates).forEach((key) => {
+      if (key !== "_id" && key !== "slug") {
+        college.set(key, updates[key], { strict: false });
+        college[key] = updates[key];
+        college.markModified(key);
+      }
+    });
+
+    // Keep nested and flat fields synced
+    if (updates.city || updates.state) {
+      if (!college.locationContact) college.locationContact = {};
+      if (updates.city) college.locationContact.city = updates.city;
+      if (updates.state) college.locationContact.state = updates.state;
+      college.location = `${college.locationContact.city || updates.city || ""}${
+        (college.locationContact.city || updates.city) && (college.locationContact.state || updates.state) ? ", " : ""
+      }${college.locationContact.state || updates.state || "India"}`;
+      college.markModified("locationContact");
+      college.markModified("location");
+    }
+
+    if (updates.nirfRank !== undefined) {
+      if (!college.rankings) college.rankings = {};
+      college.rankings.nirfRank = Number(updates.nirfRank);
+      college.nirfRank = Number(updates.nirfRank);
+      college.markModified("rankings");
+    }
+
+    if (updates.avgPackage) {
+      if (!college.placements) college.placements = {};
+      college.placements.avgPackage = updates.avgPackage;
+      college.avgPackage = updates.avgPackage;
+      college.markModified("placements");
+    }
+
+    if (updates.highestPackage) {
+      if (!college.placements) college.placements = {};
+      college.placements.highestDomestic = updates.highestPackage;
+      college.highestPackage = updates.highestPackage;
+      college.markModified("placements");
+    }
+
+    if (updates.placementPercent !== undefined) {
+      if (!college.placements) college.placements = {};
+      college.placements.placementRate = Number(updates.placementPercent);
+      college.placementPercent = Number(updates.placementPercent);
+      college.markModified("placements");
+    }
+
+    await college.save();
+
+    await AuditLog.create({
+      adminUser: req.user.name,
+      action: "College Details Updated",
+      target: college.name,
+      details: `Administrator updated institutional details for ${college.name}.`,
+      type: "edit",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "College profile updated successfully by admin.",
+      college,
+    });
+  } catch (error) {
+    console.error("updateCollegeByAdmin error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to update college." });
   }
 };
 
@@ -854,3 +947,289 @@ export const deleteInquiry = async (req, res) => {
     return res.status(500).json({ success: false, message: "Failed to delete inquiry." });
   }
 };
+
+// 10. LIVE INTEL TICKER MANAGEMENT (CRUD)
+export const getAdminLiveIntel = async (req, res) => {
+  try {
+    const alerts = await LiveIntel.find().sort({ priority: -1, createdAt: -1 });
+    return res.status(200).json({ success: true, alerts });
+  } catch (error) {
+    console.error("getAdminLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch live intel alerts." });
+  }
+};
+
+export const createAdminLiveIntel = async (req, res) => {
+  try {
+    const { text, category, link, isActive, priority } = req.body;
+    if (!text || !text.trim()) {
+      return res.status(400).json({ success: false, message: "Intel headline/text is required." });
+    }
+
+    const alert = await LiveIntel.create({
+      text: text.trim(),
+      category: category ? category.trim() : "LIVE INTEL",
+      link: link ? link.trim() : "",
+      isActive: isActive !== undefined ? Boolean(isActive) : true,
+      priority: priority !== undefined ? Number(priority) : 0,
+    });
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Live Intel Alert Created",
+      target: alert.text.slice(0, 50),
+      details: `Created new live intel item with category: ${alert.category}`,
+      type: "live_intel_created",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Live intel alert created successfully.",
+      alert,
+    });
+  } catch (error) {
+    console.error("createAdminLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to create live intel alert." });
+  }
+};
+
+export const updateAdminLiveIntel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text, category, link, isActive, priority } = req.body;
+
+    const alert = await LiveIntel.findById(id);
+    if (!alert) {
+      return res.status(404).json({ success: false, message: "Live intel alert not found." });
+    }
+
+    if (text !== undefined) alert.text = text.trim();
+    if (category !== undefined) alert.category = category.trim();
+    if (link !== undefined) alert.link = link.trim();
+    if (isActive !== undefined) alert.isActive = Boolean(isActive);
+    if (priority !== undefined) alert.priority = Number(priority);
+
+    await alert.save();
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Live Intel Alert Updated",
+      target: alert.text.slice(0, 50),
+      details: `Updated live intel alert #${alert._id}`,
+      type: "live_intel_updated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Live intel alert updated successfully.",
+      alert,
+    });
+  } catch (error) {
+    console.error("updateAdminLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update live intel alert." });
+  }
+};
+
+export const toggleAdminLiveIntel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alert = await LiveIntel.findById(id);
+    if (!alert) {
+      return res.status(404).json({ success: false, message: "Live intel alert not found." });
+    }
+
+    alert.isActive = !alert.isActive;
+    await alert.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Alert is now ${alert.isActive ? "active" : "inactive"}.`,
+      alert,
+    });
+  } catch (error) {
+    console.error("toggleAdminLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to toggle live intel status." });
+  }
+};
+
+export const deleteAdminLiveIntel = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const alert = await LiveIntel.findByIdAndDelete(id);
+    if (!alert) {
+      return res.status(404).json({ success: false, message: "Live intel alert not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Live Intel Alert Deleted",
+      target: alert.text.slice(0, 50),
+      details: `Deleted live intel alert: ${alert.text}`,
+      type: "live_intel_deleted",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Live intel alert deleted successfully.",
+    });
+  } catch (error) {
+    console.error("deleteAdminLiveIntel error:", error);
+    return res.status(500).json({ success: false, message: "Failed to delete live intel alert." });
+  }
+};
+
+// 12. BLOGS MANAGEMENT (Editorial & Student Articles)
+export const getAdminBlogs = async (req, res) => {
+  try {
+    const blogs = await Blog.find().sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, blogs });
+  } catch (error) {
+    console.error("getAdminBlogs error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch blogs." });
+  }
+};
+
+export const createAdminBlog = async (req, res) => {
+  try {
+    const {
+      title,
+      category,
+      badge,
+      coverImage,
+      readTime,
+      authorName,
+      authorRole,
+      authorAvatar,
+      excerpt,
+      content,
+      tags,
+      status,
+    } = req.body;
+
+    if (!title || !title.trim()) {
+      return res.status(400).json({ success: false, message: "Blog title is required." });
+    }
+    if (!excerpt || !excerpt.trim()) {
+      return res.status(400).json({ success: false, message: "Excerpt / summary is required." });
+    }
+    if (!content || !content.trim()) {
+      return res.status(400).json({ success: false, message: "Blog content is required." });
+    }
+
+    const baseSlug = title
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)+/g, "");
+
+    let slug = baseSlug;
+    const existing = await Blog.findOne({ slug });
+    if (existing) {
+      slug = `${baseSlug}-${Date.now().toString().slice(-4)}`;
+    }
+
+    const newBlog = await Blog.create({
+      title: title.trim(),
+      slug,
+      category: category || "Admissions & Cutoffs",
+      badge: badge || "",
+      coverImage: coverImage || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?auto=format&fit=crop&w=1200&q=80",
+      readTime: readTime || "5 min read",
+      author: {
+        name: authorName || "VidyaScope Editorial Team",
+        role: authorRole || "Higher Education Analyst",
+        avatar: authorAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      },
+      excerpt: excerpt.trim(),
+      content: content.trim(),
+      tags: Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+      status: status || "published",
+      publishedAt: status === "draft" ? null : new Date(),
+    });
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "New Blog Created",
+      target: newBlog.title,
+      details: `Created blog article: ${newBlog.title} (${newBlog.category})`,
+      type: "blog_created",
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Blog created successfully.",
+      blog: newBlog,
+    });
+  } catch (error) {
+    console.error("createAdminBlog error:", error);
+    return res.status(500).json({ success: false, message: "Failed to create blog.", error: error.message });
+  }
+};
+
+export const updateAdminBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatePayload = { ...req.body };
+
+    if (updatePayload.tags && typeof updatePayload.tags === "string") {
+      updatePayload.tags = updatePayload.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+
+    if (updatePayload.authorName || updatePayload.authorRole || updatePayload.authorAvatar) {
+      updatePayload.author = {
+        name: updatePayload.authorName || "VidyaScope Editorial Team",
+        role: updatePayload.authorRole || "Higher Education Analyst",
+        avatar: updatePayload.authorAvatar || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80",
+      };
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(id, updatePayload, { new: true });
+    if (!updatedBlog) {
+      return res.status(404).json({ success: false, message: "Blog not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Blog Updated",
+      target: updatedBlog.title,
+      details: `Updated blog article: ${updatedBlog.title}`,
+      type: "blog_updated",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog updated successfully.",
+      blog: updatedBlog,
+    });
+  } catch (error) {
+    console.error("updateAdminBlog error:", error);
+    return res.status(500).json({ success: false, message: "Failed to update blog." });
+  }
+};
+
+export const deleteAdminBlog = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deletedBlog = await Blog.findByIdAndDelete(id);
+    if (!deletedBlog) {
+      return res.status(404).json({ success: false, message: "Blog not found." });
+    }
+
+    await AuditLog.create({
+      adminUser: req.user?.name || "Admin",
+      action: "Blog Deleted",
+      target: deletedBlog.title,
+      details: `Deleted blog article: ${deletedBlog.title}`,
+      type: "blog_deleted",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Blog deleted successfully.",
+    });
+  } catch (error) {
+    console.error("deleteAdminBlog error:", error);
+    return res.status(500).json({ success: false, message: "Failed to delete blog." });
+  }
+};
+

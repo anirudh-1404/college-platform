@@ -48,6 +48,7 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
   ]
 
   const resourceLinks = [
+    { name: 'Student Blogs & Articles', target: 'blogs' },
     { name: 'Compare Colleges', target: 'compare' },
     { name: 'Saved Colleges', target: 'shortlist' },
     { name: 'Career Roadmaps', target: 'career-guide' },
@@ -186,7 +187,7 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
           <div className="border-t border-border-dark/60 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
             <p>© 2026 VidyaScope. Transparent College Discovery Platform.</p>
             <p className="flex items-center gap-1.5">
-              <span>Designed for Indian students</span>
+              <span>Designed for students</span>
               <Heart className="h-3.5 w-3.5 text-brand-primary fill-brand-primary" />
             </p>
           </div>

@@ -13,10 +13,12 @@ import {
   TrendingUp,
   RefreshCw,
   Sparkles,
+  Edit3,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal } from '../components/common/AdminModal'
 import { CollegeReviewStudio } from '../components/review/CollegeReviewStudio'
+import { AdminCollegeEditModal } from '../components/modals/AdminCollegeEditModal'
 import { adminService } from '../data/adminService'
 
 const CollegeProfilesReviewPage = ({
@@ -25,6 +27,7 @@ const CollegeProfilesReviewPage = ({
   onApproveAndPublish,
   onRequestChanges,
   onUnpublish,
+  onUpdateCollege,
 }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState(defaultFilter)
@@ -38,11 +41,30 @@ const CollegeProfilesReviewPage = ({
   const [isRefreshingProfile, setIsRefreshingProfile] = useState(false)
 
   // Modals State
+  const [editingCollege, setEditingCollege] = useState(null)
   const [requestChangesModalOpen, setRequestChangesModalOpen] = useState(false)
   const [feedbackComment, setFeedbackComment] = useState('')
   const [approvePublishModalOpen, setApprovePublishModalOpen] = useState(false)
   const [unpublishModalOpen, setUnpublishModalOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+
+  // Save college edits handler
+  const handleSaveCollegeEdits = async (collegeId, updates) => {
+    if (onUpdateCollege) {
+      await onUpdateCollege(collegeId, updates)
+    } else {
+      await adminService.updateCollegeProfile(collegeId, updates)
+    }
+    // Update local reviewing profile if currently open
+    if (
+      reviewingProfile &&
+      (reviewingProfile.id === collegeId ||
+        reviewingProfile.slug === collegeId ||
+        reviewingProfile._id === collegeId)
+    ) {
+      setReviewingProfile((prev) => ({ ...prev, ...updates }))
+    }
+  }
 
   // Real-time Single Profile Refresher
   const handleOpenReview = async (profile) => {
@@ -374,14 +396,26 @@ const CollegeProfilesReviewPage = ({
                     </td>
 
                     <td className="py-3.5 px-4 text-right">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenReview(profile)}
-                        className="btn bg-[#033C8D] hover:bg-[#022B66] text-white btn-sm text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5"
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                        <span>Inspect & Review</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setEditingCollege(profile)}
+                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#033C8D] hover:border-[#033C8D]/40 text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5 transition-all"
+                          title="Edit Institutional Details"
+                        >
+                          <Edit3 className="h-3.5 w-3.5 text-[#033C8D]" />
+                          <span>Edit</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenReview(profile)}
+                          className="btn bg-[#033C8D] hover:bg-[#022B66] text-white btn-sm text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          <span>Inspect</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 )
@@ -412,6 +446,7 @@ const CollegeProfilesReviewPage = ({
           onRequestChanges={() => setRequestChangesModalOpen(true)}
           onUnpublish={() => setUnpublishModalOpen(true)}
           onRefreshProfile={handleRefreshCurrentProfile}
+          onEditCollege={(col) => setEditingCollege(col || reviewingProfile)}
           isRefreshing={isRefreshingProfile}
         />
       )}
@@ -482,6 +517,14 @@ const CollegeProfilesReviewPage = ({
           The institutional profile will be reverted to draft mode and immediately hidden from student search queries until re-approved.
         </p>
       </AdminModal>
+
+      {/* 4. Comprehensive Admin College Details Editor Modal */}
+      <AdminCollegeEditModal
+        isOpen={!!editingCollege}
+        college={editingCollege}
+        onClose={() => setEditingCollege(null)}
+        onSave={handleSaveCollegeEdits}
+      />
 
     </div>
   )

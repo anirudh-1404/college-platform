@@ -5,7 +5,7 @@ import { publicApi } from '../api/publicApi'
 import FilterSidebar from '../components/FilterSidebar'
 import SortBar from '../components/SortBar'
 import CollegeCard from '../components/CollegeCard'
-import CompareTray from '../components/CompareTray'
+import { staggerFast, cardVariant } from '../utils/animations'
 
 const parseFeeInLakhs = (feeStr) => {
   if (!feeStr) return 0
@@ -203,7 +203,11 @@ const CollegeListingPage = ({
   }, [colleges, activeStream, filters])
 
   return (
-    <div className="min-h-screen bg-slate-50/50 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-[#F3F6FC] via-[#F8FAFC] to-[#EEF3FB] pb-20 relative isolate overflow-hidden">
+      {/* Ambient background refraction glows for 3D glassmorphic cards */}
+      <div className="absolute top-24 right-10 w-96 h-96 bg-blue-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute top-[600px] left-10 w-96 h-96 bg-indigo-300/12 rounded-full blur-3xl pointer-events-none -z-10" />
+      <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-sky-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
       
       {/* 1. Breadcrumb Bar */}
       <div className="bg-white border-b border-border-color py-3">
@@ -262,7 +266,11 @@ const CollegeListingPage = ({
                 </p>
               </div>
             ) : filteredColleges.length > 0 ? (
-              <div
+              <motion.div
+                layout
+                variants={staggerFast}
+                initial="hidden"
+                animate="visible"
                 className={
                   viewMode === 'grid'
                     ? 'grid grid-cols-1 md:grid-cols-2 gap-5'
@@ -274,19 +282,20 @@ const CollegeListingPage = ({
                   const isShortlisted = shortlistedIds.includes(college.id)
 
                   return (
-                    <CollegeCard
-                      key={college.id}
-                      college={college}
-                      viewMode={viewMode}
-                      isCompared={isCompared}
-                      onToggleCompare={onToggleCompare}
-                      onSelectCollege={onSelectCollege}
-                      isShortlisted={isShortlisted}
-                      onToggleShortlist={onToggleShortlist}
-                    />
+                    <motion.div key={college.id} variants={cardVariant} layout>
+                      <CollegeCard
+                        college={college}
+                        viewMode={viewMode}
+                        isCompared={isCompared}
+                        onToggleCompare={onToggleCompare}
+                        onSelectCollege={onSelectCollege}
+                        isShortlisted={isShortlisted}
+                        onToggleShortlist={onToggleShortlist}
+                      />
+                    </motion.div>
                   )
                 })}
-              </div>
+              </motion.div>
             ) : (
               <div className="p-16 text-center bg-white border border-slate-200/80 rounded-2xl space-y-3">
                 <Building className="h-10 w-10 text-slate-300 mx-auto" />
@@ -309,15 +318,6 @@ const CollegeListingPage = ({
 
         </div>
       </div>
-
-      {/* Floating Compare Tray */}
-      <CompareTray
-        compareList={compareList}
-        onRemoveCompare={(cId) => onToggleCompare && onToggleCompare({ id: cId })}
-        onClearAll={onClearCompare}
-        onNavigateCompare={onNavigateCompare}
-      />
-
     </div>
   )
 }

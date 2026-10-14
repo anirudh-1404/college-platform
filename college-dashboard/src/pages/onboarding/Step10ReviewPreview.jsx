@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react'
 import {
   MapPin, Star, Heart, Scale, Calculator, ShieldCheck, Building2, Users,
   Check, AlertCircle, Layers, GraduationCap, Lock, Send, Eye,
-  Compass, Calendar, ExternalLink, FileText, CheckCircle2, Clock, Sparkles
+  Compass, Calendar, ExternalLink, FileText, CheckCircle2, Clock, Sparkles, Download, X
 } from 'lucide-react'
 import { ConfirmationModal } from '../../components/common/ConfirmationModal'
 import { StatusBadge } from '../../components/common/StatusBadge'
@@ -17,6 +17,8 @@ const Step10ReviewPreview = ({
   const [calculatorTenure, setCalculatorTenure] = useState(4)
   const [confirmSubmitOpen, setConfirmSubmitOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isBrochureModalOpen, setIsBrochureModalOpen] = useState(false)
+  const [brochureSubmitted, setBrochureSubmitted] = useState(false)
 
   const tabs = [
     { id: 'overview', label: 'Overview & Facts' },
@@ -25,7 +27,6 @@ const Step10ReviewPreview = ({
     { id: 'cutoffs', label: 'Cutoffs & Eligibility' },
     { id: 'placements', label: 'Placements' },
     { id: 'roi', label: 'ROI & Fee Breakdown' },
-    { id: 'reviews', label: 'Reviews & Pros/Cons' },
     { id: 'gallery', label: 'Campus Gallery' },
   ]
 
@@ -817,53 +818,6 @@ const Step10ReviewPreview = ({
                 </div>
               )}
 
-              {/* TAB 6: REVIEWS (Platform Generated - Locked) */}
-              {activeTab === 'reviews' && (
-                <div className="bg-white border border-border-color rounded-xl p-6 space-y-5">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-serif text-xl font-bold text-text-primary">
-                      Verified Student Pros & Cons
-                    </h3>
-                    <span className="inline-flex items-center gap-1 text-[11px] font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-md">
-                      <Lock className="h-3 w-3" /> Platform Managed (Locked)
-                    </span>
-                  </div>
-
-                  {collegeData.prosAndCons && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 space-y-2">
-                        <h4 className="font-serif text-sm font-bold text-emerald-900 flex items-center gap-1.5">
-                          <Check className="h-4 w-4 text-emerald-600" />
-                          <span>Key Advantages (Pros)</span>
-                        </h4>
-                        <ul className="space-y-1.5 text-xs text-emerald-950">
-                          {collegeData.prosAndCons.pros.map((pro, idx) => (
-                            <li key={idx} className="flex items-start gap-1.5">
-                              <span className="text-emerald-600 font-bold">•</span>
-                              <span>{pro}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 space-y-2">
-                        <h4 className="font-serif text-sm font-bold text-amber-900 flex items-center gap-1.5">
-                          <AlertCircle className="h-4 w-4 text-amber-600" />
-                          <span>Things to Consider (Cons)</span>
-                        </h4>
-                        <ul className="space-y-1.5 text-xs text-amber-950">
-                          {collegeData.prosAndCons.cons.map((con, idx) => (
-                            <li key={idx} className="flex items-start gap-1.5">
-                              <span className="text-amber-600 font-bold">•</span>
-                              <span>{con}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
 
               {/* TAB 7: GALLERY */}
               {activeTab === 'gallery' && (
@@ -886,21 +840,70 @@ const Step10ReviewPreview = ({
 
             </div>
 
-            {/* Right 1 Column: Advisory & Similar Colleges Sidebar (Platform Generated) */}
+            {/* Right 1 Column: Admissions & Deadlines Sidebar (Clean Light Card) */}
             <div className="space-y-5">
-              <div className="bg-navy-dark text-white p-6 rounded-xl border border-border-dark space-y-3.5">
-                <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-brand-primary bg-brand-primary/15 px-2.5 py-0.5 rounded-full border border-brand-primary/25">
-                  <GraduationCap className="h-3.5 w-3.5" />
-                  <span>VidyaScope Advisory</span>
+              <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+                <div>
+                  <h4 className="font-serif text-lg font-bold text-slate-900">
+                    Admissions & Deadlines
+                  </h4>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Official admission timeline, entrance eligibility and application desk.
+                  </p>
                 </div>
-                <h4 className="font-serif text-lg font-bold">
-                  Evaluating {collegeData.shortName}?
-                </h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  Connect with verified student mentors from {collegeData.shortName} for real insights on campus life, grading, and placement tips.
-                </p>
-                <div className="btn btn-primary btn-md w-full opacity-90 pointer-events-none">
-                  <span>Connect With Student Mentor</span>
+
+                {/* Deadlines Box */}
+                <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 space-y-3">
+                  <div className="flex items-start justify-between gap-2 text-xs">
+                    <div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                        Application Starts
+                      </span>
+                      <span className="font-bold text-slate-800">
+                        {collegeData.applicationStartDate || 'May 2026'}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                        Closing Deadline
+                      </span>
+                      <span className="font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60 inline-block">
+                        {collegeData.applicationEndDate || 'July 2026'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Accepted Exams */}
+                  <div className="pt-2 border-t border-slate-200/70 space-y-1.5">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                      Accepted Entrance Tests
+                    </span>
+                    <div className="flex flex-wrap items-center gap-1.5">
+                      {(collegeData.examAccepted && collegeData.examAccepted.length > 0
+                        ? collegeData.examAccepted
+                        : ['JEE Advanced', 'JEE Main', 'GATE']
+                      ).map((exam, idx) => (
+                        <span
+                          key={idx}
+                          className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[11px] font-bold shadow-2xs"
+                        >
+                          {exam}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="pt-1">
+                  <button
+                    type="button"
+                    onClick={() => setIsBrochureModalOpen(true)}
+                    className="btn btn-primary btn-md w-full text-xs font-bold justify-center shadow-xs cursor-pointer flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    <span>Download Official Brochure</span>
+                  </button>
                 </div>
               </div>
 
@@ -929,6 +932,123 @@ const Step10ReviewPreview = ({
           </div>
         </div>
       </div>
+
+      {/* Download Brochure Lead Modal Preview */}
+      {isBrochureModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-border-color p-6 sm:p-7 space-y-4">
+            <button
+              type="button"
+              onClick={() => {
+                setIsBrochureModalOpen(false)
+                setBrochureSubmitted(false)
+              }}
+              className="absolute top-4 right-4 p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            {brochureSubmitted ? (
+              <div className="text-center py-5 space-y-3">
+                <div className="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                  <CheckCircle2 className="h-6 w-6" />
+                </div>
+                <h3 className="font-serif text-xl font-bold text-slate-900">
+                  Brochure Request Submitted!
+                </h3>
+                <p className="text-xs text-slate-600 max-w-sm mx-auto leading-relaxed">
+                  Thank you! Your inquiry has been registered. You can now proceed to the official admission portal of <strong className="text-slate-900">{collegeData.name}</strong>.
+                </p>
+                <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  {collegeData.admissionPortalUrl ? (
+                    <a
+                      href={collegeData.admissionPortalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-primary btn-md text-xs font-bold flex items-center justify-center gap-1.5 w-full sm:w-auto shadow-sm"
+                    >
+                      <span>Proceed to Official Admission Portal</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsBrochureModalOpen(false)
+                      setBrochureSubmitted(false)
+                    }}
+                    className="btn btn-outline btn-md text-xs font-semibold text-slate-600 hover:text-slate-900 w-full sm:w-auto cursor-pointer"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <h3 className="font-serif text-xl font-bold text-slate-900">
+                  Download Official Brochure
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5 mb-5">
+                  Enter your details to access {collegeData.name}&apos;s official curriculum brochure and admission portal.
+                </p>
+
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault()
+                    setBrochureSubmitted(true)
+                  }}
+                  className="space-y-3.5"
+                >
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="e.g. Student Name"
+                      className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-primary outline-none text-xs font-medium"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Mobile Number *
+                      </label>
+                      <input
+                        type="tel"
+                        required
+                        placeholder="+91 98765 43210"
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-primary outline-none text-xs font-medium"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">
+                        Email Address *
+                      </label>
+                      <input
+                        type="email"
+                        required
+                        placeholder="student@example.com"
+                        className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:border-brand-primary outline-none text-xs font-medium"
+                      />
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    className="w-full mt-2 py-3 rounded-xl bg-brand-primary hover:bg-brand-primary-hover text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                  >
+                    <Send className="h-3.5 w-3.5" />
+                    <span>Submit & Get Admission Portal Access</span>
+                  </button>
+                </form>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Confirmation Modal for Final Submission */}
       <ConfirmationModal

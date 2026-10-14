@@ -209,17 +209,19 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
                 return (
                   <motion.div
                     key={feat.id}
-                    whileHover={{ y: -6, transition: { duration: 0.2 } }}
-                    className="flex flex-col items-center p-6 rounded-2xl bg-white border border-slate-100 hover:border-slate-200 hover:bg-slate-50/80 transition-all shadow-2xs hover:shadow-md group cursor-pointer"
+                    whileHover={{ y: -8, scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ type: 'spring', stiffness: 350, damping: 22 }}
                     onClick={() => handleAction(feat.action)}
+                    className="flex flex-col items-center p-6 rounded-2xl bg-white border border-slate-200/80 hover:border-brand-primary/40 shadow-sm hover:shadow-card-hover select-none cursor-pointer group transition-all"
                   >
-                    {/* Clean Feature Icon */}
-                    <div className={`w-14 h-14 rounded-2xl ${feat.iconColor} flex items-center justify-center mb-4 transition-transform group-hover:scale-110 shadow-xs`}>
+                    {/* Clean Feature Icon with interactive pulse */}
+                    <div className={`w-14 h-14 rounded-2xl ${feat.iconColor} flex items-center justify-center mb-4 shadow-xs group-hover:scale-110 transition-transform duration-300`}>
                       <Icon className="h-7 w-7" />
                     </div>
 
                     {/* Title */}
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 mb-2 group-hover:text-brand-primary transition-colors">
+                    <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors mb-2">
                       {feat.title}
                     </h3>
 

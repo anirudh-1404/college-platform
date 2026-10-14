@@ -6,6 +6,7 @@ import {
   rejectRegistration,
   getAllProfiles,
   getProfileById,
+  updateCollegeByAdmin,
   approveAndPublishProfile,
   requestProfileChanges,
   unpublishProfile,
@@ -25,6 +26,15 @@ import {
   getAdminInquiries,
   updateInquiryStatus,
   deleteInquiry,
+  getAdminLiveIntel,
+  createAdminLiveIntel,
+  updateAdminLiveIntel,
+  deleteAdminLiveIntel,
+  toggleAdminLiveIntel,
+  getAdminBlogs,
+  createAdminBlog,
+  updateAdminBlog,
+  deleteAdminBlog,
 } from "../controllers/adminController.js";
 import { verifyToken, isAdmin } from "../utils/authMiddleware.js";
 
@@ -44,6 +54,7 @@ router.post("/registrations/:id/reject", rejectRegistration);
 // College Profiles CMS Review
 router.get("/profiles", getAllProfiles);
 router.get("/profiles/:id", getProfileById);
+router.put("/profiles/:id", updateCollegeByAdmin);
 router.post("/profiles/:id/publish", approveAndPublishProfile);
 router.post("/profiles/:id/request-changes", requestProfileChanges);
 router.post("/profiles/:id/unpublish", unpublishProfile);
@@ -75,5 +86,18 @@ router.get("/audit-logs", getAuditLogs);
 router.get("/inquiries", getAdminInquiries);
 router.patch("/inquiries/:id/status", updateInquiryStatus);
 router.delete("/inquiries/:id", deleteInquiry);
+
+// Live Intel Ticker CRUD
+router.get("/live-intel", getAdminLiveIntel);
+router.post("/live-intel", createAdminLiveIntel);
+router.put("/live-intel/:id", updateAdminLiveIntel);
+router.delete("/live-intel/:id", deleteAdminLiveIntel);
+router.patch("/live-intel/:id/toggle", toggleAdminLiveIntel);
+
+// Blogs / Articles CMS CRUD
+router.get("/blogs", getAdminBlogs);
+router.post("/blogs", createAdminBlog);
+router.put("/blogs/:id", updateAdminBlog);
+router.delete("/blogs/:id", deleteAdminBlog);
 
 export default router;

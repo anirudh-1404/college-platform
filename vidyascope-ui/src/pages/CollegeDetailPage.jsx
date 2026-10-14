@@ -4,7 +4,7 @@ import {
   ChevronRight, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
   Check, AlertCircle, Scale, Layers, GraduationCap, Building,
-  Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils
+  Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils, Download
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
@@ -16,9 +16,11 @@ const CollegeDetailPage = ({
   onOpenCounseling,
   onSelectCollege,
   isShortlisted = false,
+  shortlistedIds = [],
   onToggleShortlist,
   onToggleCompare,
   isCompared = false,
+  compareList = [],
 }) => {
   const { id } = useParams()
   const effectiveCollegeId = id || collegeId || 'iit-bombay'
@@ -28,6 +30,20 @@ const CollegeDetailPage = ({
   const [calculatorTenure, setCalculatorTenure] = useState(4)
   const [college, setCollege] = useState(null)
   const [loading, setLoading] = useState(true)
+
+  const effectiveIsShortlisted =
+    isShortlisted ||
+    shortlistedIds.includes(effectiveCollegeId) ||
+    Boolean(college && (shortlistedIds.includes(college.id) || shortlistedIds.includes(college._id) || shortlistedIds.includes(college.slug)))
+
+  const effectiveIsCompared =
+    isCompared ||
+    compareList.some(
+      (c) =>
+        c.id === effectiveCollegeId ||
+        c.slug === effectiveCollegeId ||
+        Boolean(college && (c.id === college.id || c.id === college._id || c.id === college.slug))
+    )
 
   // Fetch Live College Details from Backend
   useEffect(() => {
@@ -53,7 +69,6 @@ const CollegeDetailPage = ({
     { id: 'cutoffs', label: 'Cutoffs & Eligibility' },
     { id: 'placements', label: 'Placements' },
     { id: 'roi', label: 'ROI & Fee Breakdown' },
-    { id: 'reviews', label: 'Reviews & Pros/Cons' },
     { id: 'gallery', label: 'Campus Gallery' },
   ]
 
@@ -82,10 +97,71 @@ const CollegeDetailPage = ({
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50/50 flex items-center justify-center p-12">
-        <p className="text-xs font-semibold text-slate-500 animate-pulse">
-          Loading college intelligence profile...
-        </p>
+      <div className="min-h-screen bg-slate-50/50 pb-20 animate-pulse">
+        {/* Breadcrumb Skeleton */}
+        <div className="bg-white border-b border-border-color py-3">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="h-4 w-56 bg-slate-200 rounded-md" />
+          </div>
+        </div>
+
+        {/* Hero Cover Skeleton */}
+        <div className="bg-white border-b border-border-color">
+          <div className="h-48 sm:h-64 md:h-72 w-full bg-slate-200" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-col md:flex-row gap-6 items-start md:items-end justify-between">
+              <div className="flex gap-4 items-center">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-slate-300 border-4 border-white shadow-sm shrink-0" />
+                <div className="space-y-2.5">
+                  <div className="h-7 w-64 sm:w-80 bg-slate-300 rounded-lg" />
+                  <div className="h-4 w-44 bg-slate-200 rounded-md" />
+                  <div className="flex gap-2">
+                    <div className="h-5 w-20 bg-slate-200 rounded-full" />
+                    <div className="h-5 w-24 bg-slate-200 rounded-full" />
+                  </div>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="h-10 w-28 bg-slate-200 rounded-xl" />
+                <div className="h-10 w-36 bg-slate-200 rounded-xl" />
+              </div>
+            </div>
+
+            {/* Tabs Skeleton */}
+            <div className="flex gap-3 mt-8 pt-4 border-t border-slate-100 overflow-x-auto">
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <div key={i} className="h-8 w-28 bg-slate-200 rounded-lg shrink-0" />
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Content Grid Skeleton */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-6">
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 space-y-4">
+                <div className="h-6 w-48 bg-slate-300 rounded-md" />
+                <div className="h-4 w-full bg-slate-200 rounded-md" />
+                <div className="h-4 w-5/6 bg-slate-200 rounded-md" />
+                <div className="h-4 w-4/6 bg-slate-200 rounded-md" />
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 pt-4">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <div key={i} className="h-20 bg-slate-100 rounded-xl" />
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="lg:col-span-4 space-y-6">
+              <div className="bg-white rounded-2xl p-6 border border-slate-200/80 space-y-4">
+                <div className="h-6 w-40 bg-slate-300 rounded-md" />
+                <div className="h-12 w-full bg-slate-100 rounded-xl" />
+                <div className="h-12 w-full bg-slate-100 rounded-xl" />
+                <div className="h-12 w-full bg-slate-100 rounded-xl" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     )
   }
@@ -197,27 +273,39 @@ const CollegeDetailPage = ({
             {/* Right Action Buttons (Cleanly positioned inside white area) */}
             <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-end pt-2 sm:pt-0">
               <button
-                onClick={() => onToggleShortlist && onToggleShortlist(college.id)}
+                type="button"
+                onClick={() => onToggleShortlist && onToggleShortlist(college?.id || college?._id || effectiveCollegeId)}
                 className={`btn btn-sm ${
-                  isShortlisted
-                    ? 'bg-rose-50 border-rose-200 text-rose-600 font-bold'
+                  effectiveIsShortlisted
+                    ? 'bg-rose-50 border-rose-300 text-rose-600 font-bold'
                     : 'btn-outline bg-white hover:bg-slate-50'
                 } shadow-2xs cursor-pointer`}
               >
-                <Heart className={`h-3.5 w-3.5 ${isShortlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
-                <span>{isShortlisted ? 'Saved' : 'Save'}</span>
+                <Heart className={`h-3.5 w-3.5 ${effectiveIsShortlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>{effectiveIsShortlisted ? 'Saved' : 'Save'}</span>
               </button>
 
               <button
-                onClick={() => onToggleCompare && onToggleCompare(college)}
+                type="button"
+                onClick={() => {
+                  if (onToggleCompare) {
+                    onToggleCompare(
+                      college || {
+                        id: effectiveCollegeId,
+                        name: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
+                        shortName: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
+                      }
+                    )
+                  }
+                }}
                 className={`btn btn-sm ${
-                  isCompared
-                    ? 'bg-purple-50 text-brand-primary border-brand-primary/30 font-bold'
+                  effectiveIsCompared
+                    ? 'bg-[#EBF2FA] text-[#033C8D] border-[#033C8D]/40 font-bold shadow-2xs'
                     : 'btn-outline bg-white hover:bg-slate-50'
                 } shadow-2xs cursor-pointer`}
               >
                 <Scale className="h-3.5 w-3.5" />
-                <span>{isCompared ? 'Comparing' : 'Compare'}</span>
+                <span>{effectiveIsCompared ? 'Comparing' : 'Compare'}</span>
               </button>
 
               <button
@@ -843,48 +931,6 @@ const CollegeDetailPage = ({
               </div>
             )}
 
-            {/* 6. REVIEWS TAB */}
-            {activeTab === 'reviews' && (
-              <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-5 shadow-card">
-                <h2 className="font-serif text-xl font-bold text-text-primary">
-                  Verified Student Pros & Cons
-                </h2>
-
-                {college.prosAndCons && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="p-4 rounded-xl bg-emerald-50/70 border border-emerald-100 space-y-2">
-                      <h3 className="font-serif text-sm font-bold text-emerald-900 flex items-center gap-1.5">
-                        <Check className="h-4 w-4 text-emerald-600" />
-                        <span>Key Advantages (Pros)</span>
-                      </h3>
-                      <ul className="space-y-1.5 text-xs text-emerald-950">
-                        {(college.prosAndCons.pros || []).map((pro, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-emerald-600 font-bold">•</span>
-                            <span>{pro}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-
-                    <div className="p-4 rounded-xl bg-amber-50/70 border border-amber-100 space-y-2">
-                      <h3 className="font-serif text-sm font-bold text-amber-900 flex items-center gap-1.5">
-                        <AlertCircle className="h-4 w-4 text-amber-600" />
-                        <span>Things to Consider (Cons)</span>
-                      </h3>
-                      <ul className="space-y-1.5 text-xs text-amber-950">
-                        {(college.prosAndCons.cons || []).map((con, idx) => (
-                          <li key={idx} className="flex items-start gap-1.5">
-                            <span className="text-amber-600 font-bold">•</span>
-                            <span>{con}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* 7. GALLERY TAB */}
             {activeTab === 'gallery' && (
@@ -908,28 +954,85 @@ const CollegeDetailPage = ({
             </motion.div>
           </AnimatePresence>
 
-          {/* Right 1 Column: Advisory */}
+          {/* Right 1 Column: Admissions & Deadlines Card (Clean Light Styling) */}
           <div className="space-y-5">
-            <div className="bg-navy-dark text-white p-6 rounded-2xl border border-border-dark space-y-3.5 shadow-md">
-              <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-brand-primary bg-brand-primary/15 px-2.5 py-0.5 rounded-full border border-brand-primary/25">
-                <GraduationCap className="h-3.5 w-3.5" />
-                <span>VidyaScope Advisory</span>
+            <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-slate-900">
+                  Admissions & Deadlines
+                </h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Official admission timeline, entrance eligibility and application desk.
+                </p>
               </div>
-              <h3 className="font-serif text-lg font-bold">
-                Evaluating {college.shortName || college.name}?
-              </h3>
-              <p className="text-xs text-slate-300 leading-relaxed">
-                Connect with verified student mentors from {college.shortName} for real insights on campus life, grading, and placement tips.
-              </p>
-              <button
-                type="button"
-                onClick={onOpenCounseling}
-                className="btn btn-primary btn-md w-full text-xs font-bold"
-              >
-                <span>Connect With Student Mentor</span>
-              </button>
+
+              {/* Deadlines Box */}
+              <div className="bg-slate-50/80 border border-slate-200/80 rounded-xl p-3.5 space-y-3">
+                <div className="flex items-start justify-between gap-2 text-xs">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                      Application Starts
+                    </span>
+                    <span className="font-bold text-slate-800">
+                      {college.applicationStartDate || college.admissions?.applicationStart || 'May 2026'}
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-0.5">
+                      Closing Deadline
+                    </span>
+                    <span className="font-extrabold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-200/60 inline-block">
+                      {college.applicationEndDate || college.admissions?.applicationEnd || 'July 2026'}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Accepted Entrance Tests */}
+                <div className="pt-2 border-t border-slate-200/70 space-y-1.5">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
+                    Accepted Entrance Tests
+                  </span>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(college.examAccepted && college.examAccepted.length > 0
+                      ? college.examAccepted
+                      : (college.admissions?.examAccepted && college.admissions.examAccepted.length > 0
+                          ? college.admissions.examAccepted
+                          : ['JEE Advanced', 'JEE Main', 'GATE'])
+                    ).map((exam, idx) => (
+                      <span
+                        key={idx}
+                        className="px-2 py-0.5 rounded-md bg-white border border-slate-200 text-slate-700 text-[11px] font-bold shadow-2xs"
+                      >
+                        {exam}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (onOpenCounseling) {
+                      onOpenCounseling({
+                        title: 'Download Official Brochure',
+                        collegeName: college.name,
+                        portalUrl: college.admissionPortalUrl || college.locationContact?.websiteUrl,
+                        stream: college.stream || 'engineering',
+                      })
+                    }
+                  }}
+                  className="btn btn-primary btn-md w-full text-xs font-bold justify-center shadow-xs cursor-pointer flex items-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Download Official Brochure</span>
+                </button>
+              </div>
             </div>
           </div>
+
 
         </div>
       </div>

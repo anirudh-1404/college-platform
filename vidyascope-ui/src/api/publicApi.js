@@ -142,4 +142,56 @@ export const publicApi = {
       return { success: false, message: "Network error submitting inquiry." };
     }
   },
+
+  async getLiveIntel() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel`);
+      const data = await res.json();
+      if (data.success && data.alerts) {
+        return data.alerts;
+      }
+      return [];
+    } catch (error) {
+      console.error("publicApi.getLiveIntel error:", error);
+      return [];
+    }
+  },
+
+  async getBlogs(params = {}) {
+    try {
+      const queryParams = new URLSearchParams();
+      if (params.category && params.category !== "all" && params.category !== "All") {
+        queryParams.append("category", params.category);
+      }
+      if (params.query) queryParams.append("query", params.query);
+      if (params.limit) queryParams.append("limit", params.limit);
+
+      const url = `${API_BASE_URL}/blogs?${queryParams.toString()}`;
+      const res = await fetch(url);
+      const data = await res.json();
+      if (data.success) {
+        return data.blogs || [];
+      }
+      return [];
+    } catch (error) {
+      console.error("publicApi.getBlogs error:", error);
+      return [];
+    }
+  },
+
+  async getBlogDetail(slugOrId) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/blogs/${slugOrId}`);
+      const data = await res.json();
+      if (data.success) {
+        return data.blog || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("publicApi.getBlogDetail error:", error);
+      return null;
+    }
+  },
 };
+
+

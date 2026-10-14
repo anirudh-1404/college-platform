@@ -40,6 +40,7 @@ import {
   Share2,
   Star,
   Percent,
+  Edit3,
 } from 'lucide-react'
 import AdminStatusBadge from '../common/AdminStatusBadge'
 import ErrorBoundary from '../common/ErrorBoundary'
@@ -51,6 +52,7 @@ export const CollegeReviewStudio = ({
   onRequestChanges,
   onUnpublish,
   onRefreshProfile,
+  onEditCollege,
   isRefreshing = false,
 }) => {
   // Navigation Section in Audit Mode
@@ -376,6 +378,19 @@ export const CollegeReviewStudio = ({
                 title="Refresh Live Data from Database"
               >
                 <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin text-[#033C8D]' : ''}`} />
+              </button>
+            )}
+
+            {/* Edit College Details Button */}
+            {onEditCollege && (
+              <button
+                type="button"
+                onClick={() => onEditCollege(profile)}
+                className="btn btn-outline border-blue-300 text-[#033C8D] bg-blue-50/70 hover:bg-blue-100 btn-md text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                title="Edit Institutional Details"
+              >
+                <Edit3 className="h-3.5 w-3.5 text-[#033C8D]" />
+                <span className="hidden sm:inline">Edit</span> Details
               </button>
             )}
 

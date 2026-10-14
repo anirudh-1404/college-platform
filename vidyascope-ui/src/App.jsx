@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import LiveAlertTicker from './components/LiveAlertTicker'
@@ -12,6 +12,10 @@ import Testimonials from './components/Testimonials'
 import BlogSection from './components/BlogSection'
 import Footer from './components/Footer'
 import CounselingModal from './components/CounselingModal'
+import CompareTray from './components/CompareTray'
+import HeartSaveAnimation from './components/HeartSaveAnimation'
+import TopProgressBar from './components/common/TopProgressBar'
+import RouteLoadingOverlay from './components/common/RouteLoadingOverlay'
 
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -24,6 +28,8 @@ import ExamsPage from './pages/ExamsPage'
 import ShortlistPage from './pages/ShortlistPage'
 import CareerGuidePage from './pages/CareerGuidePage'
 import CounselingPage from './pages/CounselingPage'
+import BlogListingPage from './pages/BlogListingPage'
+import BlogDetailPage from './pages/BlogDetailPage'
 
 const HomePage = ({
   onNavigateListing,
@@ -39,6 +45,7 @@ const HomePage = ({
       onNavigateListing={onNavigateListing}
       onNavigateCompare={onNavigateCompare}
       onSelectCollege={onSelectCollege}
+      onHeroSearch={handleHeroSearch}
     />
     <FeaturesTailored
       onNavigateListing={onNavigateListing}
@@ -68,15 +75,74 @@ const App = () => {
 
   const [selectedStream, setSelectedStream] = useState('all')
   const [selectedCollegeId, setSelectedCollegeId] = useState(null)
-  const [compareList, setCompareList] = useState([])
-  const [shortlistedIds, setShortlistedIds] = useState([])
   const [isCounselingModalOpen, setIsCounselingModalOpen] = useState(false)
+  const [counselingContext, setCounselingContext] = useState(null)
   const [heroSearchQuery, setHeroSearchQuery] = useState('')
+  const [heartAnimTrigger, setHeartAnimTrigger] = useState(0)
 
-  // Scroll to top on page navigation
+  const handleOpenCounseling = (ctx) => {
+    if (ctx && typeof ctx === 'object') {
+      setCounselingContext(ctx)
+    } else {
+      setCounselingContext(null)
+    }
+    setIsCounselingModalOpen(true)
+  }
+
+  // Persistent Comparison State
+  const [compareList, setCompareList] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vidyascope_compare')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      return []
+    }
+  })
+
   useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }, [location.pathname])
+    try {
+      localStorage.setItem('vidyascope_compare', JSON.stringify(compareList))
+    } catch (e) {
+      console.warn('Compare storage error', e)
+    }
+  }, [compareList])
+
+  // Persistent Shortlist / Favorite State
+  const [shortlistedIds, setShortlistedIds] = useState(() => {
+    try {
+      const saved = localStorage.getItem('vidyascope_shortlist')
+      return saved ? JSON.parse(saved) : []
+    } catch (e) {
+      return []
+    }
+  })
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('vidyascope_shortlist', JSON.stringify(shortlistedIds))
+    } catch (e) {
+      console.warn('Shortlist storage error', e)
+    }
+  }, [shortlistedIds])
+
+  // Page Route Transition Loading State
+  const [isRouteLoading, setIsRouteLoading] = useState(false)
+  const isFirstRender = useRef(true)
+
+  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false
+      return
+    }
+    setIsRouteLoading(true)
+    window.scrollTo({ top: 0, behavior: 'instant' })
+
+    const timer = setTimeout(() => {
+      setIsRouteLoading(false)
+    }, 360)
+
+    return () => clearTimeout(timer)
+  }, [location.pathname, location.search])
 
   // Navigation Handlers
   const handleNavigate = (page, param) => {
@@ -112,6 +178,16 @@ const App = () => {
           navigate('/career-guide')
         }
         break
+      case 'blogs':
+        navigate('/blogs')
+        break
+      case 'blog-detail':
+        if (param) {
+          navigate(`/blogs/${param}`)
+        } else {
+          navigate('/blogs')
+        }
+        break
       case 'counseling':
         navigate('/counseling')
         break
@@ -144,41 +220,74 @@ const App = () => {
   // Compare List Handlers
   const handleToggleCompare = (college) => {
     if (!college) return
+    const collegeId = college.id || college._id || college.slug
     setCompareList((prev) => {
-      const exists = prev.some((item) => item.id === college.id)
+      const exists = prev.some((item) => (item.id || item._id || item.slug) === collegeId)
       if (exists) {
-        return prev.filter((item) => item.id !== college.id)
+        return prev.filter((item) => (item.id || item._id || item.slug) !== collegeId)
       } else {
         if (prev.length >= 4) {
           alert('You can compare up to 4 colleges at a time.')
           return prev
         }
-        return [...prev, college]
+        return [
+          ...prev,
+          {
+            ...college,
+            id: collegeId,
+            name: college.name,
+            shortName: college.shortName || college.name,
+            image: college.image || college.logo,
+          },
+        ]
       }
     })
   }
 
   const handleAddCompare = (college) => {
     if (!college) return
+    const collegeId = college.id || college._id || college.slug
     if (compareList.length >= 4) {
       alert('You can compare up to 4 colleges at a time.')
       return
     }
-    if (!compareList.some((c) => c.id === college.id)) {
-      setCompareList((prev) => [...prev, college])
+    if (!compareList.some((c) => (c.id || c._id || c.slug) === collegeId)) {
+      setCompareList((prev) => [
+        ...prev,
+        {
+          ...college,
+          id: collegeId,
+          name: college.name,
+          shortName: college.shortName || college.name,
+          image: college.image || college.logo,
+        },
+      ])
     }
   }
 
   // Shortlist Handlers
   const handleToggleShortlist = (collegeId) => {
-    setShortlistedIds((prev) =>
-      prev.includes(collegeId) ? prev.filter((id) => id !== collegeId) : [...prev, collegeId]
-    )
+    setShortlistedIds((prev) => {
+      const isAlreadyShortlisted = prev.includes(collegeId)
+      if (!isAlreadyShortlisted) {
+        // Trigger center heart animation when saving
+        setHeartAnimTrigger(Date.now())
+        return [...prev, collegeId]
+      } else {
+        return prev.filter((id) => id !== collegeId)
+      }
+    })
   }
 
   return (
     <div className="min-h-screen flex flex-col bg-white text-text-primary selection:bg-brand-primary selection:text-white antialiased font-sans">
       
+      {/* 0. Top Screen Glowing Progress Bar */}
+      <TopProgressBar />
+
+      {/* 0.1 Route Loading Frosted Indicator */}
+      <RouteLoadingOverlay isLoading={isRouteLoading} />
+
       {/* 1. Top Real-time Regulatory & Cutoff Ticker */}
       <LiveAlertTicker />
 
@@ -193,10 +302,10 @@ const App = () => {
       <AnimatePresence mode="wait">
         <motion.main
           key={location.pathname}
-          initial={{ opacity: 0, y: 8 }}
+          initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -6 }}
-          transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}
+          exit={{ opacity: 0, y: -8 }}
+          transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
           className="flex-grow"
         >
           <Routes>
@@ -252,12 +361,12 @@ const App = () => {
                   collegeId={selectedCollegeId}
                   onNavigateHome={() => navigate('/')}
                   onNavigateListing={() => navigate('/colleges')}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={handleOpenCounseling}
                   onSelectCollege={handleSelectCollege}
-                  isShortlisted={shortlistedIds.includes(selectedCollegeId)}
+                  shortlistedIds={shortlistedIds}
                   onToggleShortlist={handleToggleShortlist}
+                  compareList={compareList}
                   onToggleCompare={handleToggleCompare}
-                  isCompared={compareList.some((c) => c.id === selectedCollegeId)}
                 />
               }
             />
@@ -268,7 +377,7 @@ const App = () => {
                 <CoursesPage
                   onNavigateHome={() => navigate('/')}
                   onSelectCollegeDetail={handleSelectCollege}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={() => handleOpenCounseling()}
                 />
               }
             />
@@ -279,7 +388,7 @@ const App = () => {
                 <ExamsPage
                   onNavigateHome={() => navigate('/')}
                   onNavigateColleges={() => navigate('/colleges')}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={() => handleOpenCounseling()}
                 />
               }
             />
@@ -289,12 +398,14 @@ const App = () => {
               element={
                 <CollegeComparePage
                   selectedColleges={compareList}
-                  onRemoveCollege={(id) => setCompareList((prev) => prev.filter((item) => item.id !== id))}
+                  onRemoveCollege={(id) =>
+                    setCompareList((prev) => prev.filter((item) => (item.id || item._id || item.slug) !== id))
+                  }
                   onAddCollege={handleAddCompare}
                   onClearAll={() => setCompareList([])}
                   onNavigateHome={() => navigate('/')}
                   onNavigateListing={() => navigate('/colleges')}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={() => handleOpenCounseling()}
                   onSelectCollege={handleSelectCollege}
                 />
               }
@@ -310,7 +421,7 @@ const App = () => {
                   onSelectCollege={handleSelectCollege}
                   onNavigateHome={() => navigate('/')}
                   onNavigateColleges={() => navigate('/colleges')}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={() => handleOpenCounseling()}
                   compareList={compareList}
                   onToggleCompare={handleToggleCompare}
                   onNavigateCompare={() => navigate('/compare')}
@@ -323,7 +434,7 @@ const App = () => {
               element={
                 <CareerGuidePage
                   onNavigateHome={() => navigate('/')}
-                  onOpenCounseling={() => setIsCounselingModalOpen(true)}
+                  onOpenCounseling={() => handleOpenCounseling()}
                   onNavigateColleges={(filter) => {
                     if (filter && filter.stream) {
                       setSelectedStream(filter.stream)
@@ -342,6 +453,29 @@ const App = () => {
               element={<CounselingPage onNavigateHome={() => navigate('/')} />}
             />
 
+            <Route
+              path="/blogs"
+              element={
+                <BlogListingPage
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateDetail={(slug) => navigate(`/blogs/${slug}`)}
+                  onOpenCounseling={handleOpenCounseling}
+                />
+              }
+            />
+
+            <Route
+              path="/blogs/:slug"
+              element={
+                <BlogDetailPage
+                  onNavigateHome={() => navigate('/')}
+                  onNavigateListing={() => navigate('/blogs')}
+                  onOpenCounseling={handleOpenCounseling}
+                  onSelectCollege={handleSelectCollege}
+                />
+              }
+            />
+
             {/* Fallback route */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
@@ -351,13 +485,35 @@ const App = () => {
       {/* Centralized Footer */}
       <Footer
         onNavigate={handleNavigate}
-        onOpenCounseling={() => setIsCounselingModalOpen(true)}
+        onOpenCounseling={() => handleOpenCounseling()}
       />
 
       {/* Global Quick Counseling Lead Modal */}
       <CounselingModal
         isOpen={isCounselingModalOpen}
-        onClose={() => setIsCounselingModalOpen(false)}
+        context={counselingContext}
+        onClose={() => {
+          setIsCounselingModalOpen(false)
+          setCounselingContext(null)
+        }}
+      />
+
+      {/* Floating Bottom-Right Compare Drawer */}
+      {location.pathname !== '/compare' && (
+        <CompareTray
+          selectedColleges={compareList}
+          onRemoveCollege={(id) =>
+            setCompareList((prev) => prev.filter((item) => (item.id || item._id || item.slug) !== id))
+          }
+          onClearAll={() => setCompareList([])}
+          onCompareNow={() => navigate('/compare')}
+        />
+      )}
+
+      {/* Floating Center Heart Pop & Flight Animation on College Save */}
+      <HeartSaveAnimation
+        triggerKey={heartAnimTrigger}
+        onComplete={() => setHeartAnimTrigger(0)}
       />
 
     </div>

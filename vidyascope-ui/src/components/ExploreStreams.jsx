@@ -12,7 +12,7 @@ import { motion } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
 import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
-// Master metadata catalogue for streams with premium icons & branding
+// Master metadata catalogue for streams with clean icons & branding
 const STREAM_METADATA = {
   engineering: {
     id: 'engineering',
@@ -21,7 +21,6 @@ const STREAM_METADATA = {
     icon: Cpu,
     borderHover: 'hover:border-[#033C8D]',
     bgIcon: 'bg-blue-50 text-[#033C8D] border border-blue-100',
-    tagline: 'Premier IITs, NITs & Top Technical Institutes',
   },
   management: {
     id: 'management',
@@ -30,7 +29,6 @@ const STREAM_METADATA = {
     icon: Briefcase,
     borderHover: 'hover:border-amber-500',
     bgIcon: 'bg-amber-50 text-amber-700 border border-amber-100',
-    tagline: 'Top IIMs & Premier Business Schools',
   },
   medical: {
     id: 'medical',
@@ -39,7 +37,6 @@ const STREAM_METADATA = {
     icon: Stethoscope,
     borderHover: 'hover:border-emerald-500',
     bgIcon: 'bg-emerald-50 text-emerald-700 border border-emerald-100',
-    tagline: 'AIIMS, Government & Top Medical Colleges',
   },
   law: {
     id: 'law',
@@ -48,7 +45,6 @@ const STREAM_METADATA = {
     icon: Scale,
     borderHover: 'hover:border-purple-500',
     bgIcon: 'bg-purple-50 text-purple-700 border border-purple-100',
-    tagline: 'National Law Universities (NLUs) & Colleges',
   },
   science: {
     id: 'science',
@@ -57,7 +53,6 @@ const STREAM_METADATA = {
     icon: Atom,
     borderHover: 'hover:border-cyan-500',
     bgIcon: 'bg-cyan-50 text-cyan-700 border border-cyan-100',
-    tagline: 'IISc, IISERs & Premier Research Campuses',
   },
   arts: {
     id: 'arts',
@@ -66,7 +61,6 @@ const STREAM_METADATA = {
     icon: Palette,
     borderHover: 'hover:border-rose-500',
     bgIcon: 'bg-rose-50 text-rose-700 border border-rose-100',
-    tagline: 'Central Universities & Premier Arts Colleges',
   },
 }
 
@@ -131,7 +125,7 @@ const ExploreStreams = ({ onSelectStream, onNavigateListing }) => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="h-5 w-28 bg-slate-200 rounded-full mx-auto mb-2.5 animate-pulse" />
           <div className="h-8 w-56 bg-slate-200 rounded-xl mx-auto mb-8 animate-pulse" />
-          <div className="h-20 max-w-2xl mx-auto rounded-2xl bg-white border border-slate-200 animate-pulse" />
+          <div className="h-40 max-w-xs mx-auto rounded-2xl bg-white border border-slate-200 animate-pulse" />
         </div>
       </section>
     )
@@ -166,18 +160,20 @@ const ExploreStreams = ({ onSelectStream, onNavigateListing }) => {
           </p>
         </motion.div>
 
-        {/* Compact, Sleek Streams Grid (No clutter, No campus count) */}
+        {/* Clean Minimal Stream Cards Grid */}
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: '-40px' }}
           variants={staggerContainer}
-          className={`grid gap-4 sm:gap-5 ${
+          className={`grid gap-4 sm:gap-6 ${
             activeStreams.length === 1
-              ? 'max-w-2xl mx-auto grid-cols-1'
+              ? 'max-w-xs sm:max-w-sm mx-auto grid-cols-1'
               : activeStreams.length === 2
-              ? 'max-w-4xl mx-auto grid-cols-1 md:grid-cols-2'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+              ? 'max-w-xl mx-auto grid-cols-1 sm:grid-cols-2'
+              : activeStreams.length === 3
+              ? 'max-w-4xl mx-auto grid-cols-1 sm:grid-cols-2 md:grid-cols-3'
+              : 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4'
           }`}
         >
           {activeStreams.map((stream) => {
@@ -190,29 +186,26 @@ const ExploreStreams = ({ onSelectStream, onNavigateListing }) => {
                 whileHover={{ y: -4, transition: { duration: 0.2 } }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleClick(stream.id)}
-                className={`bg-white rounded-2xl border border-slate-200/90 p-5 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer group ${stream.borderHover}`}
+                className={`bg-white rounded-2xl border border-slate-200/90 p-6 flex flex-col justify-between shadow-2xs hover:shadow-md transition-all duration-200 cursor-pointer group ${stream.borderHover}`}
               >
-                <div className="flex items-center gap-4">
-                  {/* Clean Branded Icon */}
-                  <div className={`w-13 h-13 rounded-2xl ${stream.bgIcon} flex items-center justify-center transition-transform group-hover:scale-105 shadow-2xs flex-shrink-0`}>
+                <div>
+                  {/* 1. Icon */}
+                  <div
+                    className={`w-12 h-12 rounded-xl ${stream.bgIcon} flex items-center justify-center mb-4 transition-transform group-hover:scale-105 shadow-2xs`}
+                  >
                     <IconComponent className="h-6 w-6" />
                   </div>
 
-                  {/* Stream Title & Subtitle */}
-                  <div className="space-y-0.5">
-                    <h3 className="text-base sm:text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
-                      {stream.title}
-                    </h3>
-                    <p className="text-xs text-slate-500 font-medium">
-                      {stream.tagline}
-                    </p>
-                  </div>
+                  {/* 2. Branch Name */}
+                  <h3 className="text-lg font-bold text-slate-900 group-hover:text-brand-primary transition-colors">
+                    {stream.title}
+                  </h3>
                 </div>
 
-                {/* Clean Action Button */}
-                <div className="flex items-center gap-2 text-xs font-bold text-brand-primary group-hover:text-brand-primary-hover flex-shrink-0 self-end sm:self-center">
+                {/* 3. Explore Button */}
+                <div className="mt-6 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-brand-primary group-hover:text-brand-primary-hover">
                   <span>Explore</span>
-                  <div className="w-8 h-8 rounded-full bg-slate-100 group-hover:bg-brand-primary group-hover:text-white flex items-center justify-center transition-all shadow-2xs">
+                  <div className="w-7 h-7 rounded-full bg-slate-100 group-hover:bg-brand-primary group-hover:text-white flex items-center justify-center transition-all">
                     <ArrowRight className="h-3.5 w-3.5" />
                   </div>
                 </div>

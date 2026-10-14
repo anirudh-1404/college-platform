@@ -138,6 +138,24 @@ export const adminService = {
     return null
   },
 
+  async updateCollegeProfile(collegeId, updates) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(updates),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Failed to update college details')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      window.dispatchEvent(new CustomEvent('vidyascope_college_data_change'))
+      return data.college
+    } catch (error) {
+      console.error('updateCollegeProfile error:', error)
+      throw error
+    }
+  },
+
   async approveAndPublish(collegeId) {
     try {
       const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/publish`, {
@@ -462,4 +480,159 @@ export const adminService = {
       throw error
     }
   },
+
+  // 9. LIVE INTEL TICKER MANAGEMENT
+  async getLiveIntel() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel`, {
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (res.ok && data.alerts) {
+        return data.alerts.map(a => ({ ...a, id: a._id || a.id }))
+      }
+    } catch (e) {
+      console.warn('Live intel fetch error:', e)
+    }
+    return []
+  },
+
+  async createLiveIntel(intelData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(intelData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Create live intel failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.alert
+    } catch (error) {
+      console.error('createLiveIntel error:', error)
+      throw error
+    }
+  },
+
+  async updateLiveIntel(id, intelData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(intelData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update live intel failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.alert
+    } catch (error) {
+      console.error('updateLiveIntel error:', error)
+      throw error
+    }
+  },
+
+  async toggleLiveIntel(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel/${id}/toggle`, {
+        method: 'PATCH',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Toggle live intel failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.alert
+    } catch (error) {
+      console.error('toggleLiveIntel error:', error)
+      throw error
+    }
+  },
+
+  async deleteLiveIntel(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/live-intel/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Delete live intel failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return true
+    } catch (error) {
+      console.error('deleteLiveIntel error:', error)
+      throw error
+    }
+  },
+
+  // 10. BLOGS & EDITORIAL CMS
+  async getBlogs(params = {}) {
+    try {
+      const query = new URLSearchParams()
+      if (params.category && params.category !== 'all') query.append('category', params.category)
+      if (params.status && params.status !== 'all') query.append('status', params.status)
+      if (params.search) query.append('search', params.search)
+
+      const res = await fetch(`${API_BASE_URL}/blogs?${query.toString()}`, {
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (res.ok && data.blogs) {
+        return data.blogs.map(b => ({ ...b, id: b._id || b.id }))
+      }
+    } catch (e) {
+      console.warn('Blogs fetch error:', e)
+    }
+    return []
+  },
+
+  async createBlog(blogData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/blogs`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(blogData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Create blog failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.blog
+    } catch (error) {
+      console.error('createBlog error:', error)
+      throw error
+    }
+  },
+
+  async updateBlog(id, blogData) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify(blogData),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Update blog failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data.blog
+    } catch (error) {
+      console.error('updateBlog error:', error)
+      throw error
+    }
+  },
+
+  async deleteBlog(id) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/blogs/${id}`, {
+        method: 'DELETE',
+        headers: this.getHeaders(),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.message || 'Delete blog failed')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return true
+    } catch (error) {
+      console.error('deleteBlog error:', error)
+      throw error
+    }
+  },
 }
+
+

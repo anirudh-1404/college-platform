@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, CheckCircle, Send, PhoneCall, Lock, Loader2 } from 'lucide-react'
+import { X, CheckCircle, Send, PhoneCall, Lock, Loader2, ExternalLink } from 'lucide-react'
 import { publicApi } from '../api/publicApi'
 
 const backdropVariants = {
@@ -25,14 +25,14 @@ const modalVariants = {
   },
 }
 
-const CounselingModal = ({ isOpen, onClose }) => {
+const CounselingModal = ({ isOpen, onClose, context = null }) => {
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     phone: '',
-    stream: 'engineering',
+    stream: context?.stream || 'engineering',
     targetYear: '2025',
   })
 
@@ -46,7 +46,8 @@ const CounselingModal = ({ isOpen, onClose }) => {
         phone: formData.phone,
         stream: formData.stream,
         admissionYear: formData.targetYear,
-        source: 'counseling_modal',
+        source: context?.portalUrl ? 'brochure_download' : 'counseling_modal',
+        collegeName: context?.collegeName,
       })
       setSubmitted(true)
     } catch (err) {
@@ -111,17 +112,28 @@ const CounselingModal = ({ isOpen, onClose }) => {
                   <CheckCircle className="h-6 w-6" />
                 </div>
                 <h3 className="font-serif text-xl font-bold text-text-primary">
-                  Counseling Slot Reserved!
+                  {context?.portalUrl ? 'Brochure Request Submitted!' : 'Counseling Slot Reserved!'}
                 </h3>
                 <p className="text-xs text-text-secondary max-w-sm mx-auto leading-relaxed">
-                  Thank you, <strong className="text-text-primary">{formData.name}</strong>. An advisor will contact you on <strong className="text-text-primary">{formData.phone}</strong> within 2 business hours.
+                  Thank you, <strong className="text-text-primary">{formData.name}</strong>. {context?.portalUrl ? `Your inquiry has been registered. You can now proceed to the official admission portal of ${context?.collegeName || 'the college'}.` : `An advisor will contact you on ${formData.phone} within 2 business hours.`}
                 </p>
-                <div className="pt-2">
+                <div className="pt-3 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  {context?.portalUrl ? (
+                    <a
+                      href={context.portalUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-5 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-xs hover:bg-brand-primary-hover transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-1.5"
+                    >
+                      <span>Proceed to Official Admission Portal</span>
+                      <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  ) : null}
                   <motion.button
                     whileHover={{ scale: 1.03 }}
                     whileTap={{ scale: 0.97 }}
                     onClick={handleReset}
-                    className="px-5 py-2.5 rounded-xl bg-brand-primary text-white font-semibold text-xs hover:bg-brand-primary-hover transition-colors cursor-pointer shadow-xs"
+                    className="px-5 py-2.5 rounded-xl bg-slate-100 text-slate-700 font-semibold text-xs hover:bg-slate-200 transition-colors cursor-pointer"
                   >
                     Done
                   </motion.button>
@@ -130,10 +142,12 @@ const CounselingModal = ({ isOpen, onClose }) => {
             ) : (
               <div>
                 <h3 className="font-serif text-xl font-bold text-text-primary">
-                  Book Free 1-on-1 Counseling
+                  {context?.title || 'Book Free 1-on-1 Counseling'}
                 </h3>
                 <p className="text-xs text-text-secondary mt-0.5 mb-5">
-                  Get personalized college recommendations, cutoff analysis, and fee breakdown from verified alumni.
+                  {context?.collegeName
+                    ? `Enter your details to access ${context.collegeName}'s official curriculum brochure and direct admission desk.`
+                    : 'Get personalized college recommendations, cutoff analysis, and fee breakdown from verified alumni.'}
                 </p>
 
                 <form onSubmit={handleSubmit} className="space-y-3.5">

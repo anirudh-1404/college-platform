@@ -8,6 +8,9 @@ import {
   getPublicExams,
   getPublicExamDetail,
   createPublicInquiry,
+  getPublicLiveIntel,
+  getPublicBlogs,
+  getPublicBlogDetail,
 } from "../controllers/publicController.js";
 
 const router = express.Router();
@@ -20,6 +23,9 @@ router.get("/career-guides", getPublicCareerGuides);
 router.get("/career-guides/:slugOrId", getPublicCareerGuideDetail);
 router.get("/exams", getPublicExams);
 router.get("/exams/:slugOrId", getPublicExamDetail);
+router.get("/live-intel", getPublicLiveIntel);
+router.get("/blogs", getPublicBlogs);
+router.get("/blogs/:slugOrId", getPublicBlogDetail);
 
 // Student Lead / Counseling Request Capture
 router.post("/counseling", createPublicInquiry);
