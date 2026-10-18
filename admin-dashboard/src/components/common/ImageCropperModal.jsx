@@ -26,7 +26,7 @@ export const ImageCropperModal = ({
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [selectedRatio, setSelectedRatio] = useState(
-    aspectRatio === 'square' ? '1:1' : aspectRatio === 'banner' ? '16:9' : '16:9'
+    aspectRatio === 'square' ? '1:1' : '3:1'
   )
   const [isProcessing, setIsProcessing] = useState(false)
   const [naturalSize, setNaturalSize] = useState({ w: 1200, h: 800 })
@@ -52,7 +52,7 @@ export const ImageCropperModal = ({
       setRotation(0)
       setPan({ x: 0, y: 0 })
       setSelectedRatio(
-        aspectRatio === 'square' ? '1:1' : aspectRatio === 'banner' ? '16:9' : '16:9'
+        aspectRatio === 'square' ? '1:1' : '3:1'
       )
     }
   }, [isOpen, imageSrc, aspectRatio])
@@ -64,22 +64,24 @@ export const ImageCropperModal = ({
     switch (selectedRatio) {
       case '1:1':
         return 1
-      case '16:9':
-        return 16 / 9
       case '3:1':
         return 3 / 1
+      case '16:9':
+        return 16 / 9
+      case '4:1':
+        return 4 / 1
       case '4:3':
         return 4 / 3
       default:
-        return 16 / 9
+        return 3 / 1
     }
   }
 
   // Calculate box dimensions that fit cleanly inside viewport
   const getBoxDimensions = () => {
     const R = getAspectRatioValue()
-    const maxW = 460
-    const maxH = 280
+    const maxW = 500
+    const maxH = 260
     let w = maxW
     let h = Math.round(w / R)
     if (h > maxH) {
@@ -184,7 +186,14 @@ export const ImageCropperModal = ({
       })
 
       // Target export dimensions
-      const targetW = selectedRatio === '1:1' ? 800 : selectedRatio === '3:1' ? 1500 : 1200
+      const targetW =
+        selectedRatio === '1:1'
+          ? 800
+          : selectedRatio === '3:1'
+          ? 1500
+          : selectedRatio === '4:1'
+          ? 1600
+          : 1600
       const targetH = Math.round(targetW / getAspectRatioValue())
 
       const canvas = document.createElement('canvas')
@@ -240,8 +249,10 @@ export const ImageCropperModal = ({
 
   const isSquare = selectedRatio === '1:1'
 
-  // Live thumbnail preview scale factor
-  const thumbScale = isSquare ? 44 / boxW : 64 / boxW
+  // Live thumbnail preview dimensions & scale factor
+  const thumbW = isSquare ? 36 : selectedRatio === '3:1' ? 72 : selectedRatio === '4:1' ? 80 : 54
+  const thumbH = Math.round(thumbW / getAspectRatioValue())
+  const thumbScale = thumbW / boxW
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -278,9 +289,10 @@ export const ImageCropperModal = ({
           </span>
           <div className="flex items-center gap-1.5">
             {[
-              { id: '1:1', label: '1:1 Circle / Square (Logo)' },
-              { id: '16:9', label: '16:9 Standard Card' },
-              { id: '3:1', label: '3:1 Wide Banner' },
+              { id: '3:1', label: '3:1 Campus Banner (Best Match)' },
+              { id: '16:9', label: '16:9 Card Landscape' },
+              { id: '1:1', label: '1:1 Circle Logo / Avatar' },
+              { id: '4:1', label: '4:1 Panoramic Ribbon' },
               { id: '4:3', label: '4:3 Classic' },
             ].map((ratio) => (
               <button
@@ -357,6 +369,23 @@ export const ImageCropperModal = ({
                 <div className="border-r border-b border-white" />
                 <div className="border-r border-b border-white" />
                 <div />
+              </div>
+            )}
+
+            {/* Live Logo Avatar Guide (shows where circle logo will overlap on live site) */}
+            {!isSquare && (
+              <div
+                style={{
+                  width: `${Math.round(boxH * 0.58)}px`,
+                  height: `${Math.round(boxH * 0.58)}px`,
+                  bottom: `-${Math.round(boxH * 0.18)}px`,
+                  left: '16px',
+                }}
+                className="absolute rounded-full border-2 border-dashed border-amber-300/85 bg-amber-400/15 backdrop-blur-[2px] flex items-center justify-center pointer-events-none z-10 shadow-sm"
+              >
+                <span className="text-[9px] font-extrabold text-amber-200 uppercase tracking-wider text-center leading-tight drop-shadow-md px-1 select-none">
+                  Logo Area
+                </span>
               </div>
             )}
           </div>
@@ -443,8 +472,8 @@ export const ImageCropperModal = ({
               </span>
               <div
                 style={{
-                  width: isSquare ? '36px' : '56px',
-                  height: '36px',
+                  width: `${thumbW}px`,
+                  height: `${thumbH}px`,
                 }}
                 className={`relative overflow-hidden bg-black border border-white/40 shrink-0 ${
                   isSquare ? 'rounded-full' : 'rounded-md'

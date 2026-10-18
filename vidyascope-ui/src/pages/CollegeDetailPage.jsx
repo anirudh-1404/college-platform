@@ -227,7 +227,7 @@ const CollegeDetailPage = ({
       <div className="bg-white border-b border-border-color">
         
         {/* Wide Background Banner */}
-        <div className="relative h-56 sm:h-72 md:h-80 w-full overflow-hidden bg-slate-900">
+        <div className="relative h-64 sm:h-80 md:h-96 lg:h-[420px] w-full overflow-hidden bg-slate-900">
           <img
             src={
               college.image ||
@@ -236,10 +236,10 @@ const CollegeDetailPage = ({
                 : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
             }
             alt={`${college.name} Campus Banner`}
-            className="w-full h-full object-cover object-center"
+            className="w-full h-full object-cover object-[center_35%]"
           />
           {/* Ambient Gradient Overlay for high-end aesthetic */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-black/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/15 to-transparent" />
 
           {/* Top-Right Badge Overlay on Banner */}
           <div className="absolute top-4 right-4 sm:top-6 sm:right-8 flex items-center gap-2">
