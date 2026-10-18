@@ -14,11 +14,11 @@ const CounselingPage = ({ onNavigateHome }) => {
     fullName: '',
     phone: '',
     email: '',
-    stream: 'engineering',
+    stream: '',
     targetScore: '',
     preferredLocation: '',
     budgetRange: 'under-10',
-    admissionYear: '2025',
+    admissionYear: '2027',
     notes: '',
   })
 
@@ -116,11 +116,11 @@ const CounselingPage = ({ onNavigateHome }) => {
                         fullName: '',
                         phone: '',
                         email: '',
-                        stream: 'engineering',
+                        stream: '',
                         targetScore: '',
                         preferredLocation: '',
                         budgetRange: 'under-10',
-                        admissionYear: '2025',
+                        admissionYear: '2027',
                         notes: '',
                       })
                     }}
@@ -186,17 +186,13 @@ const CounselingPage = ({ onNavigateHome }) => {
                     <label className="block text-xs font-bold text-text-primary uppercase tracking-wider mb-1">
                       Target Discipline
                     </label>
-                    <select
+                    <input
+                      type="text"
+                      placeholder="e.g. B.Tech, MBA, MBBS, Law, Design..."
                       value={formData.stream}
                       onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium bg-white"
-                    >
-                      <option value="engineering">Engineering (B.Tech / M.Tech)</option>
-                      <option value="management">Management (MBA / PGDM)</option>
-                      <option value="medical">Medical (MBBS / BDS)</option>
-                      <option value="law">Law (BA LLB)</option>
-                      <option value="applied-sciences">Applied Sciences (B.Sc / BA)</option>
-                    </select>
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium"
+                    />
                   </div>
                   <div>
                     <label className="block text-xs font-bold text-text-primary uppercase tracking-wider mb-1">
@@ -237,8 +233,10 @@ const CounselingPage = ({ onNavigateHome }) => {
                       onChange={(e) => setFormData({ ...formData, admissionYear: e.target.value })}
                       className="w-full px-3.5 py-2.5 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium bg-white"
                     >
-                      <option value="2025">2025 – 2026 Academic Year</option>
-                      <option value="2026">2026 – 2027 Academic Year</option>
+                      <option value="2027">2027 – 2028 Academic Year</option>
+                      <option value="2028">2028 – 2029 Academic Year</option>
+                      <option value="2029">2029 – 2030 Academic Year</option>
+                      <option value="2030">2030 – 2031 Academic Year</option>
                     </select>
                   </div>
                 </div>
