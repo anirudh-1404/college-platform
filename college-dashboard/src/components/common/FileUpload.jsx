@@ -53,7 +53,7 @@ export const DocumentUploader = ({
           hour: '2-digit',
           minute: '2-digit',
         }),
-        previewUrl: file.type.startsWith('image/') ? reader.result : null,
+        previewUrl: reader.result,
       })
     }
     reader.readAsDataURL(file)

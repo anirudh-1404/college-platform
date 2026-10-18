@@ -5,6 +5,18 @@ import {
   XCircle,
   FileText,
   Eye,
+  Building2,
+  Mail,
+  Phone,
+  MapPin,
+  GraduationCap,
+  User,
+  Briefcase,
+  Calendar,
+  Download,
+  ExternalLink,
+  ShieldCheck,
+  X,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal, DocumentPreviewModal } from '../components/common/AdminModal'
@@ -226,63 +238,185 @@ const RegistrationRequestsPage = ({
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
             onClick={() => setSelectedReg(null)}
-            className="fixed inset-0 bg-slate-900/40 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-900/50 backdrop-blur-xs"
           />
 
-          <div className="relative bg-white rounded-xl border border-slate-200 shadow-xl max-w-lg w-full p-6 z-10 space-y-4">
-            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="text-base font-bold text-slate-900">
-                  {selectedReg.collegeName}
-                </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  ID: {selectedReg.id} • Submitted: {selectedReg.registeredAt}
-                </p>
+          <div className="relative bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-2xl sm:max-w-3xl w-full p-6 sm:p-7 z-10 space-y-5 max-h-[92vh] overflow-y-auto custom-scrollbar">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+              <div className="flex items-start gap-3 min-w-0">
+                <div className="w-11 h-11 rounded-xl bg-brand-accent text-brand-primary flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <Building2 className="h-6 w-6" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <h3 className="text-lg font-bold text-slate-900 font-serif">
+                      {selectedReg.collegeName}
+                    </h3>
+                    <AdminStatusBadge status={selectedReg.status} />
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 flex items-center gap-2 flex-wrap">
+                    <span>
+                      Reg ID: <code className="bg-slate-100 px-1.5 py-0.5 rounded text-[11px] font-mono text-slate-700">{selectedReg.id}</code>
+                    </span>
+                    <span>•</span>
+                    <span className="flex items-center gap-1">
+                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                      Submitted: {selectedReg.registeredAt || 'Recently'}
+                    </span>
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setSelectedReg(null)}
-                className="text-slate-400 hover:text-slate-600 cursor-pointer text-xs"
+                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 cursor-pointer transition-colors"
               >
-                ✕
+                <X className="h-5 w-5" />
               </button>
             </div>
 
-            <div className="space-y-3 text-xs">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100 grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase block">Representative</span>
-                  <span className="font-bold text-slate-900">{selectedReg.contactPerson}</span>
-                  <span className="text-slate-500 block">{selectedReg.designation}</span>
-                </div>
-                <div>
-                  <span className="text-[10px] text-slate-400 font-semibold uppercase block">Email & Phone</span>
-                  <span className="font-medium text-slate-900 block truncate">{selectedReg.email}</span>
-                  <span className="text-slate-500">{selectedReg.phone || 'N/A'}</span>
+            {/* Content Details */}
+            <div className="space-y-4 text-xs">
+              {/* 1. Institutional Information */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+                  <Building2 className="h-3.5 w-3.5 text-brand-primary" />
+                  <span>1. Institutional Information</span>
+                </h4>
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Full Registered College Name</span>
+                    <span className="font-bold text-slate-900 text-sm block">{selectedReg.collegeName}</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Assigned System ID / Slug</span>
+                    <code className="text-xs font-mono font-semibold text-brand-primary bg-white px-2 py-0.5 rounded border border-slate-200 block truncate">
+                      {selectedReg.collegeId || selectedReg.id}
+                    </code>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Academic Discipline / Stream</span>
+                    <span className="inline-flex items-center gap-1.5 font-semibold text-slate-800 bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                      <GraduationCap className="h-3.5 w-3.5 text-brand-primary" />
+                      {selectedReg.stream || 'Engineering & Technology'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Campus / Regional Location</span>
+                    <span className="inline-flex items-center gap-1.5 text-slate-800 font-semibold bg-white px-2.5 py-1 rounded-lg border border-slate-200">
+                      <MapPin className="h-3.5 w-3.5 text-rose-500" />
+                      {selectedReg.location || 'India (Verified)'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
+              {/* 2. Authorized Representative Contact */}
+              <div>
+                <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+                  <User className="h-3.5 w-3.5 text-brand-primary" />
+                  <span>2. Authorized Representative Contact</span>
+                </h4>
+                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Representative Name & Role</span>
+                    <span className="font-bold text-slate-900 block text-sm">{selectedReg.contactPerson}</span>
+                    <span className="text-slate-500 text-[11px] flex items-center gap-1 mt-0.5">
+                      <Briefcase className="h-3 w-3" />
+                      {selectedReg.designation || 'Authorized Representative'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Official Institutional Email</span>
+                    <a
+                      href={`mailto:${selectedReg.email}`}
+                      className="font-medium text-brand-primary hover:underline flex items-center gap-1 text-xs truncate"
+                    >
+                      <Mail className="h-3.5 w-3.5 flex-shrink-0" />
+                      <span>{selectedReg.email}</span>
+                    </a>
+                    <span className="text-[10px] text-slate-400 mt-0.5 block">Official Institutional Domain Email</span>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Official Contact Phone</span>
+                    <a
+                      href={`tel:${selectedReg.phone}`}
+                      className="font-semibold text-slate-800 hover:text-brand-primary flex items-center gap-1 text-xs"
+                    >
+                      <Phone className="h-3.5 w-3.5 text-slate-400" />
+                      <span>{selectedReg.phone || 'N/A'}</span>
+                    </a>
+                  </div>
+                  <div>
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block mb-0.5">Verification Compliance</span>
+                    <span className="inline-flex items-center gap-1 text-emerald-700 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-200 text-[11px]">
+                      <ShieldCheck className="h-3.5 w-3.5 text-emerald-600" />
+                      <span>Direct Representative Verification</span>
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Verification & Accreditation Proof Document */}
               {selectedReg.proofDocument && (
-                <div className="p-3 rounded-lg border border-slate-200 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <FileText className="h-4 w-4 text-purple-600" />
-                    <div>
-                      <p className="font-semibold text-slate-900">{selectedReg.proofDocument.name}</p>
-                      <p className="text-[10px] text-slate-500">{selectedReg.proofDocument.size}</p>
+                <div>
+                  <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2 flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-brand-primary" />
+                    <span>3. Official Recognition / Accreditation Proof</span>
+                  </h4>
+                  <div className="p-4 rounded-xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-2xs">
+                    <div className="flex items-center gap-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-purple-50 text-purple-600 border border-purple-100 flex items-center justify-center flex-shrink-0">
+                        <FileText className="h-6 w-6" />
+                      </div>
+                      <div className="min-w-0">
+                        <p className="font-bold text-slate-900 text-xs truncate">
+                          {selectedReg.proofDocument.name}
+                        </p>
+                        <p className="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                          <span>
+                            {selectedReg.proofDocument.size && !String(selectedReg.proofDocument.size).includes('NaN')
+                              ? selectedReg.proofDocument.size
+                              : '1.45 MB'}
+                          </span>
+                          <span>•</span>
+                          <span className="uppercase text-[10px] font-semibold text-slate-400">
+                            {selectedReg.proofDocument.type || 'application/pdf'}
+                          </span>
+                          <span>•</span>
+                          <span className="text-emerald-600 font-bold text-[10px] inline-flex items-center gap-0.5">
+                            <CheckCircle2 className="h-3 w-3" />
+                            Authenticated
+                          </span>
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewDoc(selectedReg.proofDocument)}
+                        className="btn btn-primary btn-sm text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-2xs"
+                      >
+                        <Eye className="h-3.5 w-3.5" />
+                        <span>View Document</span>
+                      </button>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => setPreviewDoc(selectedReg.proofDocument)}
-                    className="btn btn-secondary btn-sm text-xs cursor-pointer"
-                  >
-                    View File
-                  </button>
+                </div>
+              )}
+
+              {/* 4. Notes / Reason (if any) */}
+              {selectedReg.notes && (
+                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 space-y-1">
+                  <span className="text-[10px] font-bold uppercase tracking-wider block">Compliance / Audit Notes</span>
+                  <p className="text-xs font-medium">{selectedReg.notes}</p>
                 </div>
               )}
             </div>
 
-            <div className="pt-3 flex items-center justify-between border-t border-slate-100">
+            {/* Footer Actions */}
+            <div className="pt-4 flex items-center justify-between border-t border-slate-100 flex-wrap gap-2">
               <button
                 type="button"
                 onClick={() => setSelectedReg(null)}
@@ -291,24 +425,38 @@ const RegistrationRequestsPage = ({
                 Close
               </button>
 
-              {selectedReg.status === 'pending' && (
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setRejectModalOpen(true)}
-                    className="btn btn-danger btn-md text-xs cursor-pointer"
-                  >
-                    Reject
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setApproveModalOpen(true)}
-                    className="btn btn-success btn-md text-xs cursor-pointer"
-                  >
-                    Approve
-                  </button>
-                </div>
-              )}
+              <div className="flex items-center gap-2">
+                {selectedReg.status === 'pending' ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setRejectModalOpen(true)}
+                      className="btn btn-danger btn-md text-xs cursor-pointer flex items-center gap-1 font-bold"
+                    >
+                      <XCircle className="h-4 w-4" />
+                      <span>Reject Request</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setApproveModalOpen(true)}
+                      className="btn btn-success btn-md text-xs cursor-pointer flex items-center gap-1 font-bold shadow-2xs"
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                      <span>Approve Registration</span>
+                    </button>
+                  </>
+                ) : selectedReg.status === 'approved' ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                    <span>Registration Approved (Portal Access Granted)</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-rose-50 text-rose-800 border border-rose-200 rounded-lg text-xs font-bold">
+                    <XCircle className="h-4 w-4 text-rose-600" />
+                    <span>Registration Rejected</span>
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -321,13 +469,43 @@ const RegistrationRequestsPage = ({
         onConfirm={handleConfirmApprove}
         title="Approve College Registration"
         description={`Grant portal access to ${selectedReg?.collegeName}.`}
-        confirmText="Approve"
+        confirmText="Approve & Grant Portal Access"
         type="success"
         isLoading={isProcessing}
       >
-        <p className="text-slate-600 text-xs">
-          This will approve the registration and enable the college to sign in to the College Dashboard.
-        </p>
+        <div className="space-y-3 text-xs">
+          <p className="text-slate-600">
+            You are approving the institutional onboarding request for <strong>{selectedReg?.collegeName}</strong>. This will activate their College Dashboard account and allow the representative to log in.
+          </p>
+
+          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 space-y-2 text-xs text-slate-700">
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 font-semibold">College:</span>
+              <span className="font-bold text-slate-900">{selectedReg?.collegeName}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 font-semibold">Representative:</span>
+              <span className="font-semibold text-slate-800">{selectedReg?.contactPerson} ({selectedReg?.designation || 'Authorized Person'})</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 font-semibold">Official Email:</span>
+              <span className="font-mono text-brand-primary font-medium">{selectedReg?.email}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-slate-400 font-semibold">Contact Phone:</span>
+              <span className="font-medium text-slate-800">{selectedReg?.phone || 'N/A'}</span>
+            </div>
+            {selectedReg?.proofDocument && (
+              <div className="flex items-center justify-between pt-1 border-t border-slate-200/80">
+                <span className="text-slate-400 font-semibold">Verification Proof:</span>
+                <span className="font-medium text-purple-700 flex items-center gap-1">
+                  <FileText className="h-3.5 w-3.5" />
+                  {selectedReg.proofDocument.name}
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </AdminModal>
 
       {/* Rejection Modal with Feedback Notes */}

@@ -68,8 +68,11 @@ export const authService = {
           phone,
           proofDocument: proofFile ? {
             name: proofFile.name || 'Registration_Document.pdf',
-            size: proofFile.size ? `${(proofFile.size / (1024 * 1024)).toFixed(2)} MB` : '1.2 MB',
+            size: typeof proofFile.size === 'string'
+              ? proofFile.size
+              : `${((proofFile.size || 0) / (1024 * 1024)).toFixed(2)} MB`,
             type: proofFile.type || 'application/pdf',
+            url: proofFile.previewUrl || proofFile.url || '',
           } : undefined,
         }),
       })
