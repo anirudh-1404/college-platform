@@ -1,6 +1,18 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { Upload, FileText, Image as ImageIcon, X, CheckCircle2, AlertCircle, Loader2, Link as LinkIcon, ExternalLink } from 'lucide-react'
+import {
+  Upload,
+  FileText,
+  Image as ImageIcon,
+  X,
+  CheckCircle2,
+  AlertCircle,
+  Loader2,
+  Link as LinkIcon,
+  ExternalLink,
+  Crop as CropIcon,
+} from 'lucide-react'
 import { collegeService } from '../../data/collegeService'
+import { ImageCropperModal } from './ImageCropperModal'
 
 // 1. Document / Verification Proof Uploader (PDF or Image)
 export const DocumentUploader = ({
@@ -146,7 +158,7 @@ export const DocumentUploader = ({
   )
 }
 
-// 2. Dual-Option Image Uploader (Option 1: URL | Option 2: Upload from Device/Computer)
+// 2. Dual-Option Image Uploader with Crop Functionality
 export const ImageUploader = ({
   imageUrl,
   onChange,
@@ -163,6 +175,8 @@ export const ImageUploader = ({
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
+  const [isCropperOpen, setIsCropperOpen] = useState(false)
+  const [cropperSource, setCropperSource] = useState('')
 
   useEffect(() => {
     setUrlInput(imageUrl || '')
@@ -186,26 +200,37 @@ export const ImageUploader = ({
       return
     }
 
+    // Read file and open interactive cropper modal
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCropperSource(reader.result)
+      setIsCropperOpen(true)
+    }
+    reader.readAsDataURL(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCropComplete = async (croppedDataUrl, croppedFile) => {
     setUploading(true)
     setUploadError('')
     try {
-      // Direct upload to backend Cloudinary endpoint
-      const uploadedUrl = await collegeService.uploadImage(file, 'vidyascope/colleges')
+      const uploadedUrl = await collegeService.uploadImage(croppedFile, 'vidyascope/colleges')
       setUrlInput(uploadedUrl)
       onChange(uploadedUrl)
     } catch (err) {
-      console.warn('Direct upload failed, falling back to local base64:', err)
-      // Graceful fallback: local Data URI
-      const reader = new FileReader()
-      reader.onload = () => {
-        setUrlInput(reader.result)
-        onChange(reader.result)
-      }
-      reader.readAsDataURL(file)
+      console.warn('Direct upload failed for cropped image, falling back to data URL:', err)
+      setUrlInput(croppedDataUrl)
+      onChange(croppedDataUrl)
     } finally {
       setUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      setIsCropperOpen(false)
     }
+  }
+
+  const handleOpenCropper = () => {
+    if (!imageUrl && !urlInput) return
+    setCropperSource(imageUrl || urlInput)
+    setIsCropperOpen(true)
   }
 
   const handleDrop = (e) => {
@@ -363,21 +388,32 @@ export const ImageUploader = ({
         {/* Visual Preview */}
         {imageUrl ? (
           <div className="space-y-2 pt-1 border-t border-border-color">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-[11px] flex-wrap gap-2">
               <span className="font-bold text-emerald-600 flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 <span>Image Active & Saved</span>
               </span>
-              {!disabled && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleClear}
-                  className="text-rose-600 hover:text-rose-700 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                  onClick={handleOpenCropper}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg text-brand-primary bg-brand-accent/40 hover:bg-brand-accent border border-brand-primary/20 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Crop, rotate and position this photo"
                 >
-                  <X className="h-3 w-3" />
-                  <span>Remove</span>
+                  <CropIcon className="h-3.5 w-3.5" />
+                  <span>Crop / Adjust Image</span>
                 </button>
-              )}
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={handleClear}
+                    className="text-rose-600 hover:text-rose-700 font-bold hover:underline cursor-pointer flex items-center gap-1 px-1.5 py-1"
+                  >
+                    <X className="h-3 w-3" />
+                    <span>Remove</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {aspectRatio === 'square' ? (
@@ -423,14 +459,24 @@ export const ImageUploader = ({
                   <span className="font-semibold bg-slate-900/70 px-2 py-0.5 rounded backdrop-blur-xs font-mono text-[10px] truncate max-w-[70%]">
                     {imageUrl}
                   </span>
-                  <a
-                    href={imageUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-2 py-0.5 rounded bg-white/20 hover:bg-white text-white hover:text-text-primary backdrop-blur-xs font-bold transition-colors"
-                  >
-                    View Original
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenCropper}
+                      className="px-2 py-0.5 rounded bg-blue-600/80 hover:bg-blue-600 text-white backdrop-blur-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <CropIcon className="h-3 w-3" />
+                      <span>Crop</span>
+                    </button>
+                    <a
+                      href={imageUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-2 py-0.5 rounded bg-white/20 hover:bg-white text-white hover:text-text-primary backdrop-blur-xs font-bold transition-colors"
+                    >
+                      View Original
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -450,6 +496,15 @@ export const ImageUploader = ({
           {helperText}
         </p>
       )}
+
+      {/* Interactive Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperSource}
+        aspectRatio={aspectRatio}
+        onClose={() => setIsCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   )
 }

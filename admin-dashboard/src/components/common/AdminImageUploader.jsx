@@ -9,8 +9,11 @@ import {
   X,
   RefreshCw,
   ExternalLink,
+  Crop as CropIcon,
+  Sparkles,
 } from 'lucide-react'
 import { adminService } from '../../data/adminService'
+import { ImageCropperModal } from './ImageCropperModal'
 
 export const AdminImageUploader = ({
   value = '',
@@ -27,6 +30,8 @@ export const AdminImageUploader = ({
   const [isUploading, setIsUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
   const [dragOver, setDragOver] = useState(false)
+  const [isCropperOpen, setIsCropperOpen] = useState(false)
+  const [cropperSource, setCropperSource] = useState('')
   const fileInputRef = useRef(null)
 
   // Keep internal URL state synced with incoming value
@@ -51,25 +56,37 @@ export const AdminImageUploader = ({
       return
     }
 
+    // Read file and immediately open the Cropper Modal so user can adjust the crop
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCropperSource(reader.result)
+      setIsCropperOpen(true)
+    }
+    reader.readAsDataURL(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCropComplete = async (croppedDataUrl, croppedFile) => {
     setIsUploading(true)
     setUploadError('')
     try {
-      const uploadedUrl = await adminService.uploadImage(file, folder)
+      const uploadedUrl = await adminService.uploadImage(croppedFile, folder)
       setUrlInput(uploadedUrl)
       onChange(uploadedUrl)
     } catch (err) {
-      console.warn('Direct Cloudinary upload failed, falling back to local reader:', err)
-      // Fallback to local Data URI if Cloudinary is unreachable
-      const reader = new FileReader()
-      reader.onload = () => {
-        setUrlInput(reader.result)
-        onChange(reader.result)
-      }
-      reader.readAsDataURL(file)
+      console.warn('Direct Cloudinary upload failed for cropped image, falling back to data URL:', err)
+      setUrlInput(croppedDataUrl)
+      onChange(croppedDataUrl)
     } finally {
       setIsUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      setIsCropperOpen(false)
     }
+  }
+
+  const handleOpenCropper = () => {
+    if (!value && !urlInput) return
+    setCropperSource(value || urlInput)
+    setIsCropperOpen(true)
   }
 
   const handleDrop = (e) => {
@@ -224,21 +241,32 @@ export const AdminImageUploader = ({
         {/* Live Visual Preview Container */}
         {value ? (
           <div className="space-y-2 pt-1 border-t border-slate-200/80">
-            <div className="flex items-center justify-between text-[11px]">
+            <div className="flex items-center justify-between text-[11px] flex-wrap gap-2">
               <span className="font-bold text-emerald-700 flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                 <span>Active Image Loaded</span>
               </span>
-              {!disabled && (
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={handleRemove}
-                  className="text-rose-600 hover:text-rose-700 font-bold hover:underline cursor-pointer flex items-center gap-1"
+                  onClick={handleOpenCropper}
+                  className="px-2.5 py-1 text-xs font-bold rounded-lg text-[#033C8D] bg-blue-50 hover:bg-blue-100 border border-blue-200/60 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
+                  title="Crop, rotate and position this photo"
                 >
-                  <X className="h-3 w-3" />
-                  <span>Remove Photo</span>
+                  <CropIcon className="h-3.5 w-3.5 text-[#033C8D]" />
+                  <span>Crop / Adjust Image</span>
                 </button>
-              )}
+                {!disabled && (
+                  <button
+                    type="button"
+                    onClick={handleRemove}
+                    className="text-rose-600 hover:text-rose-700 font-bold hover:underline cursor-pointer flex items-center gap-1 px-1.5 py-1"
+                  >
+                    <X className="h-3 w-3" />
+                    <span>Remove Photo</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Square Logo Preview */}
@@ -284,14 +312,24 @@ export const AdminImageUploader = ({
                   <span className="font-semibold bg-slate-900/70 px-2 py-0.5 rounded backdrop-blur-xs font-mono text-[10px] truncate max-w-[70%]">
                     {value}
                   </span>
-                  <a
-                    href={value}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="px-2 py-0.5 rounded bg-white/20 hover:bg-white text-white hover:text-slate-900 backdrop-blur-xs font-bold transition-colors"
-                  >
-                    View Original
-                  </a>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleOpenCropper}
+                      className="px-2 py-0.5 rounded bg-blue-600/80 hover:bg-blue-600 text-white backdrop-blur-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                    >
+                      <CropIcon className="h-3 w-3" />
+                      <span>Crop</span>
+                    </button>
+                    <a
+                      href={value}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="px-2 py-0.5 rounded bg-white/20 hover:bg-white text-white hover:text-slate-900 backdrop-blur-xs font-bold transition-colors"
+                    >
+                      View Original
+                    </a>
+                  </div>
                 </div>
               </div>
             )}
@@ -307,6 +345,15 @@ export const AdminImageUploader = ({
       </div>
 
       {helperText && <p className="text-[11px] text-slate-500">{helperText}</p>}
+
+      {/* Interactive Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperSource}
+        aspectRatio={aspectRatio}
+        onClose={() => setIsCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   )
 }

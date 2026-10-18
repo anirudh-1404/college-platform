@@ -1,7 +1,20 @@
 import React, { useState, useRef } from 'react'
-import { Plus, Trash2, Image as ImageIcon, Upload, Eye, X, Check, Loader2, Link as LinkIcon, AlertCircle } from 'lucide-react'
+import {
+  Plus,
+  Trash2,
+  Image as ImageIcon,
+  Upload,
+  Eye,
+  X,
+  Check,
+  Loader2,
+  Link as LinkIcon,
+  AlertCircle,
+  Crop as CropIcon,
+} from 'lucide-react'
 import { FormField, TextInput, SelectInput, SectionCard } from '../../components/common/FormControls'
 import { collegeService } from '../../data/collegeService'
+import { ImageCropperModal } from '../../components/common/ImageCropperModal'
 
 const SAMPLE_IMAGE_OPTIONS = [
   { label: 'Main Academic Quadrangle', url: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80', category: 'Campus' },
@@ -27,13 +40,15 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
   const [dragOver, setDragOver] = useState(false)
   const [isAddingNew, setIsAddingNew] = useState(false)
   const [selectedPreview, setSelectedPreview] = useState(null)
+  const [isCropperOpen, setIsCropperOpen] = useState(false)
+  const [cropperSource, setCropperSource] = useState('')
 
   const handleRemoveImage = (index) => {
     const updated = gallery.filter((_, idx) => idx !== index)
     onChange({ ...collegeData, gallery: updated })
   }
 
-  const handleFileUpload = async (file) => {
+  const handleFileUpload = (file) => {
     if (!file) return
     if (!file.type.startsWith('image/')) {
       setUploadError('Only image files (PNG, JPG, WebP) are allowed.')
@@ -44,29 +59,33 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
       return
     }
 
+    const reader = new FileReader()
+    reader.onload = () => {
+      setCropperSource(reader.result)
+      setIsCropperOpen(true)
+    }
+    reader.readAsDataURL(file)
+    if (fileInputRef.current) fileInputRef.current.value = ''
+  }
+
+  const handleCropComplete = async (croppedDataUrl, croppedFile) => {
     setIsUploading(true)
     setUploadError('')
     try {
-      const uploadedUrl = await collegeService.uploadImage(file, 'vidyascope/colleges')
+      const uploadedUrl = await collegeService.uploadImage(croppedFile, 'vidyascope/colleges')
       setNewImage((prev) => ({
         ...prev,
         url: uploadedUrl,
-        title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
       }))
     } catch (err) {
-      console.warn('Cloudinary upload error, using local data URL fallback:', err)
-      const reader = new FileReader()
-      reader.onload = () => {
-        setNewImage((prev) => ({
-          ...prev,
-          url: reader.result,
-          title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
-        }))
-      }
-      reader.readAsDataURL(file)
+      console.warn('Crop upload fallback to data URL:', err)
+      setNewImage((prev) => ({
+        ...prev,
+        url: croppedDataUrl,
+      }))
     } finally {
       setIsUploading(false)
-      if (fileInputRef.current) fileInputRef.current.value = ''
+      setIsCropperOpen(false)
     }
   }
 
@@ -335,13 +354,26 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setNewImage((prev) => ({ ...prev, url: '' }))}
-                    className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
-                  >
-                    Clear Photo
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCropperSource(newImage.url)
+                        setIsCropperOpen(true)
+                      }}
+                      className="px-2.5 py-1 text-xs font-bold rounded-lg text-brand-primary bg-brand-accent/40 hover:bg-brand-accent border border-brand-primary/20 shadow-2xs flex items-center gap-1.5 transition-all cursor-pointer"
+                    >
+                      <CropIcon className="h-3.5 w-3.5" />
+                      <span>Crop / Adjust</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewImage((prev) => ({ ...prev, url: '' }))}
+                      className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
+                    >
+                      Clear Photo
+                    </button>
+                  </div>
                 </div>
               )}
 
@@ -424,6 +456,15 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
           </div>
         </div>
       )}
+
+      {/* Interactive Image Cropper Modal */}
+      <ImageCropperModal
+        isOpen={isCropperOpen}
+        imageSrc={cropperSource}
+        aspectRatio="banner"
+        onClose={() => setIsCropperOpen(false)}
+        onCropComplete={handleCropComplete}
+      />
     </div>
   )
 }

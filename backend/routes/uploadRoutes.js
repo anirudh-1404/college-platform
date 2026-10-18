@@ -1,6 +1,6 @@
 import express from "express";
 import multer from "multer";
-import { uploadImage } from "../controllers/uploadController.js";
+import { uploadImage, proxyImage, uploadFromUrl } from "../controllers/uploadController.js";
 
 const router = express.Router();
 
@@ -17,7 +17,14 @@ const upload = multer({
   },
 });
 
-// POST /api/upload - Single image upload
+// GET /api/upload/proxy?url=... - Image proxy to bypass CORS for client-side canvas cropping
+router.get("/proxy", proxyImage);
+
+// POST /api/upload/url - Direct upload from remote URL to Cloudinary
+router.post("/url", uploadFromUrl);
+
+// POST /api/upload - Single image upload from device
 router.post("/", upload.single("image"), uploadImage);
 
 export default router;
+

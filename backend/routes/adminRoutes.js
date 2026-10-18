@@ -55,6 +55,8 @@ router.post("/registrations/:id/reject", rejectRegistration);
 router.get("/profiles", getAllProfiles);
 router.get("/profiles/:id", getProfileById);
 router.put("/profiles/:id", updateCollegeByAdmin);
+router.post("/profiles/:id", updateCollegeByAdmin);
+router.patch("/profiles/:id", updateCollegeByAdmin);
 router.post("/profiles/:id/publish", approveAndPublishProfile);
 router.post("/profiles/:id/request-changes", requestProfileChanges);
 router.post("/profiles/:id/unpublish", unpublishProfile);

@@ -154,15 +154,27 @@ export const getAllProfiles = async (req, res) => {
 export const getProfileById = async (req, res) => {
   try {
     const { id } = req.params;
+    const cleanId = decodeURIComponent(id || "").trim();
     let college = null;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      college = await College.findById(id);
+    if (mongoose.Types.ObjectId.isValid(cleanId)) {
+      college = await College.findById(cleanId);
     }
     if (!college) {
-      college = await College.findOne({ slug: id });
+      college = await College.findOne({ slug: cleanId.toLowerCase() });
     }
     if (!college) {
-      college = await College.findOne({ name: id });
+      college = await College.findOne({ slug: cleanId });
+    }
+    if (!college) {
+      college = await College.findOne({ name: cleanId });
+    }
+    if (!college) {
+      college = await College.findOne({
+        $or: [
+          { slug: { $regex: new RegExp(`^${cleanId}$`, "i") } },
+          { name: { $regex: new RegExp(`^${cleanId}$`, "i") } },
+        ],
+      });
     }
 
     if (!college) {
@@ -323,17 +335,29 @@ export const unpublishProfile = async (req, res) => {
 export const updateCollegeByAdmin = async (req, res) => {
   try {
     const { id } = req.params;
+    const cleanId = decodeURIComponent(id || "").trim();
     const updates = req.body;
 
     let college = null;
-    if (mongoose.Types.ObjectId.isValid(id)) {
-      college = await College.findById(id);
+    if (mongoose.Types.ObjectId.isValid(cleanId)) {
+      college = await College.findById(cleanId);
     }
     if (!college) {
-      college = await College.findOne({ slug: id });
+      college = await College.findOne({ slug: cleanId.toLowerCase() });
     }
     if (!college) {
-      college = await College.findOne({ name: id });
+      college = await College.findOne({ slug: cleanId });
+    }
+    if (!college) {
+      college = await College.findOne({ name: cleanId });
+    }
+    if (!college) {
+      college = await College.findOne({
+        $or: [
+          { slug: { $regex: new RegExp(`^${cleanId}$`, "i") } },
+          { name: { $regex: new RegExp(`^${cleanId}$`, "i") } },
+        ],
+      });
     }
 
     if (!college) {

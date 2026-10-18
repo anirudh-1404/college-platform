@@ -11,6 +11,41 @@ const API_BASE_URL =
         ? 'https://vidyascope-backend.onrender.com/api/admin'
         : 'http://localhost:8080/api/admin')
 
+async function parseJsonResponse(res, fallbackErrMsg = 'Operation failed') {
+  const contentType = res.headers.get('content-type') || ''
+  let data = null
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await res.json()
+    } catch (e) {
+      // ignore json parse error
+    }
+  }
+
+  if (!res.ok) {
+    if (data?.message) {
+      throw new Error(data.message)
+    }
+    if (res.status === 404) {
+      throw new Error(
+        `Backend endpoint not found (HTTP 404). Please ensure the backend server has the latest routes deployed.`
+      )
+    }
+    if (res.status === 401 || res.status === 403) {
+      throw new Error(data?.message || `Access denied (${res.status}). Please log in again with administrative credentials.`)
+    }
+    if (res.status >= 500) {
+      throw new Error(
+        `Backend server returned HTTP ${res.status}. If using Render, the service may be spinning up from sleep.`
+      )
+    }
+    throw new Error(fallbackErrMsg || `Request failed with status ${res.status}`)
+  }
+
+  return data || {}
+}
+
 export const adminService = {
   getHeaders() {
     const token = adminAuthService.getToken()
@@ -37,10 +72,10 @@ export const adminService = {
       body: formData,
     })
 
-    const data = await res.json()
-    if (!res.ok) throw new Error(data.message || 'Image upload failed')
+    const data = await parseJsonResponse(res, 'Image upload failed')
     return data.url
   },
+
 
   // 1. ANALYTICS
   async getAnalytics() {
@@ -127,9 +162,9 @@ export const adminService = {
 
   async getProfileById(collegeId) {
     try {
-      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}`, { headers: this.getHeaders() })
-      const data = await res.json()
-      if (res.ok && data.profile) {
+      const res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}`, { headers: this.getHeaders() })
+      const data = await parseJsonResponse(res, 'Failed to fetch profile')
+      if (data?.profile) {
         return { ...data.profile, id: data.profile.slug || data.profile._id }
       }
     } catch (e) {
@@ -140,13 +175,20 @@ export const adminService = {
 
   async updateCollegeProfile(collegeId, updates) {
     try {
-      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}`, {
+      let res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}`, {
         method: 'PUT',
         headers: this.getHeaders(),
         body: JSON.stringify(updates),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Failed to update college details')
+      // If PUT is blocked or returns 404/405, fallback to POST
+      if (res.status === 404 || res.status === 405) {
+        res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify(updates),
+        })
+      }
+      const data = await parseJsonResponse(res, 'Failed to update college details')
       window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
       window.dispatchEvent(new CustomEvent('vidyascope_college_data_change'))
       return data.college
@@ -158,12 +200,11 @@ export const adminService = {
 
   async approveAndPublish(collegeId) {
     try {
-      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/publish`, {
+      const res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/publish`, {
         method: 'POST',
         headers: this.getHeaders(),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Publish failed')
+      const data = await parseJsonResponse(res, 'Publish failed')
       window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
       return data.college
     } catch (error) {
@@ -178,13 +219,12 @@ export const adminService = {
 
   async requestChanges(collegeId, feedbackComment) {
     try {
-      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/request-changes`, {
+      const res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/request-changes`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify({ feedbackComment }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Request changes failed')
+      const data = await parseJsonResponse(res, 'Request changes failed')
       window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
       return data.college
     } catch (error) {
@@ -199,12 +239,11 @@ export const adminService = {
 
   async unpublish(collegeId) {
     try {
-      const res = await fetch(`${API_BASE_URL}/profiles/${collegeId}/unpublish`, {
+      const res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/unpublish`, {
         method: 'POST',
         headers: this.getHeaders(),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.message || 'Unpublish failed')
+      const data = await parseJsonResponse(res, 'Unpublish failed')
       window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
       return data.college
     } catch (error) {
