@@ -26,7 +26,7 @@ export const ImageCropperModal = ({
   const [isDragging, setIsDragging] = useState(false)
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
   const [selectedRatio, setSelectedRatio] = useState(
-    aspectRatio === 'square' ? '1:1' : '4:1'
+    aspectRatio === 'square' ? '1:1' : aspectRatio === 'banner' ? '16:9' : '16:9'
   )
   const [isProcessing, setIsProcessing] = useState(false)
   const [naturalSize, setNaturalSize] = useState({ w: 1200, h: 800 })
@@ -52,7 +52,7 @@ export const ImageCropperModal = ({
       setRotation(0)
       setPan({ x: 0, y: 0 })
       setSelectedRatio(
-        aspectRatio === 'square' ? '1:1' : '4:1'
+        aspectRatio === 'square' ? '1:1' : aspectRatio === 'banner' ? '16:9' : '16:9'
       )
     }
   }, [isOpen, imageSrc, aspectRatio])
@@ -64,24 +64,22 @@ export const ImageCropperModal = ({
     switch (selectedRatio) {
       case '1:1':
         return 1
-      case '4:1':
-        return 4 / 1
-      case '3:1':
-        return 3 / 1
       case '16:9':
         return 16 / 9
+      case '3:1':
+        return 3 / 1
       case '4:3':
         return 4 / 3
       default:
-        return 4 / 1
+        return 16 / 9
     }
   }
 
   // Calculate box dimensions that fit cleanly inside viewport
   const getBoxDimensions = () => {
     const R = getAspectRatioValue()
-    const maxW = 500
-    const maxH = 260
+    const maxW = 460
+    const maxH = 280
     let w = maxW
     let h = Math.round(w / R)
     if (h > maxH) {
@@ -186,14 +184,7 @@ export const ImageCropperModal = ({
       })
 
       // Target export dimensions
-      const targetW =
-        selectedRatio === '1:1'
-          ? 800
-          : selectedRatio === '4:1'
-          ? 1600
-          : selectedRatio === '3:1'
-          ? 1500
-          : 1600
+      const targetW = selectedRatio === '1:1' ? 800 : selectedRatio === '3:1' ? 1500 : 1200
       const targetH = Math.round(targetW / getAspectRatioValue())
 
       const canvas = document.createElement('canvas')
@@ -249,10 +240,8 @@ export const ImageCropperModal = ({
 
   const isSquare = selectedRatio === '1:1'
 
-  // Live thumbnail preview dimensions & scale factor
-  const thumbW = isSquare ? 36 : selectedRatio === '4:1' ? 72 : 54
-  const thumbH = Math.round(thumbW / getAspectRatioValue())
-  const thumbScale = thumbW / boxW
+  // Live thumbnail preview scale factor
+  const thumbScale = isSquare ? 44 / boxW : 64 / boxW
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
@@ -289,11 +278,10 @@ export const ImageCropperModal = ({
           </span>
           <div className="flex items-center gap-1.5">
             {[
-              { id: '4:1', label: '4:1 LinkedIn Banner' },
-              { id: '3:1', label: '3:1 Panoramic' },
-              { id: '16:9', label: '16:9 Landscape' },
-              { id: '1:1', label: '1:1 Square (Logo)' },
-              { id: '4:3', label: '4:3 Standard' },
+              { id: '1:1', label: '1:1 Circle / Square (Logo)' },
+              { id: '16:9', label: '16:9 Standard Card' },
+              { id: '3:1', label: '3:1 Wide Banner' },
+              { id: '4:3', label: '4:3 Classic' },
             ].map((ratio) => (
               <button
                 key={ratio.id}
@@ -455,8 +443,8 @@ export const ImageCropperModal = ({
               </span>
               <div
                 style={{
-                  width: `${thumbW}px`,
-                  height: `${thumbH}px`,
+                  width: isSquare ? '36px' : '56px',
+                  height: '36px',
                 }}
                 className={`relative overflow-hidden bg-black border border-white/40 shrink-0 ${
                   isSquare ? 'rounded-full' : 'rounded-md'

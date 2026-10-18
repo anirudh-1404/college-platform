@@ -223,207 +223,205 @@ const CollegeDetailPage = ({
         </div>
       </div>
 
-      {/* LinkedIn-Style Profile Hero Card */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6">
-        <div className="bg-white rounded-2xl border border-slate-200/90 shadow-sm overflow-hidden mb-6">
-          
-          {/* Banner Container: Standard LinkedIn 4:1 Aspect Ratio with soft inner framing */}
-          <div className="relative aspect-[3/1] sm:aspect-[3.6/1] md:aspect-[4/1] w-full overflow-hidden bg-slate-900 group">
-            <img
-              src={
-                college.image ||
-                (Array.isArray(college.gallery) && college.gallery.length > 0
-                  ? (typeof college.gallery[0] === 'string' ? college.gallery[0] : college.gallery[0]?.url)
-                  : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
-              }
-              alt={`${college.name} Campus Banner`}
-              className="w-full h-full object-cover object-center"
-            />
-            {/* Ambient Subtle Vignette */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent pointer-events-none" />
+      {/* LinkedIn-style Hero Banner & Header */}
+      <div className="bg-white border-b border-border-color">
+        
+        {/* Wide Background Banner */}
+        <div className="relative h-56 sm:h-72 md:h-80 w-full overflow-hidden bg-slate-900">
+          <img
+            src={
+              college.image ||
+              (Array.isArray(college.gallery) && college.gallery.length > 0
+                ? (typeof college.gallery[0] === 'string' ? college.gallery[0] : college.gallery[0]?.url)
+                : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
+            }
+            alt={`${college.name} Campus Banner`}
+            className="w-full h-full object-cover object-center"
+          />
+          {/* Ambient Gradient Overlay for high-end aesthetic */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-slate-900/20 to-black/10" />
 
-            {/* Top-Right Badge Overlay on Banner */}
-            <div className="absolute top-4 right-4 sm:top-5 sm:right-6 flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-slate-900/70 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
-                {college.stream || 'Commerce'}
+          {/* Top-Right Badge Overlay on Banner */}
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-8 flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
+              {college.stream || 'Engineering'}
+            </span>
+            {college.ownership && (
+              <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold border border-white/30 shadow-sm">
+                {college.ownership}
               </span>
+            )}
+          </div>
+        </div>
+
+        {/* Profile Content (White Card Area) */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-6 sm:pb-8">
+          
+          {/* Row 1: Circular Avatar (Overlapping Banner) + Action Buttons */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-18 md:-mt-22 mb-4">
+            
+            {/* Circular Logo Avatar (LinkedIn style) */}
+            <div className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden flex-shrink-0 z-10 flex items-center justify-center">
+              {college.logo ? (
+                <img
+                  src={college.logo}
+                  alt={`${college.name} Logo`}
+                  className="w-full h-full object-cover"
+                />
+              ) : college.image ? (
+                <img
+                  src={college.image}
+                  alt={`${college.name} Logo`}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-[#033C8D] to-indigo-900 flex items-center justify-center text-white text-2xl font-bold uppercase">
+                  {(college.shortName || college.name || 'VS').slice(0, 4)}
+                </div>
+              )}
+            </div>
+
+            {/* Right Action Buttons (Cleanly positioned inside white area) */}
+            <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-end pt-2 sm:pt-0">
+              <button
+                type="button"
+                onClick={() => onToggleShortlist && onToggleShortlist(college?.id || college?._id || effectiveCollegeId)}
+                className={`btn btn-sm ${
+                  effectiveIsShortlisted
+                    ? 'bg-rose-50 border-rose-300 text-rose-600 font-bold'
+                    : 'btn-outline bg-white hover:bg-slate-50'
+                } shadow-2xs cursor-pointer`}
+              >
+                <Heart className={`h-3.5 w-3.5 ${effectiveIsShortlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
+                <span>{effectiveIsShortlisted ? 'Saved' : 'Save'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  if (onToggleCompare) {
+                    onToggleCompare(
+                      college || {
+                        id: effectiveCollegeId,
+                        name: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
+                        shortName: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
+                      }
+                    )
+                  }
+                }}
+                className={`btn btn-sm ${
+                  effectiveIsCompared
+                    ? 'bg-[#EBF2FA] text-[#033C8D] border-[#033C8D]/40 font-bold shadow-2xs'
+                    : 'btn-outline bg-white hover:bg-slate-50'
+                } shadow-2xs cursor-pointer`}
+              >
+                <Scale className="h-3.5 w-3.5" />
+                <span>{effectiveIsCompared ? 'Comparing' : 'Compare'}</span>
+              </button>
+
+              <button
+                onClick={onOpenCounseling}
+                className="btn btn-primary btn-md text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
+              >
+                <span>Get Free Counseling</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Row 2: Title, Badges & Institutional Details (100% inside white card, no collision) */}
+          <div className="space-y-2 mb-6">
+            <div className="flex flex-wrap items-center gap-2">
+              {college.nirfRank && (
+                <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase shadow-2xs">
+                  NIRF #{college.nirfRank}
+                </span>
+              )}
               {college.ownership && (
-                <span className="px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-white text-xs font-semibold border border-white/30 shadow-sm">
+                <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold border border-slate-200">
                   {college.ownership}
                 </span>
               )}
+              {college.establishmentYear && (
+                <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
+                  Est. {college.establishmentYear}
+                </span>
+              )}
+              {college.naacGrade && (
+                <span className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[11px] font-semibold border border-purple-200">
+                  NAAC {college.naacGrade}
+                </span>
+              )}
             </div>
+
+            <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary tracking-tight">
+              {college.name}
+            </h1>
+
+            <p className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-text-light font-medium">
+              <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
+              <span>{college.location}</span>
+              {college.campusArea && (
+                <>
+                  <span>•</span>
+                  <span>Campus: {college.campusArea}</span>
+                </>
+              )}
+              {college.affiliation && (
+                <>
+                  <span>•</span>
+                  <span className="text-text-secondary">{college.affiliation}</span>
+                </>
+              )}
+            </p>
           </div>
 
-          {/* Profile Card Body Area */}
-          <div className="px-5 sm:px-8 pb-6 sm:pb-8">
-            
-            {/* Row 1: Overlapping Circular Avatar + Action Buttons */}
-            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 -mt-14 sm:-mt-18 md:-mt-22 mb-4">
-              
-              {/* Circular Logo Avatar (LinkedIn style with ring & shadow) */}
-              <div className="relative w-28 h-28 sm:w-36 sm:h-36 md:w-40 md:h-40 rounded-full border-4 border-white shadow-xl bg-white overflow-hidden flex-shrink-0 z-10 flex items-center justify-center ring-1 ring-slate-200/50">
-                {college.logo ? (
-                  <img
-                    src={college.logo}
-                    alt={`${college.name} Logo`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : college.image ? (
-                  <img
-                    src={college.image}
-                    alt={`${college.name} Logo`}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#033C8D] to-indigo-900 flex items-center justify-center text-white text-2xl font-bold uppercase">
-                    {(college.shortName || college.name || 'VS').slice(0, 4)}
-                  </div>
-                )}
-              </div>
-
-              {/* Right Action Buttons */}
-              <div className="flex flex-wrap items-center gap-2.5 self-start sm:self-end pt-2 sm:pt-0">
-                <button
-                  type="button"
-                  onClick={() => onToggleShortlist && onToggleShortlist(college?.id || college?._id || effectiveCollegeId)}
-                  className={`btn btn-sm ${
-                    effectiveIsShortlisted
-                      ? 'bg-rose-50 border-rose-300 text-rose-600 font-bold'
-                      : 'btn-outline bg-white hover:bg-slate-50'
-                  } shadow-2xs cursor-pointer`}
-                >
-                  <Heart className={`h-3.5 w-3.5 ${effectiveIsShortlisted ? 'fill-rose-500 text-rose-500' : ''}`} />
-                  <span>{effectiveIsShortlisted ? 'Saved' : 'Save'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (onToggleCompare) {
-                      onToggleCompare(
-                        college || {
-                          id: effectiveCollegeId,
-                          name: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
-                          shortName: effectiveCollegeId.replace(/-/g, ' ').toUpperCase(),
-                        }
-                      )
-                    }
-                  }}
-                  className={`btn btn-sm ${
-                    effectiveIsCompared
-                      ? 'bg-[#EBF2FA] text-[#033C8D] border-[#033C8D]/40 font-bold shadow-2xs'
-                      : 'btn-outline bg-white hover:bg-slate-50'
-                  } shadow-2xs cursor-pointer`}
-                >
-                  <Scale className="h-3.5 w-3.5" />
-                  <span>{effectiveIsCompared ? 'Comparing' : 'Compare'}</span>
-                </button>
-
-                <button
-                  onClick={onOpenCounseling}
-                  className="btn btn-primary btn-md text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
-                >
-                  <span>Get Free Counseling</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Row 2: Title, Badges & Institutional Details */}
-            <div className="space-y-2 mb-6">
-              <div className="flex flex-wrap items-center gap-2">
-                {college.nirfRank && (
-                  <span className="px-2.5 py-0.5 rounded-md bg-brand-primary text-white text-[11px] font-bold uppercase shadow-2xs">
-                    NIRF #{college.nirfRank}
-                  </span>
-                )}
-                {college.ownership && (
-                  <span className="px-2.5 py-0.5 rounded-md bg-slate-100 text-text-secondary text-[11px] font-semibold border border-slate-200">
-                    {college.ownership}
-                  </span>
-                )}
-                {college.establishmentYear && (
-                  <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
-                    Est. {college.establishmentYear}
-                  </span>
-                )}
-                {college.naacGrade && (
-                  <span className="px-2.5 py-0.5 rounded-md bg-purple-50 text-purple-700 text-[11px] font-semibold border border-purple-200">
-                    NAAC {college.naacGrade}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="font-serif text-2xl sm:text-3xl md:text-4xl font-bold text-text-primary tracking-tight">
-                {college.name}
-              </h1>
-
-              <p className="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-text-light font-medium">
-                <MapPin className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-                <span>{college.location}</span>
-                {college.campusArea && (
-                  <>
-                    <span>•</span>
-                    <span>Campus: {college.campusArea}</span>
-                  </>
-                )}
-                {college.affiliation && (
-                  <>
-                    <span>•</span>
-                    <span className="text-text-secondary">{college.affiliation}</span>
-                  </>
-                )}
+          {/* Quick Metrics Bar */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl mt-6">
+            <div>
+              <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                Average Package
+              </p>
+              <p className="text-base sm:text-lg font-extrabold text-emerald-600 mt-0.5">
+                {college.avgPackage}
               </p>
             </div>
-
-            {/* Quick Metrics Bar */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-slate-50 border border-slate-200/80 rounded-2xl">
-              <div>
-                <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
-                  Average Package
-                </p>
-                <p className="text-base sm:text-lg font-extrabold text-emerald-600 mt-0.5">
-                  {college.avgPackage}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
-                  Total Tuition Fees
-                </p>
-                <p className="text-base sm:text-lg font-bold text-text-primary mt-0.5">
-                  {college.totalFees} ({college.feesPeriod})
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
-                  Highest Placement
-                </p>
-                <p className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
-                  {college.highestPackage || '₹50 LPA'}
-                </p>
-              </div>
-              <div>
-                <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
-                  Student Rating
-                </p>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                  <span className="text-base sm:text-lg font-bold text-text-primary">
-                    {college.rating}
-                  </span>
-                  <span className="text-xs text-text-light font-medium">
-                    ({college.reviewsCount || 0})
-                  </span>
-                </div>
+            <div>
+              <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                Total Tuition Fees
+              </p>
+              <p className="text-base sm:text-lg font-bold text-text-primary mt-0.5">
+                {college.totalFees} ({college.feesPeriod})
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                Highest Placement
+              </p>
+              <p className="text-base sm:text-lg font-bold text-brand-primary mt-0.5">
+                {college.highestPackage || '₹50 LPA'}
+              </p>
+            </div>
+            <div>
+              <p className="text-[10px] font-semibold text-text-light uppercase tracking-wider">
+                Student Rating
+              </p>
+              <div className="flex items-center gap-1 mt-0.5">
+                <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+                <span className="text-base sm:text-lg font-bold text-text-primary">
+                  {college.rating}
+                </span>
+                <span className="text-xs text-text-light font-medium">
+                  ({college.reviewsCount || 0})
+                </span>
               </div>
             </div>
-
           </div>
+
         </div>
       </div>
 
       {/* Sticky Tab Navigation Bar */}
-      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-y border-border-color shadow-2xs mb-6">
+      <div className="sticky top-16 z-30 bg-white/95 backdrop-blur-md border-b border-border-color shadow-2xs">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar py-2">
             {tabs.map((tab) => (
