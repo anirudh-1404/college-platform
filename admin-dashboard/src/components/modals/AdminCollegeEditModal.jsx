@@ -18,8 +18,12 @@ import {
   DollarSign,
   Star,
   ShieldCheck,
+  Image as ImageIcon,
+  Trash2,
+  Plus,
 } from 'lucide-react'
 import AdminStatusBadge from '../common/AdminStatusBadge'
+import AdminImageUploader from '../common/AdminImageUploader'
 
 export const AdminCollegeEditModal = ({
   isOpen,
@@ -77,7 +81,10 @@ export const AdminCollegeEditModal = ({
     prosStr: '',
     consStr: '',
     profileStatus: 'published',
+    gallery: [],
   })
+
+  const [newGalleryPhotoUrl, setNewGalleryPhotoUrl] = useState('')
 
   // Populate formData whenever college prop changes
   useEffect(() => {
@@ -94,6 +101,7 @@ export const AdminCollegeEditModal = ({
 
       const pros = Array.isArray(college.prosAndCons?.pros) ? college.prosAndCons.pros : []
       const cons = Array.isArray(college.prosAndCons?.cons) ? college.prosAndCons.cons : []
+      const galleryList = Array.isArray(college.gallery) ? college.gallery : []
 
       setFormData({
         name: college.name || '',
@@ -139,11 +147,29 @@ export const AdminCollegeEditModal = ({
         prosStr: pros.join('\n'),
         consStr: cons.join('\n'),
         profileStatus: college.profileStatus || 'published',
+        gallery: galleryList,
       })
       setErrorMsg('')
       setSuccessMsg('')
     }
   }, [college])
+
+  const handleAddGalleryPhoto = (e) => {
+    e?.preventDefault()
+    if (!newGalleryPhotoUrl || !newGalleryPhotoUrl.trim()) return
+    setFormData((prev) => ({
+      ...prev,
+      gallery: [...(prev.gallery || []), newGalleryPhotoUrl.trim()],
+    }))
+    setNewGalleryPhotoUrl('')
+  }
+
+  const handleRemoveGalleryPhoto = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      gallery: (prev.gallery || []).filter((_, idx) => idx !== index),
+    }))
+  }
 
   if (!isOpen || !college) return null
 
@@ -265,6 +291,7 @@ export const AdminCollegeEditModal = ({
           pros: pros.length ? pros : college.prosAndCons?.pros || [],
           cons: cons.length ? cons : college.prosAndCons?.cons || [],
         },
+        gallery: Array.isArray(formData.gallery) ? formData.gallery : [],
       }
 
       const collegeId = college.id || college.slug || college._id
@@ -287,6 +314,7 @@ export const AdminCollegeEditModal = ({
     { id: 'academics', label: 'Rankings & Exams', icon: Award },
     { id: 'placements', label: 'Placements & Fees', icon: TrendingUp },
     { id: 'facilities', label: 'Facilities & Pros/Cons', icon: Sparkles },
+    { id: 'gallery', label: 'Media & Campus Gallery', icon: ImageIcon },
   ]
 
   return (
@@ -490,28 +518,22 @@ export const AdminCollegeEditModal = ({
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      Hero Banner Image URL
-                    </label>
-                    <input
-                      type="url"
+                    <AdminImageUploader
+                      label="Main Campus Banner & Card Image"
                       value={formData.image}
-                      onChange={(e) => handleChange('image', e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:border-[#033C8D] focus:ring-1 focus:ring-[#033C8D] outline-none"
-                      placeholder="https://images.unsplash.com/photo-1562774053-701939374585..."
+                      onChange={(val) => handleChange('image', val)}
+                      aspectRatio="banner"
+                      helperText="Displayed as wide campus banner on college detail page and primary thumbnail on search & compare cards."
                     />
                   </div>
 
                   <div className="sm:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 mb-1">
-                      College Logo URL
-                    </label>
-                    <input
-                      type="url"
+                    <AdminImageUploader
+                      label="College Official Logo (Circle Avatar)"
                       value={formData.logo}
-                      onChange={(e) => handleChange('logo', e.target.value)}
-                      className="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:border-[#033C8D] focus:ring-1 focus:ring-[#033C8D] outline-none"
-                      placeholder="https://upload.wikimedia.org/wikipedia/en/..."
+                      onChange={(val) => handleChange('logo', val)}
+                      aspectRatio="square"
+                      helperText="Displayed in the circular avatar emblem next to the college title on profile and search cards."
                     />
                   </div>
 
@@ -910,6 +932,111 @@ export const AdminCollegeEditModal = ({
                       <option value="draft">⚪ Draft (Hidden from Public)</option>
                     </select>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 6: MEDIA & CAMPUS GALLERY */}
+            {activeTab === 'gallery' && (
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900">
+                    Campus Photo Gallery & Media Assets
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Manage high-definition campus facilities, library, hostels, supercomputing labs, and event photography displayed on the public college detail page.
+                  </p>
+                </div>
+
+                {/* Add New Photo Card with 2 options */}
+                <div className="p-4 bg-slate-50/80 border border-slate-200 rounded-2xl space-y-3">
+                  <h4 className="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                    <Plus className="h-4 w-4 text-[#033C8D]" />
+                    <span>Add New Photo to Gallery</span>
+                  </h4>
+                  
+                  <AdminImageUploader
+                    label="Choose Photo (Option 1: Paste URL or Option 2: Upload from Device)"
+                    value={newGalleryPhotoUrl}
+                    onChange={(val) => setNewGalleryPhotoUrl(val)}
+                    aspectRatio="banner"
+                    helperText="Paste direct image URL or upload image file directly from your computer."
+                  />
+
+                  {newGalleryPhotoUrl && (
+                    <div className="flex justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={handleAddGalleryPhoto}
+                        className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-[#033C8D] hover:bg-[#022B66] shadow-xs cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                        <span>Add Photo to Gallery ({formData.gallery?.length || 0} existing)</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+
+                {/* Existing Gallery Photos */}
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-xs font-bold text-slate-700">
+                      Existing Gallery Photos ({formData.gallery?.length || 0})
+                    </span>
+                    <span className="text-[11px] text-slate-400">
+                      Click trash icon on any photo to remove it
+                    </span>
+                  </div>
+
+                  {formData.gallery && formData.gallery.length > 0 ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {formData.gallery.map((photoUrl, idx) => (
+                        <div
+                          key={idx}
+                          className="group relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 aspect-video shadow-xs"
+                        >
+                          <img
+                            src={photoUrl}
+                            alt={`Gallery photo ${idx + 1}`}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                            onError={(e) => {
+                              e.target.src = 'https://placehold.co/400x250?text=Invalid+Image'
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 p-2">
+                            <a
+                              href={photoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 rounded-lg bg-white/20 hover:bg-white text-white hover:text-slate-900 transition-colors cursor-pointer"
+                              title="Open original"
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </a>
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveGalleryPhoto(idx)}
+                              className="p-2 rounded-lg bg-rose-600 hover:bg-rose-700 text-white transition-colors cursor-pointer"
+                              title="Remove from gallery"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                          <div className="absolute bottom-2 left-2 bg-slate-900/80 text-white text-[10px] font-bold px-2 py-0.5 rounded backdrop-blur-xs">
+                            #{idx + 1}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="py-8 text-center border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                      <ImageIcon className="h-8 w-8 text-slate-300 mx-auto mb-1.5" />
+                      <p className="text-xs font-bold text-slate-600">No gallery photos added yet</p>
+                      <p className="text-[11px] text-slate-400 mt-0.5">
+                        Add campus photos using the uploader above.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
-import { Plus, Trash2, Image as ImageIcon, Upload, Eye, X, Check } from 'lucide-react'
+import { Plus, Trash2, Image as ImageIcon, Upload, Eye, X, Check, Loader2, Link as LinkIcon, AlertCircle } from 'lucide-react'
 import { FormField, TextInput, SelectInput, SectionCard } from '../../components/common/FormControls'
+import { collegeService } from '../../data/collegeService'
 
 const SAMPLE_IMAGE_OPTIONS = [
   { label: 'Main Academic Quadrangle', url: 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=800&q=80', category: 'Campus' },
@@ -20,6 +21,10 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
     title: '',
     category: 'Campus',
   })
+  const [inputMode, setInputMode] = useState('url') // 'url' | 'upload'
+  const [isUploading, setIsUploading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+  const [dragOver, setDragOver] = useState(false)
   const [isAddingNew, setIsAddingNew] = useState(false)
   const [selectedPreview, setSelectedPreview] = useState(null)
 
@@ -28,29 +33,55 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
     onChange({ ...collegeData, gallery: updated })
   }
 
-  const handleFileUpload = (e) => {
-    const file = e.target.files?.[0]
+  const handleFileUpload = async (file) => {
     if (!file) return
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image file exceeds 5MB limit.')
+    if (!file.type.startsWith('image/')) {
+      setUploadError('Only image files (PNG, JPG, WebP) are allowed.')
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError('Image file exceeds 10MB limit.')
       return
     }
 
-    const reader = new FileReader()
-    reader.onload = () => {
+    setIsUploading(true)
+    setUploadError('')
+    try {
+      const uploadedUrl = await collegeService.uploadImage(file, 'vidyascope/colleges')
       setNewImage((prev) => ({
         ...prev,
-        url: reader.result,
+        url: uploadedUrl,
         title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
       }))
+    } catch (err) {
+      console.warn('Cloudinary upload error, using local data URL fallback:', err)
+      const reader = new FileReader()
+      reader.onload = () => {
+        setNewImage((prev) => ({
+          ...prev,
+          url: reader.result,
+          title: prev.title || file.name.replace(/\.[^/.]+$/, ''),
+        }))
+      }
+      reader.readAsDataURL(file)
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
-    reader.readAsDataURL(file)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragOver(false)
+    if (isUploading) return
+    const file = e.dataTransfer.files?.[0]
+    if (file) handleFileUpload(file)
   }
 
   const handleAddImageToGallery = (e) => {
     e.preventDefault()
     if (!newImage.url.trim()) {
-      alert('Please provide an image URL or upload a file.')
+      alert('Please provide an image URL or upload a photo from your computer.')
       return
     }
 
@@ -60,6 +91,7 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
     })
 
     setNewImage({ url: '', title: '', category: 'Campus' })
+    setUploadError('')
     setIsAddingNew(false)
   }
 
@@ -80,8 +112,11 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
           !isReadOnly && (
             <button
               type="button"
-              onClick={() => setIsAddingNew(true)}
-              className="btn btn-primary btn-sm text-xs cursor-pointer"
+              onClick={() => {
+                setIsAddingNew(true)
+                setUploadError('')
+              }}
+              className="btn btn-primary btn-sm text-xs cursor-pointer flex items-center gap-1.5"
             >
               <Plus className="h-3.5 w-3.5" />
               <span>Add Campus Photo</span>
@@ -146,43 +181,120 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
           {isAddingNew && (
             <div className="p-4 rounded-xl border border-brand-primary/30 bg-purple-50/40 space-y-4">
               <div className="flex items-center justify-between">
-                <h4 className="text-xs font-bold text-brand-primary">Upload or Link New Campus Photo</h4>
+                <div>
+                  <h4 className="text-xs font-bold text-brand-primary">Add New Campus Photo</h4>
+                  <p className="text-[11px] text-text-secondary mt-0.5">
+                    Select either direct URL or upload a photo file from your computer.
+                  </p>
+                </div>
                 <button
                   type="button"
                   onClick={() => setIsAddingNew(false)}
-                  className="text-xs text-text-light hover:text-text-primary cursor-pointer"
+                  className="text-xs text-text-light hover:text-text-primary cursor-pointer p-1"
                 >
                   ✕
                 </button>
               </div>
 
+              {/* 2 Options Switcher */}
+              <div className="inline-flex items-center p-0.5 rounded-lg bg-white border border-border-color">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputMode('url')
+                    setUploadError('')
+                  }}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    inputMode === 'url'
+                      ? 'bg-brand-primary text-white shadow-2xs'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  <LinkIcon className="h-3.5 w-3.5" />
+                  <span>1. Enter Image URL</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setInputMode('upload')
+                    setUploadError('')
+                  }}
+                  className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                    inputMode === 'upload'
+                      ? 'bg-brand-primary text-white shadow-2xs'
+                      : 'text-text-secondary hover:text-text-primary'
+                  }`}
+                >
+                  <Upload className="h-3.5 w-3.5" />
+                  <span>2. Upload from Computer</span>
+                </button>
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <FormField label="Image URL (or upload below)" required>
-                    <TextInput
-                      placeholder="https://images.unsplash.com/..."
-                      value={newImage.url}
-                      onChange={(e) => setNewImage({ ...newImage, url: e.target.value })}
-                    />
-                  </FormField>
+                  {inputMode === 'url' ? (
+                    <FormField label="Direct Image URL" required>
+                      <TextInput
+                        placeholder="https://images.unsplash.com/..."
+                        value={newImage.url}
+                        onChange={(e) => setNewImage({ ...newImage, url: e.target.value })}
+                      />
+                    </FormField>
+                  ) : (
+                    <div>
+                      <input
+                        ref={fileInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0]
+                          if (file) handleFileUpload(file)
+                        }}
+                        className="hidden"
+                      />
+                      <div
+                        onDragOver={(e) => {
+                          e.preventDefault()
+                          setDragOver(true)
+                        }}
+                        onDragLeave={() => setDragOver(false)}
+                        onDrop={handleDrop}
+                        onClick={() => !isUploading && fileInputRef.current?.click()}
+                        className={`border-2 border-dashed rounded-xl p-4 text-center transition-all cursor-pointer ${
+                          dragOver
+                            ? 'border-brand-primary bg-brand-accent/50'
+                            : 'border-border-color hover:border-brand-primary/60 hover:bg-white bg-white/70'
+                        } ${isUploading ? 'opacity-70 cursor-wait' : ''}`}
+                      >
+                        {isUploading ? (
+                          <div className="flex flex-col items-center justify-center py-2 text-brand-primary">
+                            <Loader2 className="h-6 w-6 animate-spin mb-1 text-brand-primary" />
+                            <span className="text-xs font-bold">Uploading to Cloudinary CDN...</span>
+                            <span className="text-[10px] text-text-light mt-0.5">Please wait</span>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center py-1">
+                            <div className="w-8 h-8 rounded-full bg-brand-accent text-brand-primary flex items-center justify-center mb-1">
+                              <Upload className="h-4 w-4" />
+                            </div>
+                            <p className="text-xs font-bold text-text-primary">
+                              Click or Drag & Drop Photo Here
+                            </p>
+                            <p className="text-[10px] text-text-light mt-0.5">
+                              PNG, JPG, WebP up to 10MB
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
 
-                  <div className="mt-2">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileUpload}
-                      className="hidden"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="btn btn-outline btn-sm text-xs w-full cursor-pointer"
-                    >
-                      <Upload className="h-3.5 w-3.5" />
-                      <span>Or Browse Local Image File (Max 5MB)</span>
-                    </button>
-                  </div>
+                  {uploadError && (
+                    <div className="mt-2 p-2 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-1.5">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0 text-rose-600" />
+                      <span>{uploadError}</span>
+                    </div>
+                  )}
                 </div>
 
                 <div className="space-y-3">
@@ -206,15 +318,30 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
 
               {/* Preview Box if selected */}
               {newImage.url && (
-                <div className="p-2 bg-white rounded-lg border border-border-color flex items-center gap-3">
-                  <img
-                    src={newImage.url}
-                    alt="Preview"
-                    className="w-16 h-12 object-cover rounded"
-                  />
-                  <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
-                    <Check className="h-3.5 w-3.5" /> Image ready to save
-                  </span>
+                <div className="p-3 bg-white rounded-xl border border-border-color flex items-center justify-between gap-3 shadow-2xs">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <img
+                      src={newImage.url}
+                      alt="Preview"
+                      className="w-16 h-12 object-cover rounded-lg border border-border-color shrink-0"
+                    />
+                    <div className="min-w-0">
+                      <span className="text-xs text-emerald-600 font-bold flex items-center gap-1">
+                        <Check className="h-3.5 w-3.5" /> Photo Loaded & Ready
+                      </span>
+                      <p className="text-[10px] text-text-light font-mono truncate max-w-xs mt-0.5">
+                        {newImage.url}
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setNewImage((prev) => ({ ...prev, url: '' }))}
+                    className="text-xs text-rose-600 font-bold hover:underline cursor-pointer"
+                  >
+                    Clear Photo
+                  </button>
                 </div>
               )}
 
@@ -228,8 +355,9 @@ const Step9Gallery = ({ collegeData, onChange, isReadOnly = false }) => {
                 </button>
                 <button
                   type="button"
+                  disabled={!newImage.url || isUploading}
                   onClick={handleAddImageToGallery}
-                  className="btn btn-primary btn-sm text-xs cursor-pointer font-bold"
+                  className="btn btn-primary btn-sm text-xs cursor-pointer font-bold disabled:opacity-50"
                 >
                   Save Photo to Gallery
                 </button>

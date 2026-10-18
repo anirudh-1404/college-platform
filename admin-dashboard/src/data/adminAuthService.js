@@ -27,8 +27,15 @@ export const adminAuthService = {
 
   getAdminAuth() {
     try {
+      const token = this.getToken()
+      if (!token) {
+        return { isAuthenticated: false, user: null }
+      }
       const stored = localStorage.getItem(STORAGE_KEY_ADMIN_AUTH)
-      if (stored) return JSON.parse(stored)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (parsed?.isAuthenticated) return parsed
+      }
     } catch (e) {
       console.error(e)
     }

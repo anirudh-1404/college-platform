@@ -113,13 +113,10 @@ const CollegeProfilesReviewPage = ({
         (p.city && p.city.toLowerCase().includes(searchQuery.toLowerCase())) ||
         (p.locationContact?.city && p.locationContact.city.toLowerCase().includes(searchQuery.toLowerCase()))
 
-      // If 'all', show submitted/actionable profiles (under_review, changes_requested, published)
+      // If 'all', show all profiles from database
       let matchStatus = false
       if (filterStatus === 'all') {
-        matchStatus =
-          p.profileStatus === 'under_review' ||
-          p.profileStatus === 'changes_requested' ||
-          p.profileStatus === 'published'
+        matchStatus = true
       } else {
         matchStatus = p.profileStatus === filterStatus
       }
@@ -131,12 +128,7 @@ const CollegeProfilesReviewPage = ({
   // Counts for Badges
   const counts = useMemo(() => {
     return {
-      all: profiles.filter(
-        (p) =>
-          p.profileStatus === 'under_review' ||
-          p.profileStatus === 'changes_requested' ||
-          p.profileStatus === 'published'
-      ).length,
+      all: profiles.length,
       under_review: profiles.filter((p) => p.profileStatus === 'under_review').length,
       changes_requested: profiles.filter((p) => p.profileStatus === 'changes_requested').length,
       published: profiles.filter((p) => p.profileStatus === 'published').length,
