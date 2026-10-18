@@ -297,12 +297,12 @@ export const AdminImageUploader = ({
                 </div>
               </div>
             ) : (
-              /* Banner / Card Preview */
-              <div className="relative w-full h-32 sm:h-40 rounded-xl overflow-hidden border border-slate-200 bg-slate-900 group">
+              /* Banner / Card Preview (LinkedIn 4:1 style) */
+              <div className="relative w-full aspect-[3.5/1] sm:aspect-[4/1] rounded-xl overflow-hidden border border-slate-200 bg-slate-900 group shadow-xs">
                 <img
                   src={value}
                   alt="Banner Preview"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover object-center"
                   onError={(e) => {
                     e.target.src = 'https://placehold.co/600x200?text=Invalid+Image+URL'
                   }}
