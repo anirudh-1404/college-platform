@@ -32,8 +32,8 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
     name: '',
     email: '',
     phone: '',
-    stream: context?.stream || 'engineering',
-    targetYear: '2025',
+    stream: context?.stream || '',
+    targetYear: '2027',
   })
 
   const handleSubmit = async (e) => {
@@ -64,8 +64,8 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
       name: '',
       email: '',
       phone: '',
-      stream: 'engineering',
-      targetYear: '2025',
+      stream: '',
+      targetYear: '2027',
     })
     onClose()
   }
@@ -199,16 +199,13 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
                       <label className="block text-xs font-bold text-text-primary uppercase mb-1">
                         Target Stream
                       </label>
-                      <select
+                      <input
+                        type="text"
+                        placeholder="e.g. B.Tech, MBA, MBBS, B.Com..."
                         value={formData.stream}
                         onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
-                        className="w-full px-3.5 py-2 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium bg-white"
-                      >
-                        <option value="engineering">Engineering (B.Tech)</option>
-                        <option value="management">Management (MBA / BBA)</option>
-                        <option value="medical">Medical (MBBS / BDS)</option>
-                        <option value="law">Law (BA LLB)</option>
-                      </select>
+                        className="w-full px-3.5 py-2 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium"
+                      />
                     </div>
                     <div>
                       <label className="block text-xs font-bold text-text-primary uppercase mb-1">
@@ -219,8 +216,10 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
                         onChange={(e) => setFormData({ ...formData, targetYear: e.target.value })}
                         className="w-full px-3.5 py-2 rounded-xl border border-border-color focus:border-brand-primary outline-none text-xs font-medium bg-white"
                       >
-                        <option value="2025">2025 Session</option>
-                        <option value="2026">2026 Session</option>
+                        <option value="2027">2027 Session</option>
+                        <option value="2028">2028 Session</option>
+                        <option value="2029">2029 Session</option>
+                        <option value="2030">2030 Session</option>
                       </select>
                     </div>
                   </div>
