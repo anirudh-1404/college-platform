@@ -390,8 +390,8 @@ const FilterSidebar = ({
   return (
     <>
       {/* Desktop Sticky Container with Ultra-Smooth Native Scrolling */}
-      <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-20 self-start">
-        <div className="bg-white rounded-2xl border border-border-color shadow-sm p-5 max-h-[calc(100vh-6rem)] overflow-y-auto overscroll-contain custom-scrollbar">
+      <aside className="hidden lg:block w-72 flex-shrink-0 sticky top-24 self-start z-20">
+        <div className="bg-white rounded-2xl border border-border-color shadow-sm p-5 max-h-[calc(100vh-7.5rem)] overflow-y-auto overscroll-contain custom-scrollbar">
           {filterContent}
         </div>
       </aside>

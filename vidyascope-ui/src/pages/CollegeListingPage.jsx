@@ -286,11 +286,13 @@ const CollegeListingPage = ({
   }, [colleges, activeStream, filters])
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[#F3F6FC] via-[#F8FAFC] to-[#EEF3FB] pb-20 relative isolate overflow-hidden">
-      {/* Ambient background refraction glows for 3D glassmorphic cards */}
-      <div className="absolute top-24 right-10 w-96 h-96 bg-blue-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute top-[600px] left-10 w-96 h-96 bg-indigo-300/12 rounded-full blur-3xl pointer-events-none -z-10" />
-      <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-sky-300/15 rounded-full blur-3xl pointer-events-none -z-10" />
+    <div className="min-h-screen bg-gradient-to-b from-[#F3F6FC] via-[#F8FAFC] to-[#EEF3FB] pb-20 relative isolate">
+      {/* Ambient background refraction glows cleanly clipped in their own layer */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none -z-10">
+        <div className="absolute top-24 right-10 w-96 h-96 bg-blue-300/15 rounded-full blur-3xl" />
+        <div className="absolute top-[600px] left-10 w-96 h-96 bg-indigo-300/12 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-1/4 w-96 h-96 bg-sky-300/15 rounded-full blur-3xl" />
+      </div>
       
       {/* 1. Breadcrumb Bar */}
       <div className="bg-white border-b border-border-color py-3">
