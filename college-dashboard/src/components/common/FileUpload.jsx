@@ -423,7 +423,7 @@ export const ImageUploader = ({
                   <img
                     src={imageUrl}
                     alt="Logo Preview"
-                    className="w-full h-full object-contain"
+                    className="w-full h-full object-cover"
                     onError={(e) => {
                       e.target.src = 'https://placehold.co/150x150?text=Invalid+Image'
                     }}

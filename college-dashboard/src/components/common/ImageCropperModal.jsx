@@ -6,14 +6,17 @@ import {
   ZoomOut,
   RotateCw,
   Crop as CropIcon,
-  RefreshCw,
+  Sparkles,
   Loader2,
+  Maximize2,
+  Move,
+  RefreshCw,
 } from 'lucide-react'
 
 export const ImageCropperModal = ({
   isOpen,
   imageSrc,
-  aspectRatio = 'banner', // 'banner' (16:9 or 3:1) | 'square' (1:1) | 'free'
+  aspectRatio = 'banner', // 'banner' (16:9 or 3:1) | 'square' (1:1)
   onClose,
   onCropComplete,
 }) => {
@@ -26,10 +29,23 @@ export const ImageCropperModal = ({
     aspectRatio === 'square' ? '1:1' : aspectRatio === 'banner' ? '16:9' : '16:9'
   )
   const [isProcessing, setIsProcessing] = useState(false)
+  const [naturalSize, setNaturalSize] = useState({ w: 1200, h: 800 })
 
   const containerRef = useRef(null)
-  const imageRef = useRef(null)
 
+  // Load natural image dimensions
+  useEffect(() => {
+    if (!imageSrc) return
+    const img = new Image()
+    img.src = imageSrc
+    img.onload = () => {
+      if (img.naturalWidth && img.naturalHeight) {
+        setNaturalSize({ w: img.naturalWidth, h: img.naturalHeight })
+      }
+    }
+  }, [imageSrc])
+
+  // Reset controls when opened with new image
   useEffect(() => {
     if (isOpen) {
       setZoom(1)
@@ -43,6 +59,7 @@ export const ImageCropperModal = ({
 
   if (!isOpen || !imageSrc) return null
 
+  // Aspect ratio value helper
   const getAspectRatioValue = () => {
     switch (selectedRatio) {
       case '1:1':
@@ -58,7 +75,28 @@ export const ImageCropperModal = ({
     }
   }
 
+  // Calculate box dimensions that fit cleanly inside viewport
+  const getBoxDimensions = () => {
+    const R = getAspectRatioValue()
+    const maxW = 460
+    const maxH = 280
+    let w = maxW
+    let h = Math.round(w / R)
+    if (h > maxH) {
+      h = maxH
+      w = Math.round(h * R)
+    }
+    return { w, h }
+  }
+
+  const { w: boxW, h: boxH } = getBoxDimensions()
+  const baseScale = Math.max(boxW / naturalSize.w, boxH / naturalSize.h)
+  const displayW = Math.round(naturalSize.w * baseScale * zoom)
+  const displayH = Math.round(naturalSize.h * baseScale * zoom)
+
+  // Mouse pan handlers
   const handleMouseDown = (e) => {
+    e.preventDefault()
     setIsDragging(true)
     setDragStart({ x: e.clientX - pan.x, y: e.clientY - pan.y })
   }
@@ -75,6 +113,7 @@ export const ImageCropperModal = ({
     setIsDragging(false)
   }
 
+  // Touch pan handlers for mobile/touch
   const handleTouchStart = (e) => {
     if (e.touches.length === 1) {
       setIsDragging(true)
@@ -97,6 +136,7 @@ export const ImageCropperModal = ({
     setIsDragging(false)
   }
 
+  // Wheel zoom handler
   const handleWheel = (e) => {
     e.preventDefault()
     const zoomDelta = e.deltaY * -0.002
@@ -118,6 +158,7 @@ export const ImageCropperModal = ({
     return imageSrc
   }
 
+  // WYSIWYG Pixel-Perfect Canvas Export
   const handleApplyCrop = async () => {
     setIsProcessing(true)
     try {
@@ -142,52 +183,41 @@ export const ImageCropperModal = ({
         }
       })
 
+      // Target export dimensions
+      const targetW = selectedRatio === '1:1' ? 800 : selectedRatio === '3:1' ? 1500 : 1200
+      const targetH = Math.round(targetW / getAspectRatioValue())
+
       const canvas = document.createElement('canvas')
+      canvas.width = targetW
+      canvas.height = targetH
       const ctx = canvas.getContext('2d')
+      ctx.imageSmoothingEnabled = true
+      ctx.imageSmoothingQuality = 'high'
 
-      const targetWidth = selectedRatio === '1:1' ? 800 : selectedRatio === '3:1' ? 1500 : 1200
-      const targetHeight = Math.round(targetWidth / getAspectRatioValue())
-
-      canvas.width = targetWidth
-      canvas.height = targetHeight
-
-      ctx.clearRect(0, 0, targetWidth, targetHeight)
-
+      ctx.clearRect(0, 0, targetW, targetH)
       ctx.save()
-      ctx.translate(targetWidth / 2, targetHeight / 2)
+
+      // Exact scale factor from on-screen crop box to canvas
+      const exportScale = targetW / boxW
+
+      // 1. Center of canvas
+      ctx.translate(targetW / 2, targetH / 2)
+
+      // 2. User's exact pan translation in canvas coordinates
+      ctx.translate(pan.x * exportScale, pan.y * exportScale)
+
+      // 3. User's rotation around center
       ctx.rotate((rotation * Math.PI) / 180)
 
-      const imgAspect = img.width / img.height
-      const targetAspect = targetWidth / targetHeight
+      // 4. Draw image at exact proportional size
+      const drawW = displayW * exportScale
+      const drawH = displayH * exportScale
+      ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH)
 
-      let drawWidth, drawHeight
-      if (imgAspect > targetAspect) {
-        drawHeight = targetHeight * zoom
-        drawWidth = drawHeight * imgAspect
-      } else {
-        drawWidth = targetWidth * zoom
-        drawHeight = drawWidth / imgAspect
-      }
-
-      const containerRect = containerRef.current
-        ? containerRef.current.getBoundingClientRect()
-        : { width: 400, height: 300 }
-      const scaleX = targetWidth / containerRect.width
-      const scaleY = targetHeight / containerRect.height
-
-      const scaledPanX = pan.x * scaleX
-      const scaledPanY = pan.y * scaleY
-
-      ctx.drawImage(
-        img,
-        -drawWidth / 2 + scaledPanX,
-        -drawHeight / 2 + scaledPanY,
-        drawWidth,
-        drawHeight
-      )
       ctx.restore()
 
-      const dataUrl = canvas.toDataURL('image/jpeg', 0.92)
+      // High-res JPEG dataUrl
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.95)
 
       canvas.toBlob(
         (blob) => {
@@ -199,24 +229,27 @@ export const ImageCropperModal = ({
           setIsProcessing(false)
         },
         'image/jpeg',
-        0.92
+        0.95
       )
     } catch (err) {
       console.error('Crop export error:', err)
-      alert('Could not crop external image. Uploading the file directly from your computer enables unrestricted high-res cropping.')
+      alert('Could not crop image: ' + (err.message || 'Error'))
       setIsProcessing(false)
     }
   }
 
   const isSquare = selectedRatio === '1:1'
 
+  // Live thumbnail preview scale factor
+  const thumbScale = isSquare ? 44 / boxW : 64 / boxW
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-slate-950/80 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative bg-slate-900 border border-slate-700/80 w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col text-slate-100 max-h-[90vh]">
+      <div className="relative bg-slate-900 border border-slate-700/80 w-full max-w-2xl rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col text-slate-100 max-h-[92vh]">
         {/* Header */}
         <div className="px-5 py-3.5 border-b border-slate-800 flex items-center justify-between gap-3 shrink-0 bg-slate-900/90">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-brand-primary text-white flex items-center justify-center shadow-xs">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-xs">
               <CropIcon className="h-4 w-4" />
             </div>
             <div>
@@ -224,7 +257,7 @@ export const ImageCropperModal = ({
                 <span>Crop & Position Photo</span>
               </h3>
               <p className="text-[11px] text-slate-400">
-                Drag to position • Scroll or slider to zoom • Select framing ratio
+                Drag to frame • Zoom with slider or scroll • What you see is what you get
               </p>
             </div>
           </div>
@@ -245,7 +278,7 @@ export const ImageCropperModal = ({
           </span>
           <div className="flex items-center gap-1.5">
             {[
-              { id: '1:1', label: '1:1 Square (Logo Avatar)' },
+              { id: '1:1', label: '1:1 Circle / Square (Logo)' },
               { id: '16:9', label: '16:9 Standard Card' },
               { id: '3:1', label: '3:1 Wide Banner' },
               { id: '4:3', label: '4:3 Classic' },
@@ -256,10 +289,11 @@ export const ImageCropperModal = ({
                 onClick={() => {
                   setSelectedRatio(ratio.id)
                   setPan({ x: 0, y: 0 })
+                  setZoom(1)
                 }}
                 className={`px-2.5 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer whitespace-nowrap ${
                   selectedRatio === ratio.id
-                    ? 'bg-brand-primary text-white shadow-xs'
+                    ? 'bg-indigo-600 text-white shadow-xs'
                     : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white'
                 }`}
               >
@@ -279,55 +313,69 @@ export const ImageCropperModal = ({
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
           onWheel={handleWheel}
-          className="relative flex-1 bg-black min-h-[260px] sm:min-h-[340px] flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none"
+          className="relative flex-1 bg-slate-950 min-h-[300px] sm:min-h-[350px] flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing select-none"
         >
+          {/* WYSIWYG Crop Window Frame */}
           <div
             style={{
-              transform: `translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg) scale(${zoom})`,
-              transition: isDragging ? 'none' : 'transform 0.1s ease-out',
+              width: `${boxW}px`,
+              height: `${boxH}px`,
             }}
-            className="pointer-events-none flex items-center justify-center"
-          >
-            <img
-              ref={imageRef}
-              src={imageSrc}
-              alt="Crop Source"
-              className="max-w-[85vw] sm:max-w-[460px] max-h-[280px] sm:max-h-[320px] object-contain shadow-2xl"
-              draggable={false}
-            />
-          </div>
-
-          <div
-            style={{
-              aspectRatio: `${getAspectRatioValue()}`,
-            }}
-            className={`absolute pointer-events-none w-[82%] sm:w-[75%] max-h-[82%] border-2 border-white/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] ${
+            className={`relative shadow-[0_0_0_9999px_rgba(2,6,23,0.85)] border-2 border-white overflow-hidden pointer-events-none ${
               isSquare ? 'rounded-full' : 'rounded-xl'
             }`}
           >
+            {/* The Image inside the frame */}
+            <img
+              src={imageSrc}
+              alt="Crop Target"
+              draggable={false}
+              style={{
+                width: `${displayW}px`,
+                height: `${displayH}px`,
+                maxWidth: 'none',
+                maxHeight: 'none',
+                position: 'absolute',
+                left: '50%',
+                top: '50%',
+                transform: `translate(-50%, -50%) translate(${pan.x}px, ${pan.y}px) rotate(${rotation}deg)`,
+                transformOrigin: 'center center',
+                userSelect: 'none',
+                pointerEvents: 'none',
+              }}
+            />
+
+            {/* Rule of thirds grid lines */}
             {!isSquare && (
-              <div className="w-full h-full grid grid-cols-3 grid-rows-3 pointer-events-none opacity-40">
-                <div className="border-r border-b border-white/40" />
-                <div className="border-r border-b border-white/40" />
-                <div className="border-b border-white/40" />
-                <div className="border-r border-b border-white/40" />
-                <div className="border-r border-b border-white/40" />
-                <div className="border-b border-white/40" />
-                <div className="border-r border-b border-white/40" />
-                <div className="border-r border-b border-white/40" />
+              <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-25">
+                <div className="border-r border-b border-white" />
+                <div className="border-r border-b border-white" />
+                <div className="border-b border-white" />
+                <div className="border-r border-b border-white" />
+                <div className="border-r border-b border-white" />
+                <div className="border-b border-white" />
+                <div className="border-r border-b border-white" />
+                <div className="border-r border-b border-white" />
                 <div />
               </div>
             )}
           </div>
 
-          <div className="absolute top-3 left-3 bg-slate-900/80 text-slate-300 text-[10px] font-semibold px-2 py-0.5 rounded-md backdrop-blur-xs border border-white/10 pointer-events-none">
-            Drag to pan position
+          {/* Helpful Drag Indicator Badge */}
+          <div className="absolute top-3 left-3 bg-slate-900/90 text-white text-[10px] font-semibold px-2.5 py-1 rounded-md backdrop-blur-md border border-white/10 pointer-events-none flex items-center gap-1.5 shadow-sm">
+            <Move className="h-3 w-3 text-indigo-400" />
+            <span>Click & Drag to position image</span>
+          </div>
+
+          <div className="absolute top-3 right-3 bg-slate-900/90 text-slate-300 text-[10px] font-mono px-2 py-0.5 rounded-md backdrop-blur-md border border-white/10 pointer-events-none">
+            {selectedRatio} • {Math.round(zoom * 100)}%
           </div>
         </div>
 
         {/* Toolbar & Zoom Slider Controls */}
         <div className="px-5 py-3.5 bg-slate-900 border-t border-slate-800 space-y-3 shrink-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            {/* Zoom Slider */}
             <div className="flex items-center gap-2.5 flex-1 max-w-sm">
               <button
                 type="button"
@@ -337,42 +385,39 @@ export const ImageCropperModal = ({
               >
                 <ZoomOut className="h-4 w-4" />
               </button>
-
               <input
                 type="range"
                 min="1"
-                max="3"
+                max="3.5"
                 step="0.05"
                 value={zoom}
                 onChange={(e) => setZoom(parseFloat(e.target.value))}
-                className="w-full h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#033C8D]"
+                className="flex-1 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-600"
               />
-
               <button
                 type="button"
-                onClick={() => setZoom((prev) => Math.min(3, prev + 0.2))}
+                onClick={() => setZoom((prev) => Math.min(3.5, prev + 0.2))}
                 className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
                 title="Zoom In"
               >
                 <ZoomIn className="h-4 w-4" />
               </button>
-
-              <span className="text-[11px] font-mono text-slate-400 w-10 text-right">
+              <span className="text-xs text-slate-400 font-mono w-10 text-right">
                 {Math.round(zoom * 100)}%
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            {/* Quick Action Tools */}
+            <div className="flex items-center gap-2 self-end sm:self-center">
               <button
                 type="button"
                 onClick={() => setRotation((prev) => (prev + 90) % 360)}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-slate-700 transition-colors"
-                title="Rotate 90 degrees"
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-300 hover:text-white hover:bg-slate-700 transition-all flex items-center gap-1.5 cursor-pointer"
+                title="Rotate 90° Clockwise"
               >
                 <RotateCw className="h-3.5 w-3.5" />
                 <span>Rotate</span>
               </button>
-
               <button
                 type="button"
                 onClick={() => {
@@ -380,48 +425,82 @@ export const ImageCropperModal = ({
                   setRotation(0)
                   setPan({ x: 0, y: 0 })
                 }}
-                className="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 cursor-pointer border border-slate-700 transition-colors"
-                title="Reset Position"
+                className="px-2.5 py-1 text-xs font-semibold rounded-lg bg-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-700 transition-all cursor-pointer flex items-center gap-1"
+                title="Reset crop adjustments"
               >
-                <RefreshCw className="h-3.5 w-3.5" />
+                <RefreshCw className="h-3 w-3" />
                 <span>Reset</span>
               </button>
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-800/80">
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isProcessing}
-              className="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors cursor-pointer"
-            >
-              Cancel
-            </button>
+          {/* Action Buttons & Live Preview Strip */}
+          <div className="flex items-center justify-between pt-2 border-t border-slate-800/80 gap-3">
+            {/* Live Crop Mini-Preview */}
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-slate-400 uppercase tracking-wider font-semibold">
+                Preview:
+              </span>
+              <div
+                style={{
+                  width: isSquare ? '36px' : '56px',
+                  height: '36px',
+                }}
+                className={`relative overflow-hidden bg-black border border-white/40 shrink-0 ${
+                  isSquare ? 'rounded-full' : 'rounded-md'
+                }`}
+              >
+                <img
+                  src={imageSrc}
+                  alt="Live Preview"
+                  draggable={false}
+                  style={{
+                    width: `${displayW * thumbScale}px`,
+                    height: `${displayH * thumbScale}px`,
+                    maxWidth: 'none',
+                    maxHeight: 'none',
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    transform: `translate(-50%, -50%) translate(${pan.x * thumbScale}px, ${pan.y * thumbScale}px) rotate(${rotation}deg)`,
+                    transformOrigin: 'center center',
+                  }}
+                />
+              </div>
+            </div>
 
-            <button
-              type="button"
-              onClick={handleApplyCrop}
-              disabled={isProcessing}
-              className="px-5 py-2 rounded-xl text-xs font-bold text-white bg-brand-primary hover:bg-brand-primary/90 shadow-sm hover:shadow transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
-            >
-              {isProcessing ? (
-                <>
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                  <span>Cropping & Processing...</span>
-                </>
-              ) : (
-                <>
-                  <Check className="h-3.5 w-3.5" />
-                  <span>Crop & Apply Photo</span>
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onClose}
+                disabled={isProcessing}
+                className="px-4 py-2 text-xs font-bold rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyCrop}
+                disabled={isProcessing}
+                className="px-5 py-2 text-xs font-bold rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white shadow-md transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {isProcessing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Processing Crop...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="h-3.5 w-3.5" />
+                    <span>Apply & Save Crop</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </div>
       </div>
     </div>
   )
 }
-
 export default ImageCropperModal

@@ -48,7 +48,6 @@ const CollegeDetailPage = ({
   // Fetch Live College Details from Backend
   useEffect(() => {
     const fetchDetail = async () => {
-      setLoading(true)
       try {
         const data = await publicApi.getCollegeDetail(effectiveCollegeId)
         setCollege(data)
@@ -59,7 +58,19 @@ const CollegeDetailPage = ({
       }
     }
 
+    setLoading(true)
     fetchDetail()
+
+    const handleDataChange = () => fetchDetail()
+    window.addEventListener('vidyascope_college_data_change', handleDataChange)
+    window.addEventListener('vidyascope_admin_data_change', handleDataChange)
+    window.addEventListener('storage', handleDataChange)
+
+    return () => {
+      window.removeEventListener('vidyascope_college_data_change', handleDataChange)
+      window.removeEventListener('vidyascope_admin_data_change', handleDataChange)
+      window.removeEventListener('storage', handleDataChange)
+    }
   }, [effectiveCollegeId])
 
   const tabs = [
@@ -216,7 +227,7 @@ const CollegeDetailPage = ({
       <div className="bg-white border-b border-border-color">
         
         {/* Wide Background Banner */}
-        <div className="relative h-48 sm:h-64 md:h-72 w-full overflow-hidden bg-slate-900">
+        <div className="relative h-56 sm:h-72 md:h-80 w-full overflow-hidden bg-slate-900">
           <img
             src={
               college.image ||
@@ -255,7 +266,7 @@ const CollegeDetailPage = ({
                 <img
                   src={college.logo}
                   alt={`${college.name} Logo`}
-                  className="w-full h-full object-contain p-2.5"
+                  className="w-full h-full object-cover"
                 />
               ) : college.image ? (
                 <img
