@@ -226,8 +226,24 @@ const CollegeDetailPage = ({
       {/* LinkedIn-style Hero Banner & Header */}
       <div className="bg-white border-b border-border-color">
         
-        {/* Wide Background Banner */}
-        <div className="relative h-64 sm:h-80 md:h-96 lg:h-[420px] w-full overflow-hidden bg-slate-900">
+        {/* Wide Background Banner with 100% Full Uncut Ambient Showcase */}
+        <div className="relative h-64 sm:h-80 md:h-96 lg:h-[440px] w-full overflow-hidden bg-slate-950 flex items-center justify-center">
+          {/* Layer 1: Ambient Blurred Backdrop (Full edge-to-edge color fill matching image) */}
+          <img
+            src={
+              college.image ||
+              (Array.isArray(college.gallery) && college.gallery.length > 0
+                ? (typeof college.gallery[0] === 'string' ? college.gallery[0] : college.gallery[0]?.url)
+                : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
+            }
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover filter blur-3xl opacity-50 scale-125 pointer-events-none select-none"
+          />
+          {/* Subtle gradient vignette to blend nicely */}
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-black/20 pointer-events-none" />
+
+          {/* Layer 2: 100% Full Uncut Photo (ZERO CROP - 100% of the image is shown without any cut!) */}
           <img
             src={
               college.image ||
@@ -236,14 +252,12 @@ const CollegeDetailPage = ({
                 : 'https://images.unsplash.com/photo-1562774053-701939374585?w=1600&auto=format&fit=crop&q=80')
             }
             alt={`${college.name} Campus Banner`}
-            className="w-full h-full object-cover object-[center_35%]"
+            className="relative z-10 max-h-full max-w-full object-contain mx-auto drop-shadow-2xl"
           />
-          {/* Ambient Gradient Overlay for high-end aesthetic */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-slate-950/15 to-transparent" />
 
           {/* Top-Right Badge Overlay on Banner */}
-          <div className="absolute top-4 right-4 sm:top-6 sm:right-8 flex items-center gap-2">
-            <span className="px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
+          <div className="absolute top-4 right-4 sm:top-6 sm:right-8 flex items-center gap-2 z-20">
+            <span className="px-3 py-1 rounded-full bg-slate-900/75 backdrop-blur-md text-white text-xs font-bold uppercase tracking-wider border border-white/20 shadow-sm">
               {college.stream || 'Engineering'}
             </span>
             {college.ownership && (

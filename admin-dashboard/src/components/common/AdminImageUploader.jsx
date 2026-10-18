@@ -297,12 +297,18 @@ export const AdminImageUploader = ({
                 </div>
               </div>
             ) : (
-              /* Banner / Card Preview */
-              <div className="relative w-full aspect-[2.8/1] sm:aspect-[3/1] rounded-xl overflow-hidden border border-slate-200 bg-slate-900 group shadow-xs">
+              /* Banner / Card Preview with 100% Full Uncut Ambient Showcase */
+              <div className="relative w-full aspect-[2.8/1] sm:aspect-[3/1] rounded-xl overflow-hidden border border-slate-200 bg-slate-950 flex items-center justify-center group shadow-xs">
+                <img
+                  src={value}
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-full object-cover filter blur-xl opacity-40 scale-125 pointer-events-none select-none"
+                />
                 <img
                   src={value}
                   alt="Banner Preview"
-                  className="w-full h-full object-cover object-[center_35%]"
+                  className="relative z-10 max-h-full max-w-full object-contain mx-auto"
                   onError={(e) => {
                     e.target.src = 'https://placehold.co/600x200?text=Invalid+Image+URL'
                   }}

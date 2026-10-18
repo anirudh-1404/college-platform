@@ -64,6 +64,8 @@ export const ImageCropperModal = ({
     switch (selectedRatio) {
       case '1:1':
         return 1
+      case 'original':
+        return naturalSize.w && naturalSize.h ? naturalSize.w / naturalSize.h : 3 / 1
       case '3:1':
         return 3 / 1
       case '16:9':
@@ -189,6 +191,8 @@ export const ImageCropperModal = ({
       const targetW =
         selectedRatio === '1:1'
           ? 800
+          : selectedRatio === 'original'
+          ? Math.min(naturalSize.w || 1600, 1600)
           : selectedRatio === '3:1'
           ? 1500
           : selectedRatio === '4:1'
@@ -289,6 +293,7 @@ export const ImageCropperModal = ({
           </span>
           <div className="flex items-center gap-1.5">
             {[
+              { id: 'original', label: '100% Full Uncut (No Crop)' },
               { id: '3:1', label: '3:1 Campus Banner (Best Match)' },
               { id: '16:9', label: '16:9 Card Landscape' },
               { id: '1:1', label: '1:1 Circle Logo / Avatar' },
