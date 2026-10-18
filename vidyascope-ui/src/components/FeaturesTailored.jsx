@@ -193,7 +193,7 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
         </motion.div>
 
         {/* 4 Clean Columns Grid with Horizontal Directional Slide (No Read More buttons) */}
-        <div className="relative overflow-hidden min-h-[220px]">
+        <div className="relative overflow-hidden min-h-[220px] pt-4 pb-6 px-4 -mt-4 -mb-6 -mx-4">
           <AnimatePresence mode="wait" custom={direction}>
             <motion.div
               key={activeTab}
@@ -209,7 +209,7 @@ const FeaturesTailored = ({ onNavigateListing, onNavigateCompare, onOpenCounseli
                 return (
                   <motion.div
                     key={feat.id}
-                    whileHover={{ y: -8, scale: 1.02 }}
+                    whileHover={{ y: -6, scale: 1.015 }}
                     whileTap={{ scale: 0.98 }}
                     transition={{ type: 'spring', stiffness: 350, damping: 22 }}
                     onClick={() => handleAction(feat.action)}
