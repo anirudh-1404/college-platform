@@ -210,7 +210,7 @@ const CollegeDetailPage = ({
             </button>
             <ChevronRight className="h-3 w-3 text-slate-400" />
             <button
-              onClick={onNavigateListing}
+              onClick={() => onNavigateListing && onNavigateListing(college.stream)}
               className="hover:text-brand-primary cursor-pointer capitalize"
             >
               {college.stream} Colleges

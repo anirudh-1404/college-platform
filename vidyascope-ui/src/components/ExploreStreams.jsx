@@ -6,6 +6,8 @@ import {
   Scale,
   Atom,
   Palette,
+  TrendingUp,
+  Landmark,
   ArrowRight,
 } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -21,6 +23,14 @@ const STREAM_METADATA = {
     icon: Cpu,
     borderHover: 'hover:border-[#033C8D]',
     bgIcon: 'bg-blue-50 text-[#033C8D] border border-blue-100',
+  },
+  commerce: {
+    id: 'commerce',
+    title: 'Commerce, Banking & Finance',
+    shortTitle: 'Commerce',
+    icon: TrendingUp,
+    borderHover: 'hover:border-amber-600',
+    bgIcon: 'bg-amber-50 text-amber-700 border border-amber-100',
   },
   management: {
     id: 'management',
@@ -96,17 +106,33 @@ const ExploreStreams = ({ onSelectStream, onNavigateListing }) => {
     // Group colleges by stream
     const streamMap = {}
     colleges.forEach((c) => {
-      const rawStream = (c.stream || 'engineering').toLowerCase()
+      const rawStream = (c.stream || 'engineering').toLowerCase().trim()
       if (!streamMap[rawStream]) {
         streamMap[rawStream] = { count: 0 }
       }
       streamMap[rawStream].count += 1
     })
 
-    // Filter master metadata: only streams that have live colleges in backend
-    return Object.keys(STREAM_METADATA)
-      .filter((streamId) => Boolean(streamMap[streamId] && streamMap[streamId].count > 0))
-      .map((streamId) => STREAM_METADATA[streamId])
+    // Find all streams present in live colleges
+    const presentStreamIds = Object.keys(streamMap).filter(
+      (streamId) => streamMap[streamId] && streamMap[streamId].count > 0
+    )
+
+    // Map each present stream to its rich metadata or dynamically construct fallback
+    return presentStreamIds.map((streamId) => {
+      if (STREAM_METADATA[streamId]) {
+        return STREAM_METADATA[streamId]
+      }
+      const title = streamId.charAt(0).toUpperCase() + streamId.slice(1)
+      return {
+        id: streamId,
+        title: `${title} & Studies`,
+        shortTitle: title,
+        icon: Landmark,
+        borderHover: 'hover:border-indigo-600',
+        bgIcon: 'bg-indigo-50 text-indigo-700 border border-indigo-100',
+      }
+    })
   }, [colleges])
 
   // Click Handler: route with filter

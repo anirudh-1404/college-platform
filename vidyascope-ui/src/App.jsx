@@ -360,7 +360,12 @@ const App = () => {
                 <CollegeDetailPage
                   collegeId={selectedCollegeId}
                   onNavigateHome={() => navigate('/')}
-                  onNavigateListing={() => navigate('/colleges')}
+                  onNavigateListing={(stream) => {
+                    if (stream && typeof stream === 'string') {
+                      setSelectedStream(stream)
+                    }
+                    navigate('/colleges')
+                  }}
                   onOpenCounseling={handleOpenCounseling}
                   onSelectCollege={handleSelectCollege}
                   shortlistedIds={shortlistedIds}

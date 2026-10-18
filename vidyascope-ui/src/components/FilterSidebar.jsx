@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 export const streamList = [
   { id: 'all', label: 'All Disciplines' },
   { id: 'engineering', label: 'Engineering (B.Tech/M.Tech)' },
+  { id: 'commerce', label: 'Commerce & Finance (B.Com/M.Com)' },
   { id: 'management', label: 'Management (MBA/BBA)' },
   { id: 'medical', label: 'Medical (MBBS/MD)' },
   { id: 'law', label: 'Law (LLB/LLM)' },
@@ -20,8 +21,8 @@ export const ownershipList = [
 ]
 
 export const defaultLocations = [
-  'Maharashtra',
   'Delhi NCR',
+  'Maharashtra',
   'Karnataka',
   'Tamil Nadu',
   'Uttar Pradesh',
@@ -39,6 +40,9 @@ const FilterSidebar = ({
   isOpen,
   onCloseMobile,
   totalResults,
+  availableStreams,
+  availableOwnerships,
+  availableLocations,
 }) => {
   const [locationQuery, setLocationQuery] = useState('')
   
@@ -65,7 +69,11 @@ const FilterSidebar = ({
     onFilterChange(category, updated)
   }
 
-  const filteredLocations = defaultLocations.filter((loc) =>
+  const streamsToRender = availableStreams && availableStreams.length > 0 ? availableStreams : streamList
+  const ownershipsToRender = availableOwnerships && availableOwnerships.length > 0 ? availableOwnerships : ownershipList
+  const locationsToRender = availableLocations && availableLocations.length > 0 ? availableLocations : defaultLocations
+
+  const filteredLocations = locationsToRender.filter((loc) =>
     loc.toLowerCase().includes(locationQuery.toLowerCase())
   )
 
@@ -123,23 +131,30 @@ const FilterSidebar = ({
                 className="overflow-hidden"
               >
                 <div className="space-y-2 pt-2 pb-1">
-                  {streamList.map((st) => {
+                  {streamsToRender.map((st) => {
                     const checked = activeStream === st.id
                     return (
                       <label
                         key={st.id}
-                        className="flex items-center gap-2.5 text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors"
+                        className="flex items-center justify-between text-xs font-semibold text-text-secondary cursor-pointer hover:text-text-primary transition-colors py-0.5"
                       >
-                        <input
-                          type="radio"
-                          name="streamFilter"
-                          checked={checked}
-                          onChange={() => onStreamChange(st.id)}
-                          className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
-                        />
-                        <span className={checked ? 'text-brand-primary font-bold' : ''}>
-                          {st.label}
-                        </span>
+                        <div className="flex items-center gap-2.5">
+                          <input
+                            type="radio"
+                            name="streamFilter"
+                            checked={checked}
+                            onChange={() => onStreamChange(st.id)}
+                            className="w-4 h-4 text-brand-primary border-border-color focus:ring-brand-primary cursor-pointer accent-brand-primary"
+                          />
+                          <span className={checked ? 'text-brand-primary font-bold' : ''}>
+                            {st.label}
+                          </span>
+                        </div>
+                        {typeof st.count === 'number' && (
+                          <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded-full">
+                            {st.count}
+                          </span>
+                        )}
                       </label>
                     )
                   })}
@@ -183,7 +198,7 @@ const FilterSidebar = ({
               className="overflow-hidden"
             >
               <div className="space-y-2 pt-2 pb-1">
-                {ownershipList.map((type) => {
+                {ownershipsToRender.map((type) => {
                   const checked = (filters.ownerships || []).includes(type)
                   return (
                     <label

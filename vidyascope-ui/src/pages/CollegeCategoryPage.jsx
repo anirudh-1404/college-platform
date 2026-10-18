@@ -1,5 +1,5 @@
 import React from 'react'
-import { GraduationCap, Briefcase, Stethoscope, FlaskConical, Scale, Palette, Home, ChevronRight, ArrowRight } from 'lucide-react'
+import { GraduationCap, Briefcase, Stethoscope, TrendingUp, FlaskConical, Scale, Palette, Home, ChevronRight, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { fadeInUp, staggerContainer, cardVariant } from '../utils/animations'
 
@@ -15,6 +15,17 @@ const CollegeCategoryPage = ({ onSelectCategory, onNavigateHome }) => {
       bgAccent: 'bg-[#F5F3FF] text-[#7C3AED] border-[#7C3AED]/20',
       isActive: true,
       description: 'Explore verified NIRF rankings, JEE/BITSAT cutoffs, average packages, and total fees for top engineering institutes.',
+    },
+    {
+      id: 'commerce',
+      title: 'Commerce, Banking & Finance',
+      degrees: 'B.Com, M.Com, CA, CS, BAF, Economics',
+      collegesCount: '3,200+ Colleges Available',
+      icon: TrendingUp,
+      color: 'from-[#D97706] to-[#B45309]',
+      bgAccent: 'bg-[#FFFBEB] text-[#D97706] border-[#D97706]/20',
+      isActive: true,
+      description: 'Find premier commerce institutions (SRCC, Loyola, St. Xavier) for investment banking, chartered accountancy, and finance.',
     },
     {
       id: 'management',

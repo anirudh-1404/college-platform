@@ -43,6 +43,89 @@ const CollegeListingPage = ({
   const [colleges, setColleges] = useState([])
   const [loading, setLoading] = useState(true)
 
+  // Master colleges list for dynamic filter options (all streams, locations, ownerships)
+  const [allPublishedColleges, setAllPublishedColleges] = useState([])
+
+  useEffect(() => {
+    let isMounted = true
+    const loadAllColleges = async () => {
+      try {
+        const data = await publicApi.getColleges()
+        if (isMounted && Array.isArray(data)) {
+          setAllPublishedColleges(data)
+        }
+      } catch (err) {
+        console.error('Failed to load all colleges for filters:', err)
+      }
+    }
+    loadAllColleges()
+    return () => {
+      isMounted = false
+    }
+  }, [])
+
+  // Dynamically compute available streams from all live published colleges
+  const availableStreams = useMemo(() => {
+    if (!allPublishedColleges || allPublishedColleges.length === 0) return null
+
+    const streamMap = {}
+    allPublishedColleges.forEach((c) => {
+      const s = (c.stream || '').toLowerCase().trim()
+      if (s) {
+        streamMap[s] = (streamMap[s] || 0) + 1
+      }
+    })
+
+    const streamLabelMap = {
+      engineering: 'Engineering (B.Tech/M.Tech)',
+      commerce: 'Commerce & Finance (B.Com/M.Com)',
+      management: 'Management (MBA/BBA)',
+      medical: 'Medical (MBBS/MD)',
+      law: 'Law (LLB/LLM)',
+      science: 'Pure Sciences (B.Sc)',
+      arts: 'Humanities & Arts',
+    }
+
+    const list = [
+      { id: 'all', label: 'All Disciplines', count: allPublishedColleges.length }
+    ]
+
+    Object.keys(streamMap).sort().forEach((streamId) => {
+      list.push({
+        id: streamId,
+        label: streamLabelMap[streamId] || `${streamId.charAt(0).toUpperCase() + streamId.slice(1)}`,
+        count: streamMap[streamId],
+      })
+    })
+
+    return list
+  }, [allPublishedColleges])
+
+  // Dynamically compute available ownership types from all live published colleges
+  const availableOwnerships = useMemo(() => {
+    if (!allPublishedColleges || allPublishedColleges.length === 0) return null
+    const set = new Set()
+    allPublishedColleges.forEach((c) => {
+      if (c.ownership && c.ownership.trim()) {
+        set.add(c.ownership.trim())
+      }
+    })
+    return set.size > 0 ? Array.from(set).sort() : null
+  }, [allPublishedColleges])
+
+  // Dynamically compute available locations (state/city) from all live published colleges
+  const availableLocations = useMemo(() => {
+    if (!allPublishedColleges || allPublishedColleges.length === 0) return null
+    const set = new Set()
+    allPublishedColleges.forEach((c) => {
+      const state = c.locationContact?.state?.trim()
+      const city = c.locationContact?.city?.trim()
+      if (state) set.add(state)
+      else if (city) set.add(city)
+    })
+    return set.size > 0 ? Array.from(set).sort() : null
+  }, [allPublishedColleges])
+
   // 4 Core Streamlined Filters: Stream, Ownership, Location, MaxFees
   const [filters, setFilters] = useState({
     locations: [],
@@ -243,6 +326,9 @@ const CollegeListingPage = ({
             totalResults={filteredColleges.length}
             isOpen={isMobileFilterOpen}
             onCloseMobile={() => setIsMobileFilterOpen(false)}
+            availableStreams={availableStreams}
+            availableOwnerships={availableOwnerships}
+            availableLocations={availableLocations}
           />
 
           {/* Right Content Stream */}
