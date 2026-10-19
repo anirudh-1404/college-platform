@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
-  ChevronRight, Home, MapPin, Star, Heart,
+  ChevronRight, ChevronLeft, X, Maximize2, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
   Check, AlertCircle, Scale, Layers, GraduationCap, Building,
   Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils, Download
@@ -30,6 +30,80 @@ const CollegeDetailPage = ({
   const [calculatorTenure, setCalculatorTenure] = useState(4)
   const [college, setCollege] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [lightboxIndex, setLightboxIndex] = useState(null)
+
+  // Memoized, normalized gallery items array
+  const galleryList = useMemo(() => {
+    if (!college) return []
+    const items = []
+
+    if (Array.isArray(college.gallery) && college.gallery.length > 0) {
+      college.gallery.forEach((item, idx) => {
+        if (typeof item === 'string' && item.trim()) {
+          items.push({
+            url: item.trim(),
+            caption: `${college.name || 'Campus'} - Photo ${idx + 1}`,
+            category: 'Campus',
+          })
+        } else if (item && typeof item === 'object' && (item.url || item.src)) {
+          items.push({
+            url: (item.url || item.src).trim(),
+            caption: item.caption || item.title || `${college.name || 'Campus'} - Photo ${idx + 1}`,
+            category: item.category || 'Campus',
+          })
+        }
+      })
+    }
+
+    if (items.length === 0 && college.image) {
+      items.push({
+        url: college.image,
+        caption: `${college.name || 'Campus'} - Main Campus Banner`,
+        category: 'Campus',
+      })
+    }
+
+    return items
+  }, [college])
+
+  const handlePrevImage = (e) => {
+    if (e) e.stopPropagation()
+    if (galleryList.length === 0) return
+    setLightboxIndex((prev) => (prev === null || prev === 0 ? galleryList.length - 1 : prev - 1))
+  }
+
+  const handleNextImage = (e) => {
+    if (e) e.stopPropagation()
+    if (galleryList.length === 0) return
+    setLightboxIndex((prev) => (prev === null || prev === galleryList.length - 1 ? 0 : prev + 1))
+  }
+
+  const handleCloseLightbox = () => {
+    setLightboxIndex(null)
+  }
+
+  // Keyboard navigation & lock body scroll when Lightbox is active
+  useEffect(() => {
+    if (lightboxIndex === null) return
+
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') {
+        handleCloseLightbox()
+      } else if (e.key === 'ArrowLeft') {
+        handlePrevImage()
+      } else if (e.key === 'ArrowRight') {
+        handleNextImage()
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    document.body.style.overflow = 'hidden'
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      document.body.style.overflow = ''
+    }
+  }, [lightboxIndex, galleryList.length])
 
   const effectiveIsShortlisted =
     isShortlisted ||
@@ -960,18 +1034,70 @@ const CollegeDetailPage = ({
             {/* 7. GALLERY TAB */}
             {activeTab === 'gallery' && (
               <div className="bg-white border border-slate-200/90 rounded-2xl p-6 space-y-4 shadow-card">
-                <h2 className="font-serif text-xl font-bold text-text-primary">
-                  Campus & Hostel Photos
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {(college.gallery || []).map((imgUrl, idx) => (
-                    <img
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="font-serif text-xl font-bold text-text-primary">
+                      Campus & Hostel Photos
+                    </h2>
+                    <p className="text-xs text-text-secondary mt-0.5">
+                      Click any photo to open full-screen preview with previous and next navigation.
+                    </p>
+                  </div>
+                  <span className="text-xs font-bold text-brand-primary bg-brand-accent/50 px-3 py-1 rounded-full border border-brand-primary/20">
+                    {galleryList.length} {galleryList.length === 1 ? 'Photo' : 'Photos'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  {galleryList.map((item, idx) => (
+                    <div
                       key={idx}
-                      src={imgUrl}
-                      alt={`Gallery ${idx}`}
-                      className="rounded-xl w-full h-44 object-cover border border-slate-200"
-                    />
+                      onClick={() => setLightboxIndex(idx)}
+                      className="group relative rounded-xl overflow-hidden border border-slate-200 bg-slate-100 h-44 sm:h-52 cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-brand-primary"
+                      title="Click to view full photo"
+                    >
+                      <img
+                        src={item.url}
+                        alt={item.caption || `Campus Photo ${idx + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        loading="lazy"
+                      />
+
+                      {/* Top Category Badge */}
+                      {item.category && (
+                        <div className="absolute top-2.5 left-2.5 z-10">
+                          <span className="px-2.5 py-0.5 rounded-md bg-slate-900/70 text-white text-[10px] font-bold backdrop-blur-md border border-white/20 uppercase tracking-wider">
+                            {item.category}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Hover Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-3.5">
+                        <div className="self-end">
+                          <span className="h-8 w-8 rounded-full bg-white/20 backdrop-blur-md text-white flex items-center justify-center border border-white/30 shadow-sm transition-transform group-hover:scale-110">
+                            <Maximize2 className="h-4 w-4" />
+                          </span>
+                        </div>
+                        <div className="text-white">
+                          <p className="text-xs sm:text-sm font-bold truncate drop-shadow-sm">
+                            {item.caption}
+                          </p>
+                          <span className="text-[10px] text-white/80 font-medium flex items-center gap-1 mt-0.5">
+                            <span>Click to view full size</span>
+                            <span>→</span>
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                   ))}
+
+                  {galleryList.length === 0 && (
+                    <div className="col-span-full py-16 text-center text-slate-400 border border-dashed border-slate-200 rounded-xl bg-slate-50/50">
+                      <p className="text-sm font-medium">No campus photography uploaded yet.</p>
+                      <p className="text-xs text-slate-400 mt-1">Photos will appear here once published by the college administration.</p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1061,6 +1187,125 @@ const CollegeDetailPage = ({
 
         </div>
       </div>
+
+      {/* ================= LIGHTBOX IMAGE PREVIEW MODAL ================= */}
+      <AnimatePresence>
+        {lightboxIndex !== null && galleryList[lightboxIndex] && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 bg-slate-950/95 backdrop-blur-md flex flex-col justify-between p-3 sm:p-6 select-none"
+            onClick={handleCloseLightbox}
+          >
+            {/* Top Bar: Title, Counter & Close Button */}
+            <div
+              className="flex items-center justify-between z-10 w-full max-w-6xl mx-auto py-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="flex items-center gap-3">
+                <span className="px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-white text-xs font-bold border border-white/20">
+                  {lightboxIndex + 1} / {galleryList.length}
+                </span>
+                <span className="text-white/90 text-xs sm:text-sm font-semibold truncate max-w-xs sm:max-w-md">
+                  {galleryList[lightboxIndex].caption}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCloseLightbox}
+                  className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/25 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-105 active:scale-95 shadow-md"
+                  title="Close (Esc)"
+                  aria-label="Close Preview"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Center Area: Left Nav Button + Image Viewport + Right Nav Button */}
+            <div
+              className="relative flex-1 flex items-center justify-center w-full max-w-6xl mx-auto my-2 min-h-0"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Previous Image Button (Left) */}
+              {galleryList.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handlePrevImage}
+                  className="absolute left-2 sm:left-4 z-20 w-12 h-12 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-2xl backdrop-blur-sm"
+                  title="Previous image (Left Arrow)"
+                  aria-label="Previous Image"
+                >
+                  <ChevronLeft className="h-6 w-6" />
+                </button>
+              )}
+
+              {/* Main Active Image with Smooth Motion */}
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={lightboxIndex}
+                  initial={{ opacity: 0, scale: 0.96 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.96 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full h-full flex items-center justify-center p-2"
+                >
+                  <img
+                    src={galleryList[lightboxIndex].url}
+                    alt={galleryList[lightboxIndex].caption}
+                    className="max-h-[72vh] max-w-full object-contain rounded-xl shadow-2xl drop-shadow-2xl border border-white/10"
+                  />
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Next Image Button (Right) */}
+              {galleryList.length > 1 && (
+                <button
+                  type="button"
+                  onClick={handleNextImage}
+                  className="absolute right-2 sm:right-4 z-20 w-12 h-12 rounded-full bg-black/60 hover:bg-black/90 text-white flex items-center justify-center transition-all cursor-pointer border border-white/20 hover:scale-110 active:scale-95 shadow-2xl backdrop-blur-sm"
+                  title="Next image (Right Arrow)"
+                  aria-label="Next Image"
+                >
+                  <ChevronRight className="h-6 w-6" />
+                </button>
+              )}
+            </div>
+
+            {/* Bottom Thumbnail Strip for Instant Jump */}
+            {galleryList.length > 1 && (
+              <div
+                className="z-10 w-full max-w-3xl mx-auto flex items-center justify-center gap-2 overflow-x-auto py-2 custom-scrollbar"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {galleryList.map((item, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setLightboxIndex(idx)}
+                    className={`relative rounded-lg overflow-hidden shrink-0 h-12 sm:h-14 w-16 sm:w-20 transition-all border-2 cursor-pointer ${
+                      lightboxIndex === idx
+                        ? 'border-white scale-105 shadow-md ring-2 ring-blue-500'
+                        : 'border-transparent opacity-40 hover:opacity-100 hover:scale-100'
+                    }`}
+                    title={item.caption}
+                  >
+                    <img
+                      src={item.url}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
