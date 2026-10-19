@@ -15,13 +15,14 @@ import {
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   'All Articles',
   'Admissions & Cutoffs',
   'Exam Preparation',
   'Placement Insights',
   'Campus & Hostel Life',
   'College Comparisons',
+  'Scholarships & Fees',
 ]
 
 const BlogListingPage = ({ onNavigateHome, onNavigateDetail, onOpenCounseling }) => {
@@ -30,6 +31,17 @@ const BlogListingPage = ({ onNavigateHome, onNavigateDetail, onOpenCounseling })
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState(searchParams.get('search') || '')
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All Articles')
+
+  // Dynamically include any custom categories created by admin
+  const allCategories = useMemo(() => {
+    const set = new Set(DEFAULT_CATEGORIES)
+    blogs.forEach((b) => {
+      if (b.category && b.category.trim()) {
+        set.add(b.category.trim())
+      }
+    })
+    return Array.from(set)
+  }, [blogs])
 
   useEffect(() => {
     const cat = searchParams.get('category')
@@ -193,7 +205,7 @@ const BlogListingPage = ({ onNavigateHome, onNavigateDetail, onOpenCounseling })
 
           {/* Category Filter Pills */}
           <div className="mt-6 flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {CATEGORIES.map((cat) => {
+            {allCategories.map((cat) => {
               const isActive = selectedCategory === cat
               return (
                 <button

@@ -1127,6 +1127,8 @@ export const createAdminBlog = async (req, res) => {
       excerpt,
       content,
       tags,
+      seoTitle,
+      metaDescription,
       status,
     } = req.body;
 
@@ -1167,6 +1169,8 @@ export const createAdminBlog = async (req, res) => {
       excerpt: excerpt.trim(),
       content: content.trim(),
       tags: Array.isArray(tags) ? tags : typeof tags === "string" ? tags.split(",").map((t) => t.trim()).filter(Boolean) : [],
+      seoTitle: (seoTitle || "").trim(),
+      metaDescription: (metaDescription || "").trim(),
       status: status || "published",
       publishedAt: status === "draft" ? null : new Date(),
     });
@@ -1197,6 +1201,13 @@ export const updateAdminBlog = async (req, res) => {
 
     if (updatePayload.tags && typeof updatePayload.tags === "string") {
       updatePayload.tags = updatePayload.tags.split(",").map((t) => t.trim()).filter(Boolean);
+    }
+
+    if (updatePayload.seoTitle !== undefined) {
+      updatePayload.seoTitle = (updatePayload.seoTitle || "").trim();
+    }
+    if (updatePayload.metaDescription !== undefined) {
+      updatePayload.metaDescription = (updatePayload.metaDescription || "").trim();
     }
 
     if (updatePayload.authorName || updatePayload.authorRole || updatePayload.authorAvatar) {

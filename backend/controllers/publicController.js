@@ -475,11 +475,25 @@ export const getPublicLiveIntel = async (req, res) => {
 // 8. GET ALL PUBLISHED BLOGS
 export const getPublicBlogs = async (req, res) => {
   try {
-    const { category, query, limit } = req.query;
+    const { category, query, limit, exclude } = req.query;
     const filter = { status: "published" };
 
-    if (category && category !== "all" && category !== "All Categories") {
-      filter.category = category;
+    if (
+      category &&
+      category !== "all" &&
+      category !== "All" &&
+      category !== "All Categories" &&
+      category !== "All Articles"
+    ) {
+      filter.category = new RegExp(`^${category.trim()}$`, "i");
+    }
+
+    if (exclude) {
+      filter.$and = filter.$and || [];
+      filter.$and.push({ slug: { $ne: exclude } });
+      if (exclude.match(/^[0-9a-fA-F]{24}$/)) {
+        filter.$and.push({ _id: { $ne: exclude } });
+      }
     }
 
     if (query && query.trim() !== "") {
@@ -514,6 +528,8 @@ export const getPublicBlogs = async (req, res) => {
       excerpt: b.excerpt,
       content: b.content,
       tags: b.tags || [],
+      seoTitle: b.seoTitle || "",
+      metaDescription: b.metaDescription || "",
       status: b.status,
       views: b.views || 0,
       publishedAt: b.publishedAt || b.createdAt,
@@ -569,6 +585,8 @@ export const getPublicBlogDetail = async (req, res) => {
         excerpt: blog.excerpt,
         content: blog.content,
         tags: blog.tags || [],
+        seoTitle: blog.seoTitle || "",
+        metaDescription: blog.metaDescription || "",
         status: blog.status,
         views: (blog.views || 0) + 1,
         publishedAt: blog.publishedAt || blog.createdAt,

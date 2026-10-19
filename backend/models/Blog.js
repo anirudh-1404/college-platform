@@ -60,6 +60,16 @@ const blogSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    seoTitle: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+    metaDescription: {
+      type: String,
+      trim: true,
+      default: "",
+    },
     status: {
       type: String,
       enum: ["published", "draft"],

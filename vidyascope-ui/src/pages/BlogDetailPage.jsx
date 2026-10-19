@@ -16,9 +16,33 @@ import {
 import { motion } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
 
-// Helper component to render markdown/formatted blog body into beautiful typography
+// Helper component to render rich formatted blog body into beautiful typography
 const FormattedBlogContent = ({ content }) => {
   if (!content) return null
+
+  // Safely format inline elements (links, underlines, bold, italics, code, inline images)
+  const formatInline = (raw) => {
+    if (!raw) return ''
+    return raw
+      // Images: ![alt](url)
+      .replace(
+        /!\[([^\]]*)\]\(([^)]+)\)/g,
+        '<figure class="my-6 rounded-2xl overflow-hidden border border-slate-200 shadow-xs"><img src="$2" alt="$1" class="w-full max-h-[460px] object-cover" /><figcaption class="p-2.5 bg-slate-50 text-center text-xs text-slate-500 italic">$1</figcaption></figure>'
+      )
+      // Links: [text](url)
+      .replace(
+        /\[([^\]]+)\]\(([^)]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline font-semibold hover:text-blue-800 transition-colors inline-flex items-center gap-0.5">$1</a>'
+      )
+      // Bold: **text**
+      .replace(/\*\*([^*]+)\*\*/g, '<strong class="font-bold text-slate-900">$1</strong>')
+      // Italic: *text*
+      .replace(/\*([^*]+)\*/g, '<em class="italic text-slate-800">$1</em>')
+      // Underline: <u>text</u>
+      .replace(/<u>(.*?)<\/u>/gi, '<u class="underline decoration-purple-600 decoration-2 underline-offset-2 font-medium">$1</u>')
+      // Inline Code: `code`
+      .replace(/`([^`]+)`/g, '<code class="bg-slate-100 px-1.5 py-0.5 rounded text-xs font-mono text-purple-700 border border-slate-200">$1</code>')
+  }
 
   // Split content into paragraphs/blocks by double newline
   const blocks = content.split(/\n\n+/)
@@ -27,13 +51,14 @@ const FormattedBlogContent = ({ content }) => {
     <div className="space-y-6 text-slate-700 leading-relaxed text-sm sm:text-base">
       {blocks.map((block, idx) => {
         const trimmed = block.trim()
+        if (!trimmed) return null
 
         // H2 heading
         if (trimmed.startsWith('## ')) {
           return (
             <h2
               key={idx}
-              className="font-serif text-xl sm:text-2xl font-bold text-slate-900 pt-6 pb-2 border-b border-slate-100 flex items-center gap-2"
+              className="font-serif text-xl sm:text-2xl font-bold text-slate-900 pt-6 pb-2 border-b border-slate-100 flex items-center gap-2.5"
             >
               <span className="w-1.5 h-6 bg-brand-primary rounded-full inline-block" />
               <span>{trimmed.replace(/^##\s+/, '')}</span>
@@ -59,10 +84,24 @@ const FormattedBlogContent = ({ content }) => {
           return (
             <div
               key={idx}
-              className="my-5 p-4 sm:p-5 bg-blue-50/70 border-l-4 border-brand-primary rounded-r-xl text-slate-800 text-sm italic font-medium"
-            >
-              {quoteText}
-            </div>
+              className="my-5 p-4 sm:p-5 bg-purple-50/70 border-l-4 border-purple-600 rounded-r-xl text-slate-800 text-sm sm:text-base italic font-medium leading-relaxed"
+              dangerouslySetInnerHTML={{ __html: formatInline(quoteText) }}
+            />
+          )
+        }
+
+        // Divider
+        if (trimmed === '---' || trimmed === '***') {
+          return <hr key={idx} className="my-8 border-slate-200" />
+        }
+
+        // Code block
+        if (trimmed.startsWith('```')) {
+          const code = trimmed.replace(/^```[a-z]*\n?/, '').replace(/\n?```$/, '')
+          return (
+            <pre key={idx} className="bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto text-xs font-mono my-4">
+              <code>{code}</code>
+            </pre>
           )
         }
 
@@ -71,47 +110,44 @@ const FormattedBlogContent = ({ content }) => {
           const items = trimmed.split(/\n[-*]\s+/).filter(Boolean)
           return (
             <ul key={idx} className="space-y-2.5 my-4 pl-1">
-              {items.map((item, itemIdx) => {
-                const cleaned = item.replace(/^[-*]\s*/, '').trim()
-                // Parse bold **text**
-                const parts = cleaned.split(/(\*\*.*?\*\*)/g)
-                return (
-                  <li key={itemIdx} className="flex items-start gap-2.5 text-sm sm:text-base text-slate-700">
-                    <span className="w-2 h-2 rounded-full bg-brand-primary mt-2 shrink-0" />
-                    <span>
-                      {parts.map((p, pIdx) => {
-                        if (p.startsWith('**') && p.endsWith('**')) {
-                          return (
-                            <strong key={pIdx} className="font-semibold text-slate-900">
-                              {p.slice(2, -2)}
-                            </strong>
-                          )
-                        }
-                        return p
-                      })}
-                    </span>
-                  </li>
-                )
-              })}
+              {items.map((item, itemIdx) => (
+                <li key={itemIdx} className="flex items-start gap-2.5 text-sm sm:text-base text-slate-700">
+                  <span className="w-2 h-2 rounded-full bg-brand-primary mt-2 shrink-0" />
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: formatInline(item.replace(/^[-*]\s*/, '').trim()),
+                    }}
+                  />
+                </li>
+              ))}
             </ul>
           )
         }
 
-        // Standard Paragraph with bold support
-        const parts = trimmed.split(/(\*\*.*?\*\*)/g)
+        // Ordered list
+        if (/^\d+\.\s/.test(trimmed)) {
+          const items = trimmed.split(/\n\d+\.\s+/).filter(Boolean)
+          return (
+            <ol key={idx} className="list-decimal list-inside space-y-2 my-4 text-sm sm:text-base text-slate-700">
+              {items.map((item, itemIdx) => (
+                <li
+                  key={itemIdx}
+                  dangerouslySetInnerHTML={{
+                    __html: formatInline(item.replace(/^\d+\.\s*/, '').trim()),
+                  }}
+                />
+              ))}
+            </ol>
+          )
+        }
+
+        // Standard Paragraph with inline formatting
         return (
-          <p key={idx} className="text-slate-700 leading-relaxed font-normal">
-            {parts.map((p, pIdx) => {
-              if (p.startsWith('**') && p.endsWith('**')) {
-                return (
-                  <strong key={pIdx} className="font-semibold text-slate-900">
-                    {p.slice(2, -2)}
-                  </strong>
-                )
-              }
-              return p
-            })}
-          </p>
+          <p
+            key={idx}
+            className="text-slate-700 leading-relaxed font-normal"
+            dangerouslySetInnerHTML={{ __html: formatInline(trimmed) }}
+          />
         )
       })}
     </div>
@@ -157,20 +193,75 @@ const BlogDetailPage = ({ onNavigateHome, onNavigateListing, onOpenCounseling, o
     }
   }, [slug])
 
-  // Fetch related blogs
+  // Dynamic Document Title and SEO Meta Description
   useEffect(() => {
+    if (!blog) return
+    const originalTitle = document.title
+    const effectiveTitle = blog.seoTitle || `${blog.title} | VidyaScope`
+    document.title = effectiveTitle
+
+    let metaDesc = document.querySelector('meta[name="description"]')
+    const originalMeta = metaDesc ? metaDesc.getAttribute('content') : ''
+    const effectiveMeta = blog.metaDescription || blog.excerpt || ''
+
+    if (effectiveMeta) {
+      if (!metaDesc) {
+        metaDesc = document.createElement('meta')
+        metaDesc.setAttribute('name', 'description')
+        document.head.appendChild(metaDesc)
+      }
+      metaDesc.setAttribute('content', effectiveMeta)
+    }
+
+    return () => {
+      document.title = originalTitle
+      if (metaDesc && originalMeta) {
+        metaDesc.setAttribute('content', originalMeta)
+      }
+    }
+  }, [blog])
+
+  // Fetch related blogs according to the blog's category
+  useEffect(() => {
+    if (!blog?.category) return
     const fetchRelated = async () => {
       try {
-        const all = await publicApi.getBlogs({ limit: 4 })
-        if (Array.isArray(all)) {
-          setRelatedBlogs(all.filter((b) => (b.slug || b.id) !== slug).slice(0, 3))
+        // First try to fetch matching articles from same category
+        const params = {
+          category: blog.category,
+          limit: 6,
+          exclude: blog._id || blog.id || slug,
         }
+        const data = await publicApi.getBlogs(params)
+        let list = Array.isArray(data)
+          ? data.filter(
+              (b) =>
+                (b.slug || b._id || b.id) !== slug &&
+                (b.slug || b._id || b.id) !== (blog._id || blog.id)
+            )
+          : []
+
+        // If fewer than 3 in same category, supplement with recent blogs
+        if (list.length < 3) {
+          const fallback = await publicApi.getBlogs({ limit: 6 })
+          if (Array.isArray(fallback)) {
+            const extra = fallback.filter(
+              (b) =>
+                (b.slug || b._id || b.id) !== slug &&
+                (b.slug || b._id || b.id) !== (blog._id || blog.id) &&
+                !list.some((existing) => (existing.slug || existing._id) === (b.slug || b._id))
+            )
+            list = [...list, ...extra]
+          }
+        }
+
+        setRelatedBlogs(list.slice(0, 3))
       } catch (err) {
         console.error('Failed to load related blogs:', err)
       }
     }
     fetchRelated()
-  }, [slug])
+  }, [blog, slug])
 
   const handleShare = () => {
     if (navigator.clipboard) {
@@ -462,11 +553,16 @@ const BlogDetailPage = ({ onNavigateHome, onNavigateListing, onOpenCounseling, o
           <div className="mt-16 pt-12 border-t border-slate-200">
             <div className="flex items-center justify-between mb-8">
               <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200">
+                    Category: {blog.category}
+                  </span>
+                </div>
                 <h2 className="font-serif text-2xl font-bold text-slate-900">
                   Related Insights & Guides
                 </h2>
                 <p className="text-xs text-slate-500 mt-1">
-                  Keep reading more articles handpicked by our academic mentors.
+                  More articles from &ldquo;{blog.category}&rdquo; handpicked for you.
                 </p>
               </div>
               <button
