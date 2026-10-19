@@ -1105,8 +1105,8 @@ const CollegeDetailPage = ({
             </motion.div>
           </AnimatePresence>
 
-          {/* Right 1 Column: Admissions & Deadlines Card (Clean Light Styling) */}
-          <div className="space-y-5">
+          {/* Right 1 Column: Admissions & Deadlines Card (Sticky on Scroll) */}
+          <div className="lg:sticky lg:top-32 space-y-5 self-start z-20">
             <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
               <div>
                 <h3 className="font-serif text-lg font-bold text-slate-900">

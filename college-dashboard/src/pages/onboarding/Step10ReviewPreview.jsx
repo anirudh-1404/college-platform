@@ -331,7 +331,7 @@ const Step10ReviewPreview = ({
 
         {/* Main Content Area */}
         <div className="p-4 sm:p-8">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
             
             {/* Left 2 Columns: Active Tab Content */}
             <div className="lg:col-span-2 space-y-6">
@@ -840,8 +840,8 @@ const Step10ReviewPreview = ({
 
             </div>
 
-            {/* Right 1 Column: Admissions & Deadlines Sidebar (Clean Light Card) */}
-            <div className="space-y-5">
+            {/* Right 1 Column: Admissions & Deadlines Sidebar (Sticky on Scroll) */}
+            <div className="lg:sticky lg:top-24 space-y-5 self-start z-20">
               <div className="bg-white border border-slate-200/90 rounded-2xl p-5 sm:p-6 shadow-sm space-y-4">
                 <div>
                   <h4 className="font-serif text-lg font-bold text-slate-900">
