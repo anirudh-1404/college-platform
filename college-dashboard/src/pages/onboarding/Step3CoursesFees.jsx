@@ -1,24 +1,23 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
 import { Plus, Edit2, Trash2, Copy, GraduationCap } from 'lucide-react'
-import { FormField, TextInput, Textarea, SelectInput, TagInput } from '../../components/common/FormControls'
+import { FormField, TextInput, Textarea, TagInput } from '../../components/common/FormControls'
 import { ConfirmationModal } from '../../components/common/ConfirmationModal'
-import { DEGREE_LEVEL_OPTIONS } from '../../data/collegeModel'
 
 const EMPTY_COURSE = {
   id: '',
   name: '',
-  degreeLevel: 'Undergraduate (B.Tech)',
-  duration: '4 Years (8 Semesters)',
-  fee: '₹8.00 Lakhs',
-  annualFee: '₹2.00 Lakhs/Yr',
-  totalFeeNumeric: 8.0,
-  seatIntake: 60,
-  eligibility: '10+2 with Physics, Chemistry, Math (min 60% aggregate) + National Entrance Rank',
-  avgSalary: '₹12.0 LPA',
-  highestSalary: '₹35.0 LPA',
-  overview: 'Comprehensive degree program integrating foundational engineering theory with practical industry applications.',
-  admissionProcess: 'Centralized state/national counseling based on entrance exam merit rank.',
+  degreeLevel: '',
+  duration: '',
+  fee: '',
+  annualFee: '',
+  totalFeeNumeric: 0,
+  seatIntake: '',
+  eligibility: '',
+  avgSalary: '',
+  highestSalary: '',
+  overview: '',
+  admissionProcess: '',
   specializations: [],
   careerOutcomes: [],
 }
@@ -84,7 +83,7 @@ const Step3CoursesFees = ({ collegeData, onChange, isReadOnly = false }) => {
   const validate = () => {
     const errs = {}
     if (!courseFormData.name.trim()) errs.name = 'Course name is required.'
-    if (!courseFormData.degreeLevel) errs.degreeLevel = 'Degree level is required.'
+    if (!courseFormData.degreeLevel || !String(courseFormData.degreeLevel).trim()) errs.degreeLevel = 'Degree level is required.'
     if (!courseFormData.duration.trim()) errs.duration = 'Duration is required.'
     if (!courseFormData.fee.trim()) errs.fee = 'Total fee string is required.'
     if (!courseFormData.seatIntake || courseFormData.seatIntake <= 0) {
@@ -305,11 +304,16 @@ const Step3CoursesFees = ({ collegeData, onChange, isReadOnly = false }) => {
               </FormField>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <FormField label="Degree Level / Classification" required error={errors.degreeLevel}>
-                  <SelectInput
+                <FormField
+                  label="Degree Level / Classification"
+                  required
+                  error={errors.degreeLevel}
+                  helperText="e.g. Undergraduate (BCA), Postgraduate (MBA), Diploma"
+                >
+                  <TextInput
                     value={courseFormData.degreeLevel}
                     onChange={(e) => setCourseFormData({ ...courseFormData, degreeLevel: e.target.value })}
-                    options={DEGREE_LEVEL_OPTIONS}
+                    placeholder="e.g. Undergraduate (BCA)"
                   />
                 </FormField>
 
