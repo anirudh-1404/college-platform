@@ -5,6 +5,7 @@ import { Exam } from "../models/Exam.js";
 import { Inquiry } from "../models/Inquiry.js";
 import { LiveIntel } from "../models/LiveIntel.js";
 import { Blog } from "../models/Blog.js";
+import { sendInquiryNotificationEmail } from "../utils/emailService.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
 export const getPublicColleges = async (req, res) => {
@@ -441,6 +442,21 @@ export const createPublicInquiry = async (req, res) => {
       source: source || "counseling_modal",
       status: "new",
     });
+
+    // Dispatch email notification to student@vidyascope.com (non-blocking)
+    sendInquiryNotificationEmail({
+      studentName: newInquiry.studentName,
+      phone: newInquiry.phone,
+      email: newInquiry.email,
+      stream: newInquiry.stream,
+      targetScore: newInquiry.targetScore,
+      preferredLocation: newInquiry.preferredLocation,
+      budgetRange: newInquiry.budgetRange,
+      admissionYear: newInquiry.admissionYear,
+      collegeName: newInquiry.collegeName,
+      source: newInquiry.source,
+      notes: newInquiry.notes,
+    }).catch((err) => console.error("sendInquiryNotificationEmail error:", err));
 
     return res.status(201).json({
       success: true,

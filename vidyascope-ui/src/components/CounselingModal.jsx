@@ -46,7 +46,7 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
         phone: formData.phone,
         stream: formData.stream,
         admissionYear: formData.targetYear,
-        source: context?.portalUrl ? 'brochure_download' : 'counseling_modal',
+        source: context?.source || (context?.portalUrl ? 'brochure_download' : (context?.isCallback ? 'request_call_back' : 'get_free_advice')),
         collegeName: context?.collegeName,
       })
       setSubmitted(true)

@@ -54,7 +54,6 @@ const inquirySchema = new mongoose.Schema(
     },
     source: {
       type: String,
-      enum: ["counseling_modal", "counseling_page", "college_profile", "brochure_download"],
       default: "counseling_modal",
     },
     status: {

@@ -490,7 +490,7 @@ const App = () => {
       {/* Centralized Footer */}
       <Footer
         onNavigate={handleNavigate}
-        onOpenCounseling={() => handleOpenCounseling()}
+        onOpenCounseling={handleOpenCounseling}
       />
 
       {/* Global Quick Counseling Lead Modal */}
