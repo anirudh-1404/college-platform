@@ -15,6 +15,14 @@ export class ErrorBoundary extends React.Component {
     console.error('Admin ErrorBoundary caught an error:', error, errorInfo)
   }
 
+  componentDidUpdate(prevProps) {
+    if (this.props.resetKey !== undefined && prevProps.resetKey !== this.props.resetKey) {
+      if (this.state.hasError) {
+        this.setState({ hasError: false, error: null })
+      }
+    }
+  }
+
   handleReset = () => {
     this.setState({ hasError: false, error: null })
     if (this.props.onReset) {

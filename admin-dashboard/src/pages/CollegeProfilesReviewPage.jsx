@@ -17,6 +17,7 @@ import {
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal } from '../components/common/AdminModal'
+import ErrorBoundary from '../components/common/ErrorBoundary'
 import { CollegeReviewStudio } from '../components/review/CollegeReviewStudio'
 import { AdminCollegeEditModal } from '../components/modals/AdminCollegeEditModal'
 import { adminService } from '../data/adminService'
@@ -431,16 +432,18 @@ const CollegeProfilesReviewPage = ({
 
       {/* ================= FULL-SCREEN / EXPANSIVE REVIEW STUDIO ================= */}
       {reviewingProfile && (
-        <CollegeReviewStudio
-          profile={reviewingProfile}
-          onClose={() => setReviewingProfile(null)}
-          onApproveAndPublish={() => setApprovePublishModalOpen(true)}
-          onRequestChanges={() => setRequestChangesModalOpen(true)}
-          onUnpublish={() => setUnpublishModalOpen(true)}
-          onRefreshProfile={handleRefreshCurrentProfile}
-          onEditCollege={(col) => setEditingCollege(col || reviewingProfile)}
-          isRefreshing={isRefreshingProfile}
-        />
+        <ErrorBoundary onReset={() => setReviewingProfile(null)}>
+          <CollegeReviewStudio
+            profile={reviewingProfile}
+            onClose={() => setReviewingProfile(null)}
+            onApproveAndPublish={() => setApprovePublishModalOpen(true)}
+            onRequestChanges={() => setRequestChangesModalOpen(true)}
+            onUnpublish={() => setUnpublishModalOpen(true)}
+            onRefreshProfile={handleRefreshCurrentProfile}
+            onEditCollege={(col) => setEditingCollege(col || reviewingProfile)}
+            isRefreshing={isRefreshingProfile}
+          />
+        </ErrorBoundary>
       )}
 
       {/* ================= MODALS ================= */}

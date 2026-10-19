@@ -21,6 +21,7 @@ import {
   Image as ImageIcon,
   Trash2,
   Plus,
+  ExternalLink,
 } from 'lucide-react'
 import AdminStatusBadge from '../common/AdminStatusBadge'
 import AdminImageUploader from '../common/AdminImageUploader'

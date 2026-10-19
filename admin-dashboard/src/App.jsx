@@ -14,6 +14,7 @@ import ContactInquiriesPage from './pages/ContactInquiriesPage'
 import LiveIntelManagementPage from './pages/LiveIntelManagementPage'
 import BlogsManagementPage from './pages/BlogsManagementPage'
 import SettingsPage from './pages/SettingsPage'
+import ErrorBoundary from './components/common/ErrorBoundary'
 import { adminService } from './data/adminService'
 import { adminAuthService } from './data/adminAuthService'
 
@@ -249,6 +250,7 @@ function App() {
 
         {/* Dynamic Page Views */}
         <main className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto">
+          <ErrorBoundary resetKey={activePage}>
           {activePage === 'overview' && (
             <AdminOverviewPage
               analytics={analytics}
@@ -356,6 +358,7 @@ function App() {
           {activePage === 'settings' && (
             <SettingsPage currentUser={authState.user} />
           )}
+          </ErrorBoundary>
         </main>
       </div>
     </div>

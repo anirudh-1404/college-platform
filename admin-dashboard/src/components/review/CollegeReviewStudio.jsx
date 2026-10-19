@@ -41,6 +41,7 @@ import {
   Star,
   Percent,
   Edit3,
+  Search,
 } from 'lucide-react'
 import AdminStatusBadge from '../common/AdminStatusBadge'
 import ErrorBoundary from '../common/ErrorBoundary'
@@ -170,16 +171,24 @@ export const CollegeReviewStudio = ({
   const hostel = profile.hostelDetails || {}
   const costs = profile.hiddenCosts || {}
 
+  const parseNumericCost = (val, fallback = 0) => {
+    if (typeof val === 'number') return isNaN(val) ? fallback : val
+    if (!val) return fallback
+    const cleaned = String(val).replace(/[^0-9.]/g, '')
+    const num = parseFloat(cleaned)
+    return isNaN(num) ? fallback : num
+  }
+
   const annualTotalCost = useMemo(() => {
-    const t = Number(costs.tuitionFeePerYear) || 0
-    const h = Number(costs.hostelRentYearly) || 0
-    const m = Number(costs.messChargesYearly) || 0
-    const e = (Number(costs.examinationMiscYearly) || 0) * 2
+    const t = parseNumericCost(costs.tuitionFeePerYear, 0)
+    const h = parseNumericCost(costs.hostelRentYearly, 0)
+    const m = parseNumericCost(costs.messChargesYearly, 0)
+    const e = parseNumericCost(costs.examinationMiscYearly, 0) * 2
     return t + h + m + e
   }, [costs])
 
   const calculated4YrExpense = useMemo(() => {
-    const caution = Number(costs.cautionDepositOneTime) || 0
+    const caution = parseNumericCost(costs.cautionDepositOneTime, 0)
     return ((annualTotalCost * calcTenure + caution) / 100000).toFixed(2)
   }, [annualTotalCost, calcTenure, costs.cautionDepositOneTime])
 
@@ -267,23 +276,33 @@ export const CollegeReviewStudio = ({
   const filteredCourses = useMemo(() => {
     if (!courseSearch.trim()) return courses
     const q = courseSearch.toLowerCase()
-    return courses.filter(
-      (c) =>
-        c.name?.toLowerCase().includes(q) ||
-        c.degreeLevel?.toLowerCase().includes(q) ||
-        c.eligibility?.toLowerCase().includes(q)
-    )
+    return courses.filter((c) => {
+      if (!c) return false
+      const name = typeof c === 'string' ? c : (c.name || '')
+      const level = typeof c === 'object' ? (c.degreeLevel || '') : ''
+      const elig = typeof c === 'object' ? (c.eligibility || '') : ''
+      return (
+        name.toLowerCase().includes(q) ||
+        level.toLowerCase().includes(q) ||
+        elig.toLowerCase().includes(q)
+      )
+    })
   }, [courses, courseSearch])
 
   const filteredCutoffs = useMemo(() => {
     if (!cutoffSearch.trim()) return cutoffs
     const q = cutoffSearch.toLowerCase()
-    return cutoffs.filter(
-      (c) =>
-        c.exam?.toLowerCase().includes(q) ||
-        c.course?.toLowerCase().includes(q) ||
-        c.quota?.toLowerCase().includes(q)
-    )
+    return cutoffs.filter((c) => {
+      if (!c) return false
+      const exam = typeof c === 'string' ? c : (c.exam || '')
+      const course = typeof c === 'object' ? (c.course || '') : ''
+      const quota = typeof c === 'object' ? (c.quota || '') : ''
+      return (
+        exam.toLowerCase().includes(q) ||
+        course.toLowerCase().includes(q) ||
+        quota.toLowerCase().includes(q)
+      )
+    })
   }, [cutoffs, cutoffSearch])
 
   return (
@@ -555,7 +574,7 @@ export const CollegeReviewStudio = ({
 
               {/* RIGHT MAIN CANVAS: Active Step Detailed Inspection */}
               <main className="flex-1 bg-slate-50 overflow-y-auto p-4 sm:p-6 custom-scrollbar space-y-6">
-                <ErrorBoundary>
+                <ErrorBoundary key={activeStep} resetKey={activeStep}>
                 {/* ---------------- STEP 1: BASIC INFORMATION ---------------- */}
                 {activeStep === 1 && (
                   <div className="space-y-6 max-w-5xl">
@@ -1321,26 +1340,26 @@ export const CollegeReviewStudio = ({
                             <tr>
                               <td className="py-2.5 px-4 font-bold text-slate-900">Tuition Fee</td>
                               <td className="py-2.5 px-4 text-slate-500">Per Academic Year</td>
-                              <td className="py-2.5 px-4 font-bold text-[#033C8D]">₹{Number(costs.tuitionFeePerYear || 200000).toLocaleString('en-IN')}</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((Number(costs.tuitionFeePerYear || 200000) * 4) / 100000).toFixed(2)} L</td>
+                              <td className="py-2.5 px-4 font-bold text-[#033C8D]">₹{parseNumericCost(costs.tuitionFeePerYear, 200000).toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((parseNumericCost(costs.tuitionFeePerYear, 200000) * 4) / 100000).toFixed(2)} L</td>
                             </tr>
                             <tr>
                               <td className="py-2.5 px-4 font-bold text-slate-900">Hostel Room Rent</td>
                               <td className="py-2.5 px-4 text-slate-500">Per Academic Year</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{Number(costs.hostelRentYearly || 45000).toLocaleString('en-IN')}</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((Number(costs.hostelRentYearly || 45000) * 4) / 100000).toFixed(2)} L</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{parseNumericCost(costs.hostelRentYearly, 45000).toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((parseNumericCost(costs.hostelRentYearly, 45000) * 4) / 100000).toFixed(2)} L</td>
                             </tr>
                             <tr>
                               <td className="py-2.5 px-4 font-bold text-slate-900">Mess / Dining Charges</td>
                               <td className="py-2.5 px-4 text-slate-500">Per Academic Year</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{Number(costs.messChargesYearly || 40000).toLocaleString('en-IN')}</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((Number(costs.messChargesYearly || 40000) * 4) / 100000).toFixed(2)} L</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{parseNumericCost(costs.messChargesYearly, 40000).toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((parseNumericCost(costs.messChargesYearly, 40000) * 4) / 100000).toFixed(2)} L</td>
                             </tr>
                             <tr>
                               <td className="py-2.5 px-4 font-bold text-slate-900">One-Time Caution Deposit</td>
                               <td className="py-2.5 px-4 text-slate-500">One-Time (Refundable)</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{Number(costs.cautionDepositOneTime || 10000).toLocaleString('en-IN')}</td>
-                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((Number(costs.cautionDepositOneTime || 10000)) / 100000).toFixed(2)} L</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-700">₹{parseNumericCost(costs.cautionDepositOneTime, 10000).toLocaleString('en-IN')}</td>
+                              <td className="py-2.5 px-4 font-bold text-slate-900">₹{((parseNumericCost(costs.cautionDepositOneTime, 10000)) / 100000).toFixed(2)} L</td>
                             </tr>
                           </tbody>
                         </table>
