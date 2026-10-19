@@ -17,9 +17,11 @@ import {
   Sparkles,
   Radio,
   BookOpen,
+  Globe,
   X,
 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
+import { usePortalUrls } from '../../data/portalNavigation'
 
 const AdminSidebar = ({
   activePage,
@@ -33,6 +35,7 @@ const AdminSidebar = ({
   isMobileOpen,
   onCloseMobile,
 }) => {
+  const { publicWebsiteUrl, collegePortalUrl } = usePortalUrls()
   const navGroups = [
     {
       title: 'OVERVIEW',
@@ -238,17 +241,30 @@ const AdminSidebar = ({
           </nav>
         </div>
 
-        {/* Bottom Section: Public Site Link */}
-        <div className="p-3.5 border-t border-slate-100">
+        {/* Bottom Section: External Platform Navigation */}
+        <div className="p-3 border-t border-slate-100 space-y-1">
           <a
-            href="http://localhost:5173"
+            href={publicWebsiteUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-100/70 transition-colors cursor-pointer group"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-[#033C8D] hover:bg-slate-50 transition-colors cursor-pointer group"
           >
             <div className="flex items-center gap-2 min-w-0">
-              <ArrowLeft className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-700 transition-transform group-hover:-translate-x-0.5" />
-              <span className="truncate">Back to Public Site</span>
+              <Globe className="h-3.5 w-3.5 text-slate-400 group-hover:text-[#033C8D] transition-colors" />
+              <span className="truncate">Public Website</span>
+            </div>
+            <ExternalLink className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600" />
+          </a>
+
+          <a
+            href={collegePortalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-purple-700 hover:bg-slate-50 transition-colors cursor-pointer group"
+          >
+            <div className="flex items-center gap-2 min-w-0">
+              <Shield className="h-3.5 w-3.5 text-slate-400 group-hover:text-purple-600 transition-colors" />
+              <span className="truncate">College Portal</span>
             </div>
             <ExternalLink className="h-3.5 w-3.5 text-slate-400 group-hover:text-slate-600" />
           </a>

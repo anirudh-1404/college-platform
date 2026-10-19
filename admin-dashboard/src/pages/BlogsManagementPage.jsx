@@ -30,6 +30,7 @@ import {
   Edit3,
 } from 'lucide-react'
 import { adminService } from '../data/adminService'
+import { usePortalUrls } from '../data/portalNavigation'
 
 const BLOG_CATEGORIES = [
   'Admissions & Cutoffs',
@@ -168,6 +169,7 @@ const AdminBlogPreview = ({ content, title, category, coverImage, authorName, re
 }
 
 const BlogsManagementPage = () => {
+  const { publicWebsiteUrl } = usePortalUrls()
   const [blogs, setBlogs] = useState([])
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
@@ -614,7 +616,7 @@ const BlogsManagementPage = () => {
                     <td className="py-3.5 px-4 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1">
                         <a
-                          href={`http://localhost:5173/blogs/${b.slug || b._id || b.id}`}
+                          href={`${publicWebsiteUrl}/blogs/${b.slug || b._id || b.id}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="p-1.5 text-slate-400 hover:text-purple-600 hover:bg-purple-50 rounded-md transition-colors"

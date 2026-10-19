@@ -10,6 +10,7 @@ import {
   User,
   CheckCircle2,
 } from 'lucide-react'
+import { usePortalUrls } from '../../data/portalNavigation'
 
 const AdminTopBar = ({
   pageTitle = 'Overview',
@@ -19,6 +20,7 @@ const AdminTopBar = ({
   onLogout,
   onSearch,
 }) => {
+  const { publicWebsiteUrl, collegePortalUrl } = usePortalUrls()
   const [searchValue, setSearchValue] = useState('')
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
@@ -121,6 +123,31 @@ const AdminTopBar = ({
           )}
         </div>
 
+        {/* Quick Portal Switcher Pills (Visible on Desktop / Tablet) */}
+        <div className="hidden sm:flex items-center gap-1.5 bg-slate-50 border border-slate-200/80 p-1 rounded-xl">
+          <a
+            href={publicWebsiteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#033C8D] hover:bg-white transition-all shadow-2xs"
+            title="Open User Discovery Platform"
+          >
+            <Globe className="h-3.5 w-3.5 text-[#033C8D]" />
+            <span>Public Website</span>
+          </a>
+
+          <a
+            href={collegePortalUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-700 hover:text-purple-700 hover:bg-white transition-all shadow-2xs"
+            title="Open College CMS Portal"
+          >
+            <Shield className="h-3.5 w-3.5 text-purple-600" />
+            <span>College Portal</span>
+          </a>
+        </div>
+
         {/* Admin Badge Tag in TopBar */}
         <span className="inline-flex items-center text-[10px] font-extrabold uppercase tracking-wider bg-[#EBF2FA] text-[#033C8D] border border-[#033C8D]/20 px-2.5 py-1 rounded-md select-none">
           Admin
@@ -165,17 +192,17 @@ const AdminTopBar = ({
 
               <div className="py-1">
                 <a
-                  href="http://localhost:5173"
+                  href={publicWebsiteUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors"
                 >
-                  <Globe className="h-3.5 w-3.5 text-slate-400" />
+                  <Globe className="h-3.5 w-3.5 text-[#033C8D]" />
                   <span>Public Website</span>
                 </a>
 
                 <a
-                  href="http://localhost:5174"
+                  href={collegePortalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2 px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 transition-colors"

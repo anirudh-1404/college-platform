@@ -11,8 +11,10 @@ import {
   Globe,
   Database,
 } from 'lucide-react'
+import { usePortalUrls } from '../data/portalNavigation'
 
 const SettingsPage = ({ currentUser }) => {
+  const { publicWebsiteUrl, collegePortalUrl } = usePortalUrls()
   const [activeTab, setActiveTab] = useState('general')
   const [isSaved, setIsSaved] = useState(false)
 
@@ -204,14 +206,14 @@ const SettingsPage = ({ currentUser }) => {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Public Web App</span>
                 <p className="font-mono text-xs text-slate-800">
-                  http://localhost:5173
+                  {publicWebsiteUrl}
                 </p>
               </div>
 
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">College Onboarding Portal</span>
                 <p className="font-mono text-xs text-slate-800">
-                  http://localhost:5174
+                  {collegePortalUrl}
                 </p>
               </div>
 
