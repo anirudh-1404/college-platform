@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Building2, Mail, Lock, User, Briefcase, Phone, ArrowRight, ShieldCheck } from 'lucide-react'
+import { Building2, Mail, Lock, User, Briefcase, Phone, ArrowRight, ShieldCheck, AlertCircle } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
 import { FormField, TextInput } from '../../components/common/FormControls'
 import { DocumentUploader } from '../../components/common/FileUpload'
 import { authService } from '../../data/authService'
+import OtpVerificationScreen from './OtpVerificationScreen'
 
 const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
   const [formData, setFormData] = useState({
@@ -18,6 +19,9 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
     proofFile: null,
   })
 
+  const [step, setStep] = useState('form') // 'form' | 'otp'
+  const [pendingEmail, setPendingEmail] = useState('')
+  const [submitError, setSubmitError] = useState('')
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -53,20 +57,46 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+    setSubmitError('')
     if (!validate()) return
 
     setIsSubmitting(true)
     try {
       const res = await authService.registerCollege(formData)
-      if (res.success) {
+      if (res.requireOtp) {
+        setPendingEmail(res.email || formData.email)
+        setStep('otp')
+      } else if (res.success) {
         onRegistrationSuccess(res.user)
       }
     } catch (err) {
-      console.error(err)
-      alert('Registration failed. Please try again.')
+      console.error('Registration error:', err)
+      setSubmitError(err.message || 'Registration failed. Please check your details and try again.')
     } finally {
       setIsSubmitting(false)
     }
+  }
+
+  const handleVerifyOtp = async (code) => {
+    const res = await authService.verifyRegisterOtp({
+      email: pendingEmail || formData.email,
+      otp: code,
+    })
+    if (res.success) {
+      onRegistrationSuccess(res.user)
+    }
+  }
+
+  if (step === 'otp') {
+    return (
+      <OtpVerificationScreen
+        email={pendingEmail || formData.email}
+        purpose="register"
+        onVerifySuccess={handleVerifyOtp}
+        onBack={() => setStep('form')}
+        resendHandler={(email, purpose) => authService.resendOtp({ email, purpose })}
+      />
+    )
   }
 
   return (
@@ -98,6 +128,13 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
               </span>
             </div>
           </div>
+
+          {submitError && (
+            <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 flex items-start gap-2.5 text-xs text-red-700 animate-in fade-in">
+              <AlertCircle className="h-4 w-4 flex-shrink-0 mt-0.5" />
+              <span>{submitError}</span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Section 1: Institution Details */}

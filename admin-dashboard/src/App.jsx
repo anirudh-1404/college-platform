@@ -93,8 +93,19 @@ function App() {
   // Auth Handlers
   const handleLogin = async (email, password) => {
     const session = await adminAuthService.login(email, password)
+    if (session.requireOtp) {
+      return session
+    }
     setAuthState(session)
     reloadData()
+    return session
+  }
+
+  const handleVerifyOtp = async (email, otp) => {
+    const session = await adminAuthService.verifyLoginOtp({ email, otp })
+    setAuthState(session)
+    reloadData()
+    return session
   }
 
   const handleLogout = async () => {
@@ -208,7 +219,7 @@ function App() {
 
   // If not logged in, render Admin Login screen
   if (!authState.isAuthenticated) {
-    return <AdminLoginPage onLoginSuccess={handleLogin} />
+    return <AdminLoginPage onLoginSuccess={handleLogin} onVerifyOtp={handleVerifyOtp} />
   }
 
   return (

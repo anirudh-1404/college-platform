@@ -1,13 +1,16 @@
 import React, { useState } from 'react'
 import { AlertCircle, Lock, Mail, Eye, EyeOff, ShieldCheck, ArrowRight, Loader2 } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
+import { adminAuthService } from '../../data/adminAuthService'
+import OtpVerificationScreen from './OtpVerificationScreen'
 
-const AdminLoginPage = ({ onLoginSuccess }) => {
+const AdminLoginPage = ({ onLoginSuccess, onVerifyOtp }) => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
+  const [step, setStep] = useState('credentials') // 'credentials' | 'otp'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -19,7 +22,10 @@ const AdminLoginPage = ({ onLoginSuccess }) => {
 
     setIsLoading(true)
     try {
-      await onLoginSuccess(email.trim(), password)
+      const res = await onLoginSuccess(email.trim(), password)
+      if (res?.requireOtp) {
+        setStep('otp')
+      }
     } catch (err) {
       setErrorMsg(
         err.message && !err.message.toLowerCase().includes('failed to fetch')
@@ -29,6 +35,23 @@ const AdminLoginPage = ({ onLoginSuccess }) => {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  const handleVerifyOtp = async (code) => {
+    if (onVerifyOtp) {
+      await onVerifyOtp(email.trim(), code)
+    }
+  }
+
+  if (step === 'otp') {
+    return (
+      <OtpVerificationScreen
+        email={email.trim()}
+        onVerifySuccess={handleVerifyOtp}
+        onBack={() => setStep('credentials')}
+        resendHandler={(em) => adminAuthService.resendOtp({ email: em, purpose: 'admin_login' })}
+      />
+    )
   }
 
   return (

@@ -58,6 +58,15 @@ export const adminAuthService = {
         throw new Error(data.message || 'Invalid credentials')
       }
 
+      if (data.requireOtp) {
+        return {
+          requireOtp: true,
+          email: data.email,
+          role: data.role,
+          message: data.message,
+        }
+      }
+
       if (data.token) {
         this.setToken(data.token)
       }
@@ -72,6 +81,57 @@ export const adminAuthService = {
       return session
     } catch (error) {
       console.error('adminAuthService.login error:', error)
+      throw error
+    }
+  },
+
+  async verifyLoginOtp({ email, otp }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/verify-login-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid verification code')
+      }
+
+      if (data.token) {
+        this.setToken(data.token)
+      }
+
+      const session = {
+        isAuthenticated: true,
+        user: data.user,
+      }
+
+      localStorage.setItem(STORAGE_KEY_ADMIN_AUTH, JSON.stringify(session))
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_auth_change', { detail: session }))
+      return session
+    } catch (error) {
+      console.error('adminAuthService.verifyLoginOtp error:', error)
+      throw error
+    }
+  },
+
+  async resendOtp({ email, purpose = 'admin_login' }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, purpose }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to resend code')
+      }
+
+      return { success: true, message: data.message }
+    } catch (error) {
+      console.error('adminAuthService.resendOtp error:', error)
       throw error
     }
   },

@@ -2,7 +2,9 @@ import { User } from "../models/User.js";
 import { College } from "../models/College.js";
 import { Registration } from "../models/Registration.js";
 import { AuditLog } from "../models/AuditLog.js";
+import { Otp } from "../models/Otp.js";
 import { generateToken } from "../utils/authMiddleware.js";
+import { sendOtpEmail } from "../utils/emailService.js";
 
 // Helper to create slug
 const createSlug = (name) => {
@@ -13,7 +15,7 @@ const createSlug = (name) => {
     .replace(/^-+|-+$/g, "");
 };
 
-// 1. REGISTER COLLEGE REPRESENTATIVE
+// 1. REGISTER COLLEGE REPRESENTATIVE (Step 1: Validate Details & Dispatch Verification OTP)
 export const registerCollege = async (req, res) => {
   try {
     const {
@@ -32,12 +34,103 @@ export const registerCollege = async (req, res) => {
       return res.status(400).json({ success: false, message: "Please fill all required fields." });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
+    const cleanEmail = email.toLowerCase().trim();
+    const existingUser = await User.findOne({ email: cleanEmail });
     if (existingUser) {
       return res.status(400).json({ success: false, message: "An account with this email already exists." });
     }
 
-    let slug = createSlug(collegeName);
+    // Generate 6-Digit OTP Code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Store in Otp collection with pending registration metadata
+    await Otp.deleteMany({ email: cleanEmail, purpose: "register" });
+    await Otp.create({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose: "register",
+      metadata: {
+        collegeName,
+        email: cleanEmail,
+        password,
+        contactPerson,
+        designation: designation || "Authorized Representative",
+        phone: phone || "",
+        stream,
+        location,
+        proofDocument,
+      },
+    });
+
+    // Send Verification Email
+    await sendOtpEmail({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose: "register",
+      name: contactPerson,
+    });
+
+    return res.status(200).json({
+      success: true,
+      requireOtp: true,
+      email: cleanEmail,
+      message: "A 6-digit verification code has been sent to your institutional email.",
+    });
+  } catch (error) {
+    console.error("registerCollege error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to initiate registration." });
+  }
+};
+
+// 1B. VERIFY COLLEGE REGISTRATION OTP & COMMIT DATA
+export const verifyRegisterOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: "Email and verification code are required." });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const otpRecord = await Otp.findOne({
+      email: cleanEmail,
+      purpose: "register",
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired or is invalid. Please request a new code.",
+      });
+    }
+
+    if (otpRecord.otp !== otp.toString().trim()) {
+      otpRecord.attempts += 1;
+      if (otpRecord.attempts >= 5) {
+        await Otp.deleteOne({ _id: otpRecord._id });
+        return res.status(400).json({
+          success: false,
+          message: "Too many failed attempts. Please request a new verification code.",
+        });
+      }
+      await otpRecord.save();
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code. Please check your email and try again.",
+      });
+    }
+
+    const data = otpRecord.metadata;
+    if (!data) {
+      return res.status(400).json({ success: false, message: "Registration session expired. Please register again." });
+    }
+
+    const existingUser = await User.findOne({ email: cleanEmail });
+    if (existingUser) {
+      await Otp.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({ success: false, message: "An account with this email already exists." });
+    }
+
+    let slug = createSlug(data.collegeName);
     const existingCollege = await College.findOne({ slug });
     if (existingCollege) {
       slug = `${slug}-${Date.now().toString().slice(-4)}`;
@@ -46,43 +139,43 @@ export const registerCollege = async (req, res) => {
     // Create Initial College Document
     const newCollege = await College.create({
       slug,
-      name: collegeName,
-      shortName: collegeName.split(" ").map(w => w[0]).join("").slice(0, 10).toUpperCase() || collegeName,
-      stream,
+      name: data.collegeName,
+      shortName: data.collegeName.split(" ").map(w => w[0]).join("").slice(0, 10).toUpperCase() || data.collegeName,
+      stream: data.stream || "engineering",
       profileStatus: "draft",
       locationContact: {
-        city: location.split(",")[0]?.trim() || "",
-        state: location.split(",")[1]?.trim() || "",
-        admissionEmail: email,
-        helplineNumber: phone,
+        city: data.location?.split(",")[0]?.trim() || "",
+        state: data.location?.split(",")[1]?.trim() || "",
+        admissionEmail: data.email,
+        helplineNumber: data.phone,
       },
     });
 
     // Create User Document (Pending Verification)
     const newUser = await User.create({
-      name: contactPerson,
-      email: email.toLowerCase(),
-      password,
+      name: data.contactPerson,
+      email: data.email,
+      password: data.password,
       role: "college_admin",
       status: "pending",
       collegeId: slug,
-      collegeName,
-      designation: designation || "Authorized Representative",
-      phone: phone || "",
+      collegeName: data.collegeName,
+      designation: data.designation || "Authorized Representative",
+      phone: data.phone || "",
     });
 
     // Create Registration Record in Admin Queue
     const newRegistration = await Registration.create({
-      collegeName,
+      collegeName: data.collegeName,
       collegeId: slug,
-      email: email.toLowerCase(),
-      contactPerson,
-      designation: designation || "Authorized Representative",
-      phone: phone || "",
-      stream,
-      location,
+      email: data.email,
+      contactPerson: data.contactPerson,
+      designation: data.designation || "Authorized Representative",
+      phone: data.phone || "",
+      stream: data.stream || "engineering",
+      location: data.location || "",
       status: "pending",
-      proofDocument: proofDocument || {
+      proofDocument: data.proofDocument || {
         name: "Official_Recognition_Order.pdf",
         size: "2.4 MB",
         type: "application/pdf",
@@ -92,28 +185,32 @@ export const registerCollege = async (req, res) => {
 
     // Audit Log
     await AuditLog.create({
-      action: "New Registration Submitted",
-      target: collegeName,
-      details: `Representative ${contactPerson} registered with official email ${email}.`,
+      action: "New Registration Verified & Submitted",
+      target: data.collegeName,
+      details: `Representative ${data.contactPerson} verified email and registered ${data.collegeName}.`,
       type: "review",
     });
 
+    // Delete used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
+
     return res.status(201).json({
       success: true,
-      message: "Registration submitted successfully. Awaiting admin compliance verification.",
+      message: "Registration submitted successfully. Awaiting compliance verification.",
       user: {
         id: newUser._id,
         name: newUser.name,
         email: newUser.email,
         role: newUser.role,
         status: newUser.status,
+        accountStatus: "pending_verification",
         collegeId: newUser.collegeId,
         collegeName: newUser.collegeName,
       },
     });
   } catch (error) {
-    console.error("registerCollege error:", error);
-    return res.status(500).json({ success: false, message: error.message || "Registration failed." });
+    console.error("verifyRegisterOtp error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to verify registration code." });
   }
 };
 
@@ -166,7 +263,7 @@ export const registerAdmin = async (req, res) => {
   }
 };
 
-// 3. UNIVERSAL LOGIN (For College Reps & Admins)
+// 3. UNIVERSAL LOGIN - STEP 1 (Credentials Check & Trigger OTP)
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -175,7 +272,8 @@ export const login = async (req, res) => {
       return res.status(400).json({ success: false, message: "Email and password are required." });
     }
 
-    const user = await User.findOne({ email: email.toLowerCase() });
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
     if (!user) {
       return res.status(401).json({ success: false, message: "Invalid email or password." });
     }
@@ -189,6 +287,85 @@ export const login = async (req, res) => {
     if (user.status === "suspended") {
       return res.status(403).json({ success: false, message: "Your account has been suspended by administration." });
     }
+
+    // Generate 6-Digit OTP Code
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+    const purpose = user.role === "college_admin" ? "login" : "admin_login";
+
+    await Otp.deleteMany({ email: cleanEmail, purpose });
+    await Otp.create({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose,
+    });
+
+    // Send OTP to user's email
+    await sendOtpEmail({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose,
+      name: user.name,
+    });
+
+    return res.status(200).json({
+      success: true,
+      requireOtp: true,
+      email: cleanEmail,
+      role: user.role,
+      message: "A 6-digit verification code has been sent to your email address.",
+    });
+  } catch (error) {
+    console.error("login error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Login failed." });
+  }
+};
+
+// 3B. UNIVERSAL LOGIN - STEP 2 (Verify OTP & Issue JWT Session)
+export const verifyLoginOtp = async (req, res) => {
+  try {
+    const { email, otp } = req.body;
+
+    if (!email || !otp) {
+      return res.status(400).json({ success: false, message: "Email and verification code are required." });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: cleanEmail });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "Account not found." });
+    }
+
+    const purpose = user.role === "college_admin" ? "login" : "admin_login";
+    const otpRecord = await Otp.findOne({
+      email: cleanEmail,
+      purpose,
+    });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        success: false,
+        message: "Verification code has expired or is invalid. Please request a new code.",
+      });
+    }
+
+    if (otpRecord.otp !== otp.toString().trim()) {
+      otpRecord.attempts += 1;
+      if (otpRecord.attempts >= 5) {
+        await Otp.deleteOne({ _id: otpRecord._id });
+        return res.status(400).json({
+          success: false,
+          message: "Too many failed attempts. Please request a new verification code.",
+        });
+      }
+      await otpRecord.save();
+      return res.status(400).json({
+        success: false,
+        message: "Invalid verification code. Please check your email and try again.",
+      });
+    }
+
+    // Delete used OTP
+    await Otp.deleteOne({ _id: otpRecord._id });
 
     // If college_admin is pending or rejected, return status without error so frontend can render appropriate screen
     if (user.role === "college_admin" && user.status === "pending") {
@@ -231,6 +408,14 @@ export const login = async (req, res) => {
     // Generate JWT Token
     const token = generateToken(res, user._id, user.role);
 
+    await AuditLog.create({
+      adminUser: user.name,
+      action: "User Logged In (OTP Verified)",
+      target: user.email,
+      details: `${user.role} signed in successfully following email verification.`,
+      type: "auth",
+    });
+
     return res.status(200).json({
       success: true,
       message: "Login successful.",
@@ -247,8 +432,74 @@ export const login = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("login error:", error);
-    return res.status(500).json({ success: false, message: error.message || "Login failed." });
+    console.error("verifyLoginOtp error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to verify code." });
+  }
+};
+
+// 3C. RESEND OTP
+export const resendOtp = async (req, res) => {
+  try {
+    const { email, purpose = "login" } = req.body;
+    if (!email) {
+      return res.status(400).json({ success: false, message: "Email is required." });
+    }
+
+    const cleanEmail = email.toLowerCase().trim();
+    const existingOtp = await Otp.findOne({ email: cleanEmail, purpose });
+
+    // Enforce 30s rate limit
+    if (existingOtp && Date.now() - new Date(existingOtp.updatedAt || existingOtp.createdAt).getTime() < 30000) {
+      const waitSeconds = Math.ceil(
+        (30000 - (Date.now() - new Date(existingOtp.updatedAt || existingOtp.createdAt).getTime())) / 1000
+      );
+      return res.status(429).json({
+        success: false,
+        message: `Please wait ${waitSeconds}s before requesting another verification code.`,
+      });
+    }
+
+    let recipientName = "";
+    let metadata = {};
+
+    if (purpose === "register") {
+      if (!existingOtp || !existingOtp.metadata) {
+        return res.status(400).json({ success: false, message: "Registration session expired. Please register again." });
+      }
+      metadata = existingOtp.metadata;
+      recipientName = metadata.contactPerson || "";
+    } else {
+      const user = await User.findOne({ email: cleanEmail });
+      if (!user) {
+        return res.status(404).json({ success: false, message: "Account not found." });
+      }
+      recipientName = user.name;
+    }
+
+    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+
+    await Otp.deleteMany({ email: cleanEmail, purpose });
+    await Otp.create({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose,
+      metadata,
+    });
+
+    await sendOtpEmail({
+      email: cleanEmail,
+      otp: otpCode,
+      purpose,
+      name: recipientName,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "A new verification code has been sent to your email address.",
+    });
+  } catch (error) {
+    console.error("resendOtp error:", error);
+    return res.status(500).json({ success: false, message: error.message || "Failed to resend verification code." });
   }
 };
 

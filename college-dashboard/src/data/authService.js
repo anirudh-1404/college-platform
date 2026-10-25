@@ -53,7 +53,7 @@ export const authService = {
     }
   },
 
-  // Register a new college account in MongoDB
+  // Register a new college account in MongoDB (Step 1: Initiate & send OTP)
   async registerCollege({ collegeName, email, password, contactPerson, designation, phone, proofFile }) {
     try {
       const res = await fetch(`${API_BASE_URL}/register-college`, {
@@ -82,6 +82,15 @@ export const authService = {
         throw new Error(data.message || 'Registration failed')
       }
 
+      // Backend now sends OTP first
+      if (data.requireOtp) {
+        return {
+          requireOtp: true,
+          email: data.email,
+          message: data.message,
+        }
+      }
+
       const state = {
         isAuthenticated: false,
         user: {
@@ -98,7 +107,37 @@ export const authService = {
     }
   },
 
-  // Login via Live Backend
+  // Verify College Registration OTP (Step 2: Commit Registration)
+  async verifyRegisterOtp({ email, otp }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/verify-register-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'OTP verification failed')
+      }
+
+      const state = {
+        isAuthenticated: false,
+        user: {
+          ...data.user,
+          accountStatus: 'pending_verification',
+        },
+      }
+      this.saveAuthState(state)
+
+      return { success: true, user: data.user, message: data.message }
+    } catch (error) {
+      console.error('verifyRegisterOtp error:', error)
+      throw error
+    }
+  },
+
+  // Login via Live Backend (Step 1: Check password & trigger OTP)
   async login({ email, password }) {
     try {
       const res = await fetch(`${API_BASE_URL}/login`, {
@@ -112,13 +151,49 @@ export const authService = {
         throw new Error(data.message || 'Invalid credentials')
       }
 
+      // Backend requires OTP verification
+      if (data.requireOtp) {
+        return {
+          requireOtp: true,
+          email: data.email,
+          role: data.role,
+          message: data.message,
+        }
+      }
+
+      return { success: true, user: data.user }
+    } catch (error) {
+      console.error('login error:', error)
+      throw error
+    }
+  },
+
+  // Verify Login OTP (Step 2: Issue Session & Token)
+  async verifyLoginOtp({ email, otp }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/verify-login-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, otp }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Invalid verification code')
+      }
+
       if (data.user?.accountStatus === 'pending_verification') {
         const state = {
           isAuthenticated: false,
           user: data.user,
         }
         this.saveAuthState(state)
-        return { success: false, status: 'pending_verification', user: data.user, message: 'Your college account is pending verification by VidyaScope Admin.' }
+        return {
+          success: false,
+          status: 'pending_verification',
+          user: data.user,
+          message: 'Your college account is pending verification by VidyaScope Admin.',
+        }
       }
 
       if (data.user?.accountStatus === 'rejected') {
@@ -127,15 +202,19 @@ export const authService = {
           user: data.user,
         }
         this.saveAuthState(state)
-        return { success: false, status: 'rejected', user: data.user, message: data.user.rejectionReason || 'Your registration was rejected by Admin.' }
+        return {
+          success: false,
+          status: 'rejected',
+          user: data.user,
+          message: data.user.rejectionReason || 'Your registration was rejected by Admin.',
+        }
       }
 
-      // Successful login
+      // Successful verified login
       if (data.token) {
         this.setToken(data.token)
       }
 
-      // Clear any prior user's cached profile data
       localStorage.removeItem('vidyascope_college_data')
 
       const state = {
@@ -146,7 +225,28 @@ export const authService = {
 
       return { success: true, user: data.user }
     } catch (error) {
-      console.error('login error:', error)
+      console.error('verifyLoginOtp error:', error)
+      throw error
+    }
+  },
+
+  // Resend OTP
+  async resendOtp({ email, purpose = 'login' }) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/resend-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, purpose }),
+      })
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.message || 'Failed to resend code')
+      }
+
+      return { success: true, message: data.message }
+    } catch (error) {
+      console.error('resendOtp error:', error)
       throw error
     }
   },
