@@ -155,23 +155,8 @@ const AdminLoginPage = ({ onLoginSuccess, onVerifyOtp }) => {
             </button>
           </form>
 
-          {/* Quick Demo Credentials Pill */}
-          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-            <span>Demo SuperAdmin:</span>
-            <button
-              type="button"
-              onClick={() => {
-                setEmail('admin@vidyascope.com')
-                setPassword('admin123')
-              }}
-              className="text-[#033C8D] font-bold hover:underline cursor-pointer bg-blue-50 px-2 py-0.5 rounded-md border border-blue-200"
-            >
-              Fill Credentials
-            </button>
-          </div>
-
           {/* Institutional Security Notice */}
-          <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium">
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[11px] text-slate-400 font-medium">
             <ShieldCheck className="h-3.5 w-3.5 text-[#033C8D]" />
             <span>Encrypted administrative session</span>
           </div>
