@@ -33,10 +33,7 @@ const InstagramIcon = (props) => (
 
 const Footer = ({ onNavigate, onOpenCounseling }) => {
   const exploreLinks = [
-    { name: 'Engineering Colleges', target: 'colleges-listing', stream: 'engineering' },
-    { name: 'Commerce & Finance', target: 'colleges-listing', stream: 'commerce' },
-    { name: 'Management Colleges', target: 'colleges-listing', stream: 'management' },
-    { name: 'Medical Colleges', target: 'colleges-listing', stream: 'medical' },
+    { name: 'Colleges', target: 'colleges-listing' },
     { name: 'Academic Courses', target: 'courses' },
     { name: 'Entrance Exams', target: 'exams' },
   ]
