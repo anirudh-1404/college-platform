@@ -329,7 +329,7 @@ const CounselingPage = ({ onNavigateHome }) => {
                 </a>
 
                 <a
-                  href="mailto:student@vidyascope.com"
+                  href="mailto:info@vidyascope.com"
                   className="flex items-center gap-3 p-3 rounded-xl border border-border-color hover:border-brand-primary hover:bg-brand-accent transition-colors text-xs text-text-primary group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-brand-accent text-brand-primary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors">
@@ -337,7 +337,7 @@ const CounselingPage = ({ onNavigateHome }) => {
                   </div>
                   <div>
                     <p className="font-bold">Email Advisory</p>
-                    <p className="text-text-light text-[11px]">student@vidyascope.com</p>
+                    <p className="text-text-light text-[11px]">info@vidyascope.com</p>
                   </div>
                 </a>
               </div>

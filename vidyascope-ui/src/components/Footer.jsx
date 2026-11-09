@@ -1,6 +1,6 @@
 import React from 'react'
 import CounselingBanner from './CounselingBanner'
-import { Mail, Phone, Heart } from 'lucide-react'
+import { Mail, Heart } from 'lucide-react'
 import logoImg from '../assets/logo.png'
 
 const FacebookIcon = (props) => (
@@ -145,19 +145,13 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
             {/* Column 4: Contact (Span 3) */}
             <div className="lg:col-span-3 flex flex-col items-start gap-3">
               <h4 className="text-xs font-bold text-white uppercase tracking-wider font-serif">
-                Student Helpline
+                Support & Inquiries
               </h4>
               <ul className="flex flex-col items-start gap-2.5 w-full text-xs">
                 <li className="flex items-center gap-2 text-slate-400">
-                  <Phone className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-                  <a href="tel:+9118001234567" className="hover:text-white transition-colors">
-                    1800 123 4567 (Toll-Free)
-                  </a>
-                </li>
-                <li className="flex items-center gap-2 text-slate-400">
                   <Mail className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-                  <a href="mailto:student@vidyascope.com" className="hover:text-white transition-colors">
-                    student@vidyascope.com
+                  <a href="mailto:info@vidyascope.com" className="hover:text-white transition-colors">
+                    info@vidyascope.com
                   </a>
                 </li>
               </ul>
