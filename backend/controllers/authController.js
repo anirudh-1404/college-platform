@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { User } from "../models/User.js";
 import { College } from "../models/College.js";
 import { Registration } from "../models/Registration.js";
@@ -5,6 +6,11 @@ import { AuditLog } from "../models/AuditLog.js";
 import { Otp } from "../models/Otp.js";
 import { generateToken } from "../utils/authMiddleware.js";
 import { sendOtpEmail } from "../utils/emailService.js";
+
+// Helper to generate a secure random 6-digit OTP
+const generateOtp = () => {
+  return crypto.randomInt(100000, 1000000).toString();
+};
 
 // Helper to create slug
 const createSlug = (name) => {
@@ -40,8 +46,8 @@ export const registerCollege = async (req, res) => {
       return res.status(400).json({ success: false, message: "An account with this email already exists." });
     }
 
-    // Generate 6-Digit OTP Code (Set to 000000 for current development/testing)
-    const otpCode = "000000";
+    // Generate secure random 6-Digit OTP Code
+    const otpCode = generateOtp();
 
     // Store in Otp collection with pending registration metadata
     await Otp.deleteMany({ email: cleanEmail, purpose: "register" });
@@ -104,7 +110,7 @@ export const verifyRegisterOtp = async (req, res) => {
     }
 
     const inputOtp = otp.toString().trim();
-    if (inputOtp !== "000000" && otpRecord.otp !== inputOtp) {
+    if (otpRecord.otp !== inputOtp) {
       otpRecord.attempts += 1;
       if (otpRecord.attempts >= 5) {
         await Otp.deleteOne({ _id: otpRecord._id });
@@ -289,8 +295,8 @@ export const login = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been suspended by administration." });
     }
 
-    // Generate 6-Digit OTP Code (Set to 000000 for development/testing)
-    const otpCode = "000000";
+    // Generate secure random 6-Digit OTP Code
+    const otpCode = generateOtp();
     const purpose = user.role === "college_admin" ? "login" : "admin_login";
 
     await Otp.deleteMany({ email: cleanEmail, purpose });
@@ -350,7 +356,7 @@ export const verifyLoginOtp = async (req, res) => {
     }
 
     const inputOtp = otp.toString().trim();
-    if (inputOtp !== "000000" && otpRecord.otp !== inputOtp) {
+    if (otpRecord.otp !== inputOtp) {
       otpRecord.attempts += 1;
       if (otpRecord.attempts >= 5) {
         await Otp.deleteOne({ _id: otpRecord._id });
@@ -478,7 +484,7 @@ export const resendOtp = async (req, res) => {
       recipientName = user.name;
     }
 
-    const otpCode = "000000";
+    const otpCode = generateOtp();
 
     await Otp.deleteMany({ email: cleanEmail, purpose });
     await Otp.create({
