@@ -558,7 +558,11 @@ export const AdminCollegeEditModal = ({
           applicationEnd: formData.applicationEndDate,
           examAccepted,
           overview: formData.admissionOverview,
-          admissionSteps: formData.admissionProcessSteps,
+          admissionSteps: (formData.admissionProcessSteps || []).map((s) =>
+            typeof s === 'string'
+              ? s
+              : (s.title && s.desc ? `${s.title}: ${s.desc}` : s.title || s.desc || JSON.stringify(s))
+          ),
         },
 
         // Cutoffs
@@ -590,7 +594,11 @@ export const AdminCollegeEditModal = ({
           nirfYear: Number(formData.nirfYear) || 2025,
           naacGrade: formData.naacGrade,
           naacCgpa: formData.naacCgpa,
-          otherRankings: formData.additionalRankings,
+          otherRankings: (formData.additionalRankings || []).map((r) =>
+            typeof r === 'string'
+              ? r
+              : `${r.agency || 'Ranking'}: ${r.rank || 'N/A'}`
+          ),
         },
         additionalRankings: formData.additionalRankings,
 

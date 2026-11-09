@@ -59,6 +59,18 @@ export const updateCollegeProfile = async (req, res) => {
       return res.status(403).json({ success: false, message: "Profile is currently locked under editorial review." });
     }
 
+    // Normalize admissions.admissionSteps and rankings.otherRankings if needed
+    if (updates.admissions && Array.isArray(updates.admissions.admissionSteps)) {
+      updates.admissions.admissionSteps = updates.admissions.admissionSteps.map((s) =>
+        typeof s === "string" ? s : s.title ? `${s.title}: ${s.desc || ""}`.trim() : JSON.stringify(s)
+      );
+    }
+    if (updates.rankings && Array.isArray(updates.rankings.otherRankings)) {
+      updates.rankings.otherRankings = updates.rankings.otherRankings.map((r) =>
+        typeof r === "string" ? r : `${r.agency || "Ranking"}: ${r.rank || ""}`.trim()
+      );
+    }
+
     // Merge updates
     Object.keys(updates).forEach((key) => {
       if (key !== "_id" && key !== "slug") {

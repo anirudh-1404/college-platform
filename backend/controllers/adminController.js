@@ -364,6 +364,19 @@ export const updateCollegeByAdmin = async (req, res) => {
       return res.status(404).json({ success: false, message: "College profile not found." });
     }
 
+    // Normalize admissions.admissionSteps if needed
+    if (updates.admissions && Array.isArray(updates.admissions.admissionSteps)) {
+      updates.admissions.admissionSteps = updates.admissions.admissionSteps.map((s) =>
+        typeof s === "string" ? s : s.title ? `${s.title}: ${s.desc || ""}`.trim() : JSON.stringify(s)
+      );
+    }
+    // Normalize rankings.otherRankings if needed
+    if (updates.rankings && Array.isArray(updates.rankings.otherRankings)) {
+      updates.rankings.otherRankings = updates.rankings.otherRankings.map((r) =>
+        typeof r === "string" ? r : `${r.agency || "Ranking"}: ${r.rank || ""}`.trim()
+      );
+    }
+
     // Merge updates
     Object.keys(updates).forEach((key) => {
       if (key !== "_id" && key !== "slug") {

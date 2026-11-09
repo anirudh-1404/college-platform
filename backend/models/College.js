@@ -156,7 +156,7 @@ const collegeSchema = new mongoose.Schema(
       applicationEnd: { type: String, default: "July 2026" },
       examAccepted: { type: [String], default: ["JEE Advanced", "JEE Main", "GATE"] },
       admissionSteps: {
-        type: [String],
+        type: [mongoose.Schema.Types.Mixed],
         default: [
           "Qualify for National Entrance Exam",
           "Register for Centralized Counseling (JoSAA / JAC / NEET / CAT)",
@@ -183,7 +183,7 @@ const collegeSchema = new mongoose.Schema(
       nirfYear: { type: Number, default: 2025 },
       naacGrade: { type: String, default: "A++ (3.88 CGPA)" },
       naacCgpa: { type: String, default: "3.88" },
-      otherRankings: { type: [String], default: ["QS World University Rankings: #118", "India Today: #2"] },
+      otherRankings: { type: [mongoose.Schema.Types.Mixed], default: ["QS World University Rankings: #118", "India Today: #2"] },
     },
     additionalRankings: [rankingAgencySchema],
     nirfRank: { type: Number, default: 3 },
