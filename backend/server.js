@@ -27,6 +27,8 @@ const defaultOrigins = [
   "https://vidyascope.com",
   "https://www.vidyascope.com",
   "https://api.vidyascope.com",
+  "https://onair.vidyascope.com",
+  "https://masteradmin.vidyascope.com",
 ];
 
 const envOrigins = process.env.CORS_ORIGIN

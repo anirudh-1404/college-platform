@@ -7,8 +7,8 @@ import { useState, useEffect } from 'react'
  */
 export function usePortalUrls() {
   const [urls, setUrls] = useState({
-    publicWebsiteUrl: import.meta.env.VITE_PUBLIC_WEBSITE_URL || 'http://localhost:5174',
-    collegePortalUrl: import.meta.env.VITE_COLLEGE_PORTAL_URL || 'http://localhost:5173',
+    publicWebsiteUrl: import.meta.env.VITE_PUBLIC_WEBSITE_URL || (import.meta.env.PROD ? 'https://vidyascope.com' : 'http://localhost:5174'),
+    collegePortalUrl: import.meta.env.VITE_COLLEGE_PORTAL_URL || (import.meta.env.PROD ? 'https://onair.vidyascope.com' : 'http://localhost:5173'),
   })
 
   useEffect(() => {

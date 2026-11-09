@@ -152,7 +152,7 @@ const Navbar = ({
             <motion.a
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              href="https://vidyascope-college-platform.vercel.app"
+              href={import.meta.env.VITE_COLLEGE_PORTAL_URL || "https://onair.vidyascope.com"}
               target="_blank"
               rel="noopener noreferrer"
               className="btn btn-outline btn-sm text-xs font-semibold"
@@ -258,7 +258,7 @@ const Navbar = ({
 
             <div className="pt-3 border-t border-slate-100 flex flex-col gap-2">
               <a
-                href="https://vidyascope-college-platform.vercel.app"
+                href={import.meta.env.VITE_COLLEGE_PORTAL_URL || "https://onair.vidyascope.com"}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="btn btn-outline btn-md w-full text-xs font-semibold justify-center"
