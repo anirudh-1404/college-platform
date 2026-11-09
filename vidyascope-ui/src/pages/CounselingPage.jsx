@@ -316,15 +316,15 @@ const CounselingPage = ({ onNavigateHome }) => {
 
               <div className="space-y-2">
                 <a
-                  href="tel:+9118001234567"
+                  href="mailto:student@vidyascope.com"
                   className="flex items-center gap-3 p-3 rounded-xl border border-border-color hover:border-brand-primary hover:bg-brand-accent transition-colors text-xs text-text-primary group"
                 >
                   <div className="w-8 h-8 rounded-lg bg-brand-accent text-brand-primary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white transition-colors">
-                    <Phone className="h-4 w-4" />
+                    <Mail className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-bold">Toll-Free Helpline</p>
-                    <p className="text-text-light text-[11px]">1800 123 4567 (Mon-Sat, 9am - 7pm)</p>
+                    <p className="font-bold">Student Advisory</p>
+                    <p className="text-text-light text-[11px]">student@vidyascope.com</p>
                   </div>
                 </a>
 

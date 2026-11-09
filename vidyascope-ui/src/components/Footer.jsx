@@ -154,6 +154,12 @@ const Footer = ({ onNavigate, onOpenCounseling }) => {
                     info@vidyascope.com
                   </a>
                 </li>
+                <li className="flex items-center gap-2 text-slate-400">
+                  <Mail className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
+                  <a href="mailto:student@vidyascope.com" className="hover:text-white transition-colors">
+                    student@vidyascope.com
+                  </a>
+                </li>
               </ul>
               <div className="mt-2 pt-3 border-t border-border-dark/80 w-full">
                 <button
