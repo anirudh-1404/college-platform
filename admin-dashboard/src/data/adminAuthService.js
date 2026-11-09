@@ -6,8 +6,8 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/auth`
     : (import.meta.env.PROD
-        ? 'https://vidyascope-backend.onrender.com/api/auth'
-        : 'http://localhost:8080/api/auth')
+        ? 'https://api.vidyascope.com/api/auth'
+        : 'https://api.vidyascope.com/api/auth')
 
 const STORAGE_KEY_ADMIN_AUTH = 'vidyascope_admin_auth_session'
 const STORAGE_KEY_ADMIN_TOKEN = 'vidyascope_admin_token'

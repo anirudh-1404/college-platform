@@ -8,8 +8,8 @@ const API_BASE_URL =
         ? import.meta.env.VITE_API_URL
         : `${import.meta.env.VITE_API_URL}/public`)
     : (import.meta.env.PROD
-        ? "https://vidyascope-backend.onrender.com/api/public"
-        : "http://localhost:8080/api/public");
+        ? "https://api.vidyascope.com/api/public"
+        : "https://api.vidyascope.com/api/public");
 
 export const publicApi = {
   async getColleges(params = {}) {

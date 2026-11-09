@@ -8,8 +8,8 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/admin`
     : (import.meta.env.PROD
-        ? 'https://vidyascope-backend.onrender.com/api/admin'
-        : 'http://localhost:8080/api/admin')
+        ? 'https://api.vidyascope.com/api/admin'
+        : 'https://api.vidyascope.com/api/admin')
 
 async function parseJsonResponse(res, fallbackErrMsg = 'Operation failed') {
   const contentType = res.headers.get('content-type') || ''

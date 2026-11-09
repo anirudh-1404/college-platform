@@ -154,8 +154,8 @@ export const ImageCropperModal = ({
       const apiBase =
         import.meta.env.VITE_API_URL ||
         (import.meta.env.PROD
-          ? 'https://vidyascope-backend.onrender.com/api'
-          : 'http://localhost:8080/api')
+          ? 'https://api.vidyascope.com/api'
+          : 'https://api.vidyascope.com/api')
       const cleanBase = apiBase.replace(/\/admin\/?$/, '').replace(/\/api\/?$/, '')
       return `${cleanBase}/api/upload/proxy?url=${encodeURIComponent(imageSrc)}`
     }

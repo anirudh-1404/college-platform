@@ -199,7 +199,7 @@ const SettingsPage = ({ currentUser }) => {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1">
                 <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Backend API Endpoint</span>
                 <p className="font-mono text-xs text-slate-800 truncate">
-                  {import.meta.env.VITE_API_URL || 'http://localhost:8080/api/admin'}
+                  {import.meta.env.VITE_API_URL || 'https://api.vidyascope.com/api/admin'}
                 </p>
               </div>
 

@@ -9,8 +9,8 @@ const API_BASE_URL =
   import.meta.env.VITE_API_URL
     ? `${import.meta.env.VITE_API_URL}/college`
     : (import.meta.env.PROD
-        ? 'https://vidyascope-backend.onrender.com/api/college'
-        : 'http://localhost:8080/api/college')
+        ? 'https://api.vidyascope.com/api/college'
+        : 'https://api.vidyascope.com/api/college')
 
 const STORAGE_KEY_COLLEGE_DATA = 'vidyascope_college_data'
 
@@ -493,8 +493,8 @@ export const collegeService = {
     const uploadEndpoint = import.meta.env.VITE_API_URL
       ? `${import.meta.env.VITE_API_URL}/upload`
       : (import.meta.env.PROD
-          ? 'https://vidyascope-backend.onrender.com/api/upload'
-          : 'http://localhost:8080/api/upload')
+          ? 'https://api.vidyascope.com/api/upload'
+          : 'https://api.vidyascope.com/api/upload')
 
     const formData = new FormData()
     formData.append('image', file)
