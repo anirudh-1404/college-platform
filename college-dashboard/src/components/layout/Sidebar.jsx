@@ -205,7 +205,7 @@ const Sidebar = ({
             </div>
 
             <a
-              href="mailto:support@vidyascope.com"
+              href="mailto:info@vidyascope.com"
               className="block text-center py-1.5 px-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700 transition-colors shadow-2xs"
             >
               Contact Support

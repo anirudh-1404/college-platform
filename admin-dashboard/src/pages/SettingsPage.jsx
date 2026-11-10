@@ -20,7 +20,7 @@ const SettingsPage = ({ currentUser }) => {
 
   // Form states
   const [platformName, setPlatformName] = useState('VidyaScope')
-  const [supportEmail, setSupportEmail] = useState('support@vidyascope.com')
+  const [supportEmail, setSupportEmail] = useState('info@vidyascope.com')
   const [verificationApprovalMode, setVerificationApprovalMode] = useState('manual')
   const [emailNotifications, setEmailNotifications] = useState(true)
   const [auditLogRetention, setAuditLogRetention] = useState('90')

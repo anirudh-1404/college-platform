@@ -103,8 +103,8 @@ const PendingVerificationScreen = ({ user, onCheckStatus, onLogout }) => {
             <Mail className="h-4 w-4 text-brand-primary flex-shrink-0 mt-0.5" />
             <p>
               Need expedited onboarding for your campus admissions cycle? Contact the institutional verification desk at{' '}
-              <a href="mailto:support@vidyascope.com" className="text-brand-primary font-bold hover:underline">
-                support@vidyascope.com
+              <a href="mailto:info@vidyascope.com" className="text-brand-primary font-bold hover:underline">
+                info@vidyascope.com
               </a>.
             </p>
           </div>
