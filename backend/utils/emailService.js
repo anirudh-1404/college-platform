@@ -33,11 +33,18 @@ function getTransporter() {
 }
 
 /**
- * Send inquiry notification email to student@vidyascope.com
+ * Send inquiry notification email to both info@vidyascope.com and student@vidyascope.com
  * @param {Object} inquiryData
  */
 export async function sendInquiryNotificationEmail(inquiryData) {
-  const recipient = process.env.STUDENT_NOTIFICATION_EMAIL || "student@vidyascope.com";
+  // Support comma-separated list and ensure both info@vidyascope.com and student@vidyascope.com receive the inquiry
+  const configuredRecipients = process.env.STUDENT_NOTIFICATION_EMAIL
+    ? process.env.STUDENT_NOTIFICATION_EMAIL.split(",").map((e) => e.trim()).filter(Boolean)
+    : [];
+
+  const defaultRecipients = ["info@vidyascope.com", "student@vidyascope.com"];
+  const recipientList = Array.from(new Set([...configuredRecipients, ...defaultRecipients]));
+  const recipient = recipientList.join(", ");
   const {
     studentName,
     phone,
@@ -172,10 +179,10 @@ export async function sendInquiryNotificationEmail(inquiryData) {
   try {
     const activeTransporter = getTransporter();
     if (activeTransporter) {
-      const fromAddress = process.env.SMTP_FROM || `"VidyaScope Inquiries" <${process.env.SMTP_USER || process.env.EMAIL_USER || "student@vidyascope.com"}>`;
+      const fromAddress = process.env.SMTP_FROM || `"VidyaScope Inquiries" <${process.env.SMTP_USER || process.env.EMAIL_USER || "info@vidyascope.com"}>`;
       const info = await activeTransporter.sendMail({
         from: fromAddress,
-        to: recipient,
+        to: recipientList,
         subject,
         html,
       });

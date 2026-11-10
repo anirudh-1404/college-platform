@@ -443,7 +443,7 @@ export const createPublicInquiry = async (req, res) => {
       status: "new",
     });
 
-    // Dispatch email notification to student@vidyascope.com (non-blocking)
+    // Dispatch email notification to info@vidyascope.com & student@vidyascope.com (non-blocking)
     sendInquiryNotificationEmail({
       studentName: newInquiry.studentName,
       phone: newInquiry.phone,
