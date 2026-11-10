@@ -408,7 +408,17 @@ const CollegeDetailPage = ({
               </button>
 
               <button
-                onClick={onOpenCounseling}
+                onClick={() => {
+                  if (onOpenCounseling) {
+                    onOpenCounseling({
+                      title: `Free Counseling for ${college.name}`,
+                      collegeName: college.name,
+                      collegeId: college.slug || college._id || college.id,
+                      stream: college.stream || 'engineering',
+                      source: 'college_detail_page',
+                    })
+                  }
+                }}
                 className="btn btn-primary btn-md text-xs font-bold shadow-sm hover:shadow-md transition-all cursor-pointer"
               >
                 <span>Get Free Counseling</span>
@@ -1168,10 +1178,12 @@ const CollegeDetailPage = ({
                   onClick={() => {
                     if (onOpenCounseling) {
                       onOpenCounseling({
-                        title: 'Download Official Brochure',
+                        title: `Download Brochure - ${college.name}`,
                         collegeName: college.name,
+                        collegeId: college.slug || college._id || college.id,
                         portalUrl: college.admissionPortalUrl || college.locationContact?.websiteUrl,
                         stream: college.stream || 'engineering',
+                        source: 'brochure_download',
                       })
                     }
                   }}

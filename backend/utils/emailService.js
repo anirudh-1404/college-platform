@@ -68,9 +68,13 @@ export async function sendInquiryNotificationEmail(inquiryData) {
       ? "Get Free Advice Banner"
       : source === "request_call_back"
       ? "Request Call Back Button"
+      : source === "college_detail_page"
+      ? "College Detail Lead"
       : "Student Inquiry / Counseling Desk";
 
-  const subject = `🎓 New Student Lead: ${studentName || "Prospective Student"} (${phone || "No Phone"}) - ${sourceLabel}`;
+  const subject = collegeName
+    ? `🎓 New Student Lead for ${collegeName}: ${studentName || "Prospective Student"} (${phone || "No Phone"})`
+    : `🎓 New Student Lead: ${studentName || "Prospective Student"} (${phone || "No Phone"}) - ${sourceLabel}`;
 
   const html = `
     <!DOCTYPE html>
@@ -102,6 +106,16 @@ export async function sendInquiryNotificationEmail(inquiryData) {
           <div class="badge">${sourceLabel}</div>
         </div>
         <div class="content">
+          ${
+            collegeName
+              ? `
+            <div style="background: #eef2ff; border: 1px solid #c7d2fe; border-radius: 12px; padding: 14px 18px; margin-bottom: 20px;">
+              <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: #4338ca;">🏛️ Target College Lead</div>
+              <div style="font-size: 17px; font-weight: 800; color: #1e1b4b; margin-top: 4px;">${collegeName}</div>
+            </div>
+          `
+              : ""
+          }
           <div class="field-group">
             <div class="label">Student Name</div>
             <div class="value">${studentName || "N/A"}</div>

@@ -267,15 +267,15 @@ const ContactInquiriesPage = () => {
 
                       <td className="py-3.5 px-4">
                         {item.collegeName ? (
-                          <div className="flex items-center gap-1.5 font-medium text-slate-800 text-xs">
+                          <div className="flex items-center gap-1.5 font-bold text-slate-900 text-xs bg-indigo-50 border border-indigo-200/80 px-2.5 py-1 rounded-lg w-fit max-w-[220px]">
                             <Building2 className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
-                            <span className="truncate max-w-[180px]">{item.collegeName}</span>
+                            <span className="truncate">{item.collegeName}</span>
                           </div>
                         ) : (
                           <span className="text-[11px] text-slate-500 italic">General Counseling</span>
                         )}
-                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block mt-0.5">
-                          {item.source?.replace('_', ' ') || 'Web Form'}
+                        <span className="text-[10px] text-slate-400 uppercase tracking-wider block mt-1 font-semibold">
+                          {item.source?.replace(/_/g, ' ') || 'Web Form'}
                         </span>
                       </td>
 
@@ -350,6 +350,34 @@ const ContactInquiriesPage = () => {
                 ✕
               </button>
             </div>
+
+            {selectedInquiry.collegeName ? (
+              <div className="p-3.5 rounded-xl bg-indigo-50/80 border border-indigo-200/70 flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-lg bg-brand-primary text-white flex items-center justify-center font-bold text-sm shadow-2xs">
+                    🏛️
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-indigo-700 tracking-wider block">
+                      Specific College Lead
+                    </span>
+                    <p className="text-xs font-extrabold text-slate-900 leading-tight">
+                      {selectedInquiry.collegeName}
+                    </p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-indigo-100 text-indigo-800 uppercase tracking-wider">
+                  {selectedInquiry.source?.replace(/_/g, ' ') || 'College Page'}
+                </span>
+              </div>
+            ) : (
+              <div className="p-2.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs text-slate-600">
+                <span className="font-medium text-slate-700">Type: <strong>General Platform Inquiry</strong></span>
+                <span className="text-[10px] font-bold uppercase text-slate-400">
+                  {selectedInquiry.source?.replace(/_/g, ' ') || 'Website'}
+                </span>
+              </div>
+            )}
 
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div className="p-3 rounded-lg bg-slate-50">

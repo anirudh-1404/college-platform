@@ -427,6 +427,21 @@ export const createPublicInquiry = async (req, res) => {
       return res.status(400).json({ success: false, message: "Contact phone number is required." });
     }
 
+    let resolvedCollegeName = (collegeName || "").trim() || null;
+    let resolvedCollegeId = (collegeId || "").toString().trim() || null;
+
+    if (resolvedCollegeId && !resolvedCollegeName) {
+      try {
+        const idFilter = mongoose.Types.ObjectId.isValid(resolvedCollegeId)
+          ? [{ _id: resolvedCollegeId }, { slug: resolvedCollegeId }]
+          : [{ slug: resolvedCollegeId }];
+        const found = await College.findOne({ $or: idFilter }).select("name");
+        if (found) resolvedCollegeName = found.name;
+      } catch (err) {
+        // non-blocking fallback
+      }
+    }
+
     const newInquiry = await Inquiry.create({
       studentName: resolvedName,
       email: (email || "").trim(),
@@ -437,9 +452,9 @@ export const createPublicInquiry = async (req, res) => {
       budgetRange: budgetRange || "under-10",
       admissionYear: admissionYear || targetYear || new Date().getFullYear().toString(),
       notes: notes || "",
-      collegeId: collegeId || null,
-      collegeName: collegeName || null,
-      source: source || "counseling_modal",
+      collegeId: resolvedCollegeId,
+      collegeName: resolvedCollegeName,
+      source: source || (resolvedCollegeName ? "college_detail_page" : "counseling_modal"),
       status: "new",
     });
 

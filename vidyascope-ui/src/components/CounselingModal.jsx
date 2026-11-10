@@ -1,6 +1,6 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, CheckCircle, Send, PhoneCall, Lock, Loader2, ExternalLink } from 'lucide-react'
+import { X, CheckCircle, Send, PhoneCall, Lock, Loader2, ExternalLink, Building2 } from 'lucide-react'
 import { publicApi } from '../api/publicApi'
 
 const backdropVariants = {
@@ -36,6 +36,12 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
     targetYear: '2027',
   })
 
+  useEffect(() => {
+    if (context?.stream) {
+      setFormData((prev) => ({ ...prev, stream: prev.stream || context.stream }))
+    }
+  }, [context])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -46,8 +52,9 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
         phone: formData.phone,
         stream: formData.stream,
         admissionYear: formData.targetYear,
-        source: context?.source || (context?.portalUrl ? 'brochure_download' : (context?.isCallback ? 'request_call_back' : 'get_free_advice')),
-        collegeName: context?.collegeName,
+        source: context?.source || (context?.portalUrl ? 'brochure_download' : (context?.isCallback ? 'request_call_back' : (context?.collegeName ? 'college_detail_page' : 'get_free_advice'))),
+        collegeName: context?.collegeName || null,
+        collegeId: context?.collegeId || null,
       })
       setSubmitted(true)
     } catch (err) {
@@ -144,7 +151,13 @@ const CounselingModal = ({ isOpen, onClose, context = null }) => {
                 <h3 className="font-serif text-xl font-bold text-text-primary">
                   {context?.title || 'Book Free 1-on-1 Counseling'}
                 </h3>
-                <p className="text-xs text-text-secondary mt-0.5 mb-5">
+                {context?.collegeName && (
+                  <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50 border border-indigo-200 text-brand-primary text-xs font-bold mt-2">
+                    <Building2 className="h-3.5 w-3.5 text-brand-primary flex-shrink-0" />
+                    <span>Inquiring for: {context.collegeName}</span>
+                  </div>
+                )}
+                <p className="text-xs text-text-secondary mt-1.5 mb-5">
                   {context?.collegeName
                     ? `Enter your details to access ${context.collegeName}'s official curriculum brochure and direct admission desk.`
                     : 'Get personalized college recommendations, cutoff analysis, and fee breakdown from verified alumni.'}
