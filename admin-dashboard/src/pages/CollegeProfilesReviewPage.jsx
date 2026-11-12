@@ -334,6 +334,7 @@ const CollegeProfilesReviewPage = ({
                 <th className="py-3.5 px-4 min-w-[100px]">NIRF Rank</th>
                 <th className="py-3.5 px-4 min-w-[120px]">Avg Package</th>
                 <th className="py-3.5 px-4 min-w-[90px]">Programs</th>
+                <th className="py-3.5 px-4 min-w-[100px]">Views</th>
                 <th className="py-3.5 px-4 min-w-[130px]">Status</th>
                 <th className="py-3.5 px-4 text-right min-w-[130px]">Action</th>
               </tr>
@@ -381,6 +382,13 @@ const CollegeProfilesReviewPage = ({
                     <td className="py-3.5 px-4 font-semibold text-slate-700">
                       <span className="px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 font-bold border border-purple-200 text-[11px]">
                         {coursesCount} Courses
+                      </span>
+                    </td>
+
+                    <td className="py-3.5 px-4 font-bold text-slate-800">
+                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-50/70 border border-indigo-100 text-[#033C8D] font-extrabold text-[11px]">
+                        <Eye className="h-3 w-3 text-[#033C8D]" />
+                        <span>{(profile.views || 0).toLocaleString()}</span>
                       </span>
                     </td>
 

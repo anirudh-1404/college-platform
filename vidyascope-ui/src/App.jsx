@@ -16,6 +16,7 @@ import CompareTray from './components/CompareTray'
 import HeartSaveAnimation from './components/HeartSaveAnimation'
 import TopProgressBar from './components/common/TopProgressBar'
 import RouteLoadingOverlay from './components/common/RouteLoadingOverlay'
+import { publicApi } from './api/publicApi'
 
 import { motion, AnimatePresence } from 'framer-motion'
 
@@ -143,6 +144,34 @@ const App = () => {
 
     return () => clearTimeout(timer)
   }, [location.pathname, location.search])
+
+  // Automatic Website Traffic & Visitor Telemetry
+  useEffect(() => {
+    const p = location.pathname
+    let pageType = 'other'
+    let collegeId = null
+
+    if (p === '/') pageType = 'home'
+    else if (p.startsWith('/colleges/')) {
+      pageType = 'college_detail'
+      collegeId = p.replace('/colleges/', '').split('/')[0]
+    } else if (p === '/colleges') pageType = 'college_listing'
+    else if (p === '/courses') pageType = 'courses'
+    else if (p === '/exams') pageType = 'exams'
+    else if (p === '/compare') pageType = 'compare'
+    else if (p === '/counseling') pageType = 'counseling'
+    else if (p === '/blogs') pageType = 'blogs'
+    else if (p.startsWith('/blogs/')) pageType = 'blog_detail'
+    else if (p === '/career-guide') pageType = 'career_guide'
+    else if (p === '/shortlist') pageType = 'shortlist'
+
+    publicApi.trackView({
+      path: p,
+      pageTitle: document.title,
+      pageType,
+      collegeId,
+    })
+  }, [location.pathname])
 
   // Navigation Handlers
   const handleNavigate = (page, param) => {

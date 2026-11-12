@@ -192,6 +192,37 @@ export const publicApi = {
       return null;
     }
   },
+
+  async trackView({ path, pageTitle, pageType, collegeId, collegeName } = {}) {
+    try {
+      const url = `${API_BASE_URL}/track-view`;
+      const payload = {
+        path: path || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+        pageTitle: pageTitle || (typeof document !== 'undefined' ? document.title : ''),
+        pageType: pageType || 'other',
+        collegeId: collegeId || null,
+        collegeName: collegeName || null,
+        referrer: typeof document !== 'undefined' ? document.referrer : null,
+      };
+
+      if (typeof navigator !== 'undefined' && navigator.sendBeacon) {
+        const blob = new Blob([JSON.stringify(payload)], { type: 'application/json' });
+        navigator.sendBeacon(url, blob);
+        return { success: true };
+      }
+
+      await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        keepalive: true,
+      });
+      return { success: true };
+    } catch (e) {
+      // Non-blocking telemetry
+      return { success: false };
+    }
+  },
 };
 
 

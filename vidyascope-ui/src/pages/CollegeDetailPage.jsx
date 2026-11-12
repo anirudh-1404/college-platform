@@ -4,7 +4,7 @@ import {
   ChevronRight, ChevronLeft, X, Maximize2, Home, MapPin, Star, Heart,
   Calculator, ShieldCheck, Building2, Users,
   Check, AlertCircle, Scale, Layers, GraduationCap, Building,
-  Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils, Download
+  Compass, Calendar, ExternalLink, FileText, CheckCircle2, ArrowRight, Clock, Sparkles, Utensils, Download, Eye
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { publicApi } from '../api/publicApi'
@@ -124,7 +124,16 @@ const CollegeDetailPage = ({
     const fetchDetail = async () => {
       try {
         const data = await publicApi.getCollegeDetail(effectiveCollegeId)
-        setCollege(data)
+        if (data) {
+          setCollege(data)
+          publicApi.trackView({
+            path: window.location.pathname,
+            pageTitle: `${data.name} - VidyaScope`,
+            pageType: 'college_detail',
+            collegeId: data.slug || data.id,
+            collegeName: data.name,
+          })
+        }
       } catch (e) {
         console.error(e)
       } finally {
@@ -442,6 +451,12 @@ const CollegeDetailPage = ({
               {college.establishmentYear && (
                 <span className="px-2.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 text-[11px] font-semibold border border-emerald-200">
                   Est. {college.establishmentYear}
+                </span>
+              )}
+              {college.views !== undefined && (
+                <span className="px-2.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 text-[11px] font-semibold border border-indigo-200/80 flex items-center gap-1">
+                  <Eye className="h-3 w-3 text-indigo-600" />
+                  <span>{(college.views || 0).toLocaleString()} Views</span>
                 </span>
               )}
               {college.naacGrade && (

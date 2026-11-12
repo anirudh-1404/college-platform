@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getAdminAnalytics,
+  getTrafficAnalytics,
   getRegistrations,
   approveRegistration,
   rejectRegistration,
@@ -43,8 +44,9 @@ const router = express.Router();
 // Require Admin Auth for all admin routes
 router.use(verifyToken, isAdmin);
 
-// Analytics
+// Analytics & Traffic
 router.get("/analytics", getAdminAnalytics);
+router.get("/traffic-analytics", getTrafficAnalytics);
 
 // Registration Requests
 router.get("/registrations", getRegistrations);

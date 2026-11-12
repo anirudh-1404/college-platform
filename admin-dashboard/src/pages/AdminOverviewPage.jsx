@@ -18,6 +18,13 @@ import {
   Send,
   AlertCircle,
   CheckCircle,
+  Eye,
+  Activity,
+  Globe,
+  Laptop,
+  Smartphone,
+  Tablet,
+  Radio,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 
@@ -69,6 +76,7 @@ const CollegeCrest = ({ name = '', logoUrl }) => {
 
 const AdminOverviewPage = ({
   analytics = {},
+  trafficData = {},
   registrations = [],
   pendingRegistrations = [],
   profiles = [],
@@ -102,6 +110,37 @@ const AdminOverviewPage = ({
   const underReviewCount = profiles.filter(p => p.profileStatus === 'under_review').length || analytics.underReviewProfiles || 0
   const publishedCount = profiles.filter(p => p.profileStatus === 'published').length || analytics.publishedProfiles || 0
   const inquiriesCount = analytics.newInquiries ?? analytics.totalInquiries ?? 0
+
+  // Live Website Traffic & Analytics Metrics
+  const totalWebsiteViews = trafficData.totalViews || analytics.totalViews || 0
+  const todayWebsiteViews = trafficData.todayViews || analytics.todayViews || 0
+  const uniqueVisitorsCount = trafficData.uniqueVisitors || 0
+  const todayUniqueVisitorsCount = trafficData.todayUniqueVisitors || 0
+  const topCollegesList = useMemo(() => {
+    if (trafficData.topColleges && trafficData.topColleges.length > 0) {
+      return trafficData.topColleges
+    }
+    return profiles
+      .filter((p) => p.profileStatus === 'published')
+      .sort((a, b) => (b.views || 0) - (a.views || 0))
+      .slice(0, 8)
+      .map((c) => ({
+        id: c.slug || c._id,
+        name: c.name,
+        shortName: c.shortName || c.name,
+        slug: c.slug,
+        stream: c.stream,
+        location: c.locationContact?.city ? `${c.locationContact.city}, ${c.locationContact.state || ''}` : 'India',
+        nirfRank: c.rankings?.nirfRank || null,
+        views: c.views || 0,
+      }))
+  }, [trafficData.topColleges, profiles])
+
+  const recentVisitorsList = trafficData.recentVisitors || []
+  const maxViews = useMemo(() => {
+    const counts = topCollegesList.map((c) => c.views || 0)
+    return Math.max(...counts, 1)
+  }, [topCollegesList])
 
   // Status counts for right-side widget (strictly dynamic from profiles / analytics)
   const statusBreakdown = useMemo(() => {
@@ -330,6 +369,270 @@ const AdminOverviewPage = ({
             </div>
           </div>
           <ChevronRight className="h-5 w-5 text-slate-300 group-hover:text-slate-600 transition-colors flex-shrink-0" />
+        </div>
+      </div>
+
+      {/* 2.5 Website Traffic & Student Engagement Section */}
+      <div className="space-y-4">
+        {/* Section Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-[#033C8D] flex items-center justify-center font-bold">
+              <Activity className="h-4 w-4" />
+            </div>
+            <div>
+              <h3 className="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                <span>Website Traffic & Student Footfall</span>
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Live Tracking
+                </span>
+              </h3>
+              <p className="text-xs text-slate-500">
+                Real-time visitor telemetry, page views, and per-college engagement metrics on VidyaScope.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* 4 Traffic KPI Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Total Page Views */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Total Page Views</span>
+              <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <Eye className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900 mt-2">
+              {totalWebsiteViews.toLocaleString()}
+            </p>
+            <p className="text-[11px] text-blue-600 font-semibold mt-1 flex items-center gap-1">
+              <span>Today:</span>
+              <span className="font-extrabold">+{todayWebsiteViews.toLocaleString()} views</span>
+            </p>
+          </div>
+
+          {/* Card 2: Unique Visitors */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Unique Visitors</span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <Globe className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900 mt-2">
+              {uniqueVisitorsCount.toLocaleString()}
+            </p>
+            <p className="text-[11px] text-emerald-600 font-semibold mt-1 flex items-center gap-1">
+              <span>Today:</span>
+              <span className="font-extrabold">+{todayUniqueVisitorsCount.toLocaleString()} unique</span>
+            </p>
+          </div>
+
+          {/* Card 3: Top Viewed College */}
+          <div
+            onClick={() => onNavigate('profiles')}
+            className="bg-white border border-slate-200/80 hover:border-[#033C8D]/40 rounded-2xl p-4 sm:p-5 shadow-2xs cursor-pointer transition-all group"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Most Viewed College</span>
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 text-[#033C8D] flex items-center justify-center group-hover:scale-105 transition-transform">
+                <Building2 className="h-4 w-4" />
+              </div>
+            </div>
+            <p className="text-sm font-extrabold text-slate-900 mt-2 truncate" title={topCollegesList[0]?.name || 'N/A'}>
+              {topCollegesList[0]?.name || 'No Data Yet'}
+            </p>
+            <p className="text-[11px] text-indigo-700 font-semibold mt-1 flex items-center gap-1">
+              <Eye className="h-3 w-3" />
+              <span>{(topCollegesList[0]?.views || 0).toLocaleString()} views</span>
+            </p>
+          </div>
+
+          {/* Card 4: Device Breakdown */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500">Device Footprint</span>
+              <div className="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                <Laptop className="h-4 w-4" />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mt-2 text-xs font-bold text-slate-800">
+              <div className="flex items-center gap-1">
+                <Laptop className="h-3.5 w-3.5 text-slate-400" />
+                <span>{trafficData.deviceBreakdown?.Desktop || 0}</span>
+              </div>
+              <span className="text-slate-300">•</span>
+              <div className="flex items-center gap-1">
+                <Smartphone className="h-3.5 w-3.5 text-slate-400" />
+                <span>{trafficData.deviceBreakdown?.Mobile || 0}</span>
+              </div>
+              <span className="text-slate-300">•</span>
+              <div className="flex items-center gap-1">
+                <Tablet className="h-3.5 w-3.5 text-slate-400" />
+                <span>{trafficData.deviceBreakdown?.Tablet || 0}</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 uppercase font-bold tracking-wider mt-1.5">
+              Desktop / Mobile / Tablet
+            </p>
+          </div>
+        </div>
+
+        {/* Two-Column Deep-Dive Grid: Top Colleges Leaderboard & Live Visitor Stream */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+          {/* Left: Top Colleges by Student Views */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                    Top Colleges by Student Views
+                  </h4>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100">
+                    Leaderboard
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => onNavigate('published-colleges')}
+                  className="text-xs font-bold text-[#033C8D] hover:underline flex items-center gap-1 cursor-pointer"
+                >
+                  <span>All Colleges</span>
+                  <ArrowRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
+              {topCollegesList.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-400">
+                  No college views recorded yet. Views will appear automatically when students explore colleges.
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 mt-2">
+                  {topCollegesList.slice(0, 6).map((college, idx) => {
+                    const pct = Math.min(100, Math.round(((college.views || 0) / maxViews) * 100))
+                    return (
+                      <div
+                        key={college.id || college.slug || idx}
+                        onClick={() => onNavigate('profiles')}
+                        className="py-3 flex items-center justify-between gap-3 hover:bg-slate-50/70 -mx-2 px-2 rounded-xl cursor-pointer transition-colors group"
+                      >
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <span className={`w-5 text-center text-xs font-black ${
+                            idx === 0 ? 'text-amber-500' : idx === 1 ? 'text-slate-400' : idx === 2 ? 'text-amber-700' : 'text-slate-400'
+                          }`}>
+                            #{idx + 1}
+                          </span>
+                          <CollegeCrest name={college.name} />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-xs font-bold text-slate-900 truncate group-hover:text-[#033C8D] transition-colors">
+                              {college.name}
+                            </p>
+                            <p className="text-[11px] text-slate-400 capitalize flex items-center gap-1.5 mt-0.5">
+                              <span>{college.stream || 'Engineering'}</span>
+                              <span>•</span>
+                              <span>{college.location}</span>
+                            </p>
+                            {/* Proportional View Bar */}
+                            <div className="w-full bg-slate-100 h-1.5 rounded-full mt-1.5 overflow-hidden">
+                              <div
+                                className="bg-[#033C8D] h-full rounded-full transition-all duration-500"
+                                style={{ width: `${Math.max(8, pct)}%` }}
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-indigo-50 border border-indigo-100 text-[#033C8D] font-extrabold text-xs">
+                            <Eye className="h-3 w-3" />
+                            <span>{(college.views || 0).toLocaleString()}</span>
+                          </span>
+                          <span className="text-[10px] text-slate-400 block mt-0.5">views</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Live Visitor Stream (Recent Traffic Log) */}
+          <div className="bg-white border border-slate-200/80 rounded-2xl p-5 shadow-2xs flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="flex items-center gap-2">
+                  <h4 className="text-sm font-extrabold text-slate-900 tracking-tight">
+                    Live Visitor Stream
+                  </h4>
+                  <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100 flex items-center gap-1">
+                    <Radio className="h-3 w-3 text-emerald-500 animate-pulse" />
+                    Real-time
+                  </span>
+                </div>
+                <span className="text-xs text-slate-400 font-medium">
+                  Latest activity
+                </span>
+              </div>
+
+              {recentVisitorsList.length === 0 ? (
+                <div className="py-12 text-center text-xs text-slate-400">
+                  <Globe className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+                  <p>No visitor sessions logged yet.</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Live traffic from vidyascope.com will stream here in real time.</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100 mt-2 max-h-[380px] overflow-y-auto pr-1">
+                  {recentVisitorsList.slice(0, 10).map((v) => {
+                    const isCollege = Boolean(v.collegeName || v.pageType === 'college_detail')
+                    return (
+                      <div key={v.id || v._id} className="py-2.5 flex items-start justify-between gap-3 text-xs">
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 font-bold text-slate-900 truncate">
+                            {isCollege ? (
+                              <>
+                                <Building2 className="h-3.5 w-3.5 text-[#033C8D] shrink-0" />
+                                <span className="truncate text-[#033C8D]">{v.collegeName || v.path}</span>
+                              </>
+                            ) : (
+                              <>
+                                <Globe className="h-3.5 w-3.5 text-slate-400 shrink-0" />
+                                <span className="truncate text-slate-800">{v.pageTitle || v.path}</span>
+                              </>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 mt-0.5 font-medium flex-wrap">
+                            <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-semibold">
+                              {v.device || 'Desktop'}
+                            </span>
+                            <span>•</span>
+                            <span>{v.browser || 'Web'}</span>
+                            {v.referrer && v.referrer !== 'Direct' && (
+                              <>
+                                <span>•</span>
+                                <span className="text-indigo-600 font-semibold">via {v.referrer}</span>
+                              </>
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="text-right shrink-0">
+                          <span className="text-[10px] text-slate-400 font-medium">
+                            {v.timestamp
+                              ? new Date(v.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                              : 'Just now'}
+                          </span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 

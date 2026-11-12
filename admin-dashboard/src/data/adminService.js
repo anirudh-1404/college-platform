@@ -96,6 +96,29 @@ export const adminService = {
       pendingRegistrations: 0,
       approvedRegistrations: 0,
       totalUsers: 0,
+      totalViews: 0,
+      todayViews: 0,
+    }
+  },
+
+  async getTrafficAnalytics() {
+    try {
+      const res = await fetch(`${API_BASE_URL}/traffic-analytics`, { headers: this.getHeaders() })
+      const data = await res.json()
+      if (res.ok && data.traffic) {
+        return data.traffic
+      }
+    } catch (e) {
+      console.warn('Traffic analytics fetch error:', e)
+    }
+    return {
+      totalViews: 0,
+      todayViews: 0,
+      uniqueVisitors: 0,
+      todayUniqueVisitors: 0,
+      topColleges: [],
+      recentVisitors: [],
+      deviceBreakdown: { Desktop: 0, Mobile: 0, Tablet: 0 },
     }
   },
 

@@ -259,6 +259,7 @@ const collegeSchema = new mongoose.Schema(
     // Platform Exclusive Metadata
     rating: { type: Number, default: 4.8 },
     reviewsCount: { type: Number, default: 0 },
+    views: { type: Number, default: 0 },
     prosAndCons: {
       pros: {
         type: [String],

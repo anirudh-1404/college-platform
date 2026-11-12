@@ -5,6 +5,7 @@ import { Exam } from "../models/Exam.js";
 import { Inquiry } from "../models/Inquiry.js";
 import { LiveIntel } from "../models/LiveIntel.js";
 import { Blog } from "../models/Blog.js";
+import { TrafficLog } from "../models/TrafficLog.js";
 import { sendInquiryNotificationEmail } from "../utils/emailService.js";
 
 // 1. GET ALL PUBLISHED COLLEGES (With Search & Filter Query Support)
@@ -150,7 +151,11 @@ export const getPublicCollegeDetail = async (req, res) => {
       prosAndCons: college.prosAndCons,
       similarColleges: college.similarColleges,
       snapshot: college.snapshot,
+      views: (college.views || 0) + 1,
     };
+
+    // Increment college views count asynchronously
+    College.findByIdAndUpdate(college._id, { $inc: { views: 1 } }).catch(() => {});
 
     return res.status(200).json({ success: true, college: formatted });
   } catch (error) {
@@ -633,6 +638,104 @@ export const getPublicBlogDetail = async (req, res) => {
   } catch (error) {
     console.error("getPublicBlogDetail error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch blog details." });
+  }
+};
+
+// Helper: Parse user-agent for analytics
+function parseUserAgent(ua = "") {
+  const lower = ua.toLowerCase();
+
+  let device = "Desktop";
+  if (/mobile|android|touch|webos|hpwos/i.test(lower)) {
+    device = "Mobile";
+  } else if (/tablet|ipad/i.test(lower)) {
+    device = "Tablet";
+  }
+
+  let os = "Other";
+  if (lower.includes("windows")) os = "Windows";
+  else if (lower.includes("macintosh") || lower.includes("mac os")) os = "macOS";
+  else if (lower.includes("android")) os = "Android";
+  else if (lower.includes("iphone") || lower.includes("ipad") || lower.includes("ios")) os = "iOS";
+  else if (lower.includes("linux")) os = "Linux";
+
+  let browser = "Other";
+  if (lower.includes("edg/")) browser = "Edge";
+  else if (lower.includes("chrome") && !lower.includes("chromium")) browser = "Chrome";
+  else if (lower.includes("safari") && !lower.includes("chrome")) browser = "Safari";
+  else if (lower.includes("firefox")) browser = "Firefox";
+  else if (lower.includes("opera") || lower.includes("opr/")) browser = "Opera";
+
+  return { device, os, browser };
+}
+
+// 12. TRACK PUBLIC TRAFFIC & VISITOR VIEW
+export const trackPublicView = async (req, res) => {
+  try {
+    const { path, pageTitle, pageType, collegeId, collegeName, referrer } = req.body;
+    if (!path) {
+      return res.status(400).json({ success: false, message: "Path is required." });
+    }
+
+    const ua = req.headers["user-agent"] || "";
+    const { device, os, browser } = parseUserAgent(ua);
+
+    const rawIp = (req.headers["x-forwarded-for"] || req.socket.remoteAddress || "").split(",")[0].trim();
+    const ip = rawIp ? rawIp.replace(/^::ffff:/, "") : "anonymous";
+
+    let resolvedCollegeName = collegeName || null;
+    let resolvedCollegeId = collegeId || null;
+
+    if (resolvedCollegeId || resolvedCollegeName) {
+      const query = resolvedCollegeId
+        ? {
+            $or: [
+              { slug: resolvedCollegeId },
+              { _id: mongoose.Types.ObjectId.isValid(resolvedCollegeId) ? resolvedCollegeId : null },
+            ],
+          }
+        : { name: resolvedCollegeName };
+
+      const updated = await College.findOneAndUpdate(
+        query,
+        { $inc: { views: 1 } },
+        { new: true }
+      ).select("name slug views");
+
+      if (updated) {
+        resolvedCollegeId = updated.slug || updated._id;
+        resolvedCollegeName = updated.name;
+      }
+    }
+
+    let cleanReferrer = "Direct";
+    if (referrer) {
+      try {
+        const refUrl = new URL(referrer);
+        cleanReferrer = refUrl.hostname.replace("www.", "");
+      } catch (e) {
+        cleanReferrer = String(referrer).slice(0, 50);
+      }
+    }
+
+    await TrafficLog.create({
+      path: String(path).slice(0, 200),
+      pageTitle: String(pageTitle || "").slice(0, 150),
+      pageType: pageType || "other",
+      collegeId: resolvedCollegeId,
+      collegeName: resolvedCollegeName,
+      ip,
+      device,
+      os,
+      browser,
+      referrer: cleanReferrer,
+      timestamp: new Date(),
+    });
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("trackPublicView error:", error);
+    return res.status(500).json({ success: false, message: "Failed to record traffic." });
   }
 };
 

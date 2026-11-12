@@ -43,10 +43,19 @@ function App() {
     approvedRegistrations: 0,
     totalUsers: 0,
   })
+  const [trafficData, setTrafficData] = useState({
+    totalViews: 0,
+    todayViews: 0,
+    uniqueVisitors: 0,
+    todayUniqueVisitors: 0,
+    topColleges: [],
+    recentVisitors: [],
+    deviceBreakdown: { Desktop: 0, Mobile: 0, Tablet: 0 },
+  })
 
   // Reload handler
   const reloadData = async () => {
-    const [regs, profs, usrs, guides, exms, logs, anal, intel] = await Promise.all([
+    const [regs, profs, usrs, guides, exms, logs, anal, intel, traf] = await Promise.all([
       adminService.getRegistrations(),
       adminService.getAllProfiles(),
       adminService.getUsers(),
@@ -55,6 +64,7 @@ function App() {
       adminService.getAuditLogs(),
       adminService.getAnalytics(),
       adminService.getLiveIntel(),
+      adminService.getTrafficAnalytics(),
     ])
     setRegistrations(regs)
     setProfiles(profs)
@@ -64,6 +74,7 @@ function App() {
     setAuditLogs(logs)
     setAnalytics(anal)
     setLiveIntelAlerts(intel)
+    if (traf) setTrafficData(traf)
   }
 
   // Load data on mount & subscribe to changes
@@ -265,6 +276,7 @@ function App() {
           {activePage === 'overview' && (
             <AdminOverviewPage
               analytics={analytics}
+              trafficData={trafficData}
               registrations={registrations}
               pendingRegistrations={registrations.filter((r) => r.status === 'pending')}
               profiles={profiles}

@@ -8,6 +8,7 @@ import { Exam } from "../models/Exam.js";
 import { Inquiry } from "../models/Inquiry.js";
 import { LiveIntel } from "../models/LiveIntel.js";
 import { Blog } from "../models/Blog.js";
+import { TrafficLog } from "../models/TrafficLog.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -25,6 +26,11 @@ export const getAdminAnalytics = async (req, res) => {
     const totalInquiries = await Inquiry.countDocuments();
     const newInquiries = await Inquiry.countDocuments({ status: "new" });
 
+    const totalViews = await TrafficLog.countDocuments();
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const todayViews = await TrafficLog.countDocuments({ timestamp: { $gte: startOfToday } });
+
     return res.status(200).json({
       success: true,
       analytics: {
@@ -37,11 +43,97 @@ export const getAdminAnalytics = async (req, res) => {
         totalUsers: totalAdmins,
         totalInquiries,
         newInquiries,
+        totalViews,
+        todayViews,
       },
     });
   } catch (error) {
     console.error("getAdminAnalytics error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch analytics." });
+  }
+};
+
+// 1B. DETAILED TRAFFIC & STUDENT ENGAGEMENT ANALYTICS
+export const getTrafficAnalytics = async (req, res) => {
+  try {
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    const [
+      totalPageViews,
+      todayPageViews,
+      uniqueVisitorsList,
+      todayUniqueVisitorsList,
+      topColleges,
+      recentVisitors,
+      deviceAgg,
+    ] = await Promise.all([
+      TrafficLog.countDocuments(),
+      TrafficLog.countDocuments({ timestamp: { $gte: startOfToday } }),
+      TrafficLog.distinct("ip"),
+      TrafficLog.distinct("ip", { timestamp: { $gte: startOfToday } }),
+      College.find({ profileStatus: "published" })
+        .sort({ views: -1 })
+        .limit(10)
+        .select("name shortName slug stream locationContact rating views rankings"),
+      TrafficLog.find()
+        .sort({ timestamp: -1 })
+        .limit(30)
+        .select("path pageTitle pageType collegeName ip device browser os referrer timestamp"),
+      TrafficLog.aggregate([
+        { $group: { _id: "$device", count: { $sum: 1 } } },
+      ]),
+    ]);
+
+    const deviceBreakdown = {
+      Desktop: 0,
+      Mobile: 0,
+      Tablet: 0,
+    };
+    deviceAgg.forEach((d) => {
+      if (d._id && deviceBreakdown[d._id] !== undefined) {
+        deviceBreakdown[d._id] = d.count;
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      traffic: {
+        totalViews: totalPageViews,
+        todayViews: todayPageViews,
+        uniqueVisitors: uniqueVisitorsList.length,
+        todayUniqueVisitors: todayUniqueVisitorsList.length,
+        topColleges: topColleges.map((c) => ({
+          id: c.slug || c._id,
+          name: c.name,
+          shortName: c.shortName || c.name,
+          slug: c.slug,
+          stream: c.stream,
+          location: c.locationContact?.city
+            ? `${c.locationContact.city}, ${c.locationContact.state || ""}`
+            : "India",
+          nirfRank: c.rankings?.nirfRank || null,
+          views: c.views || 0,
+        })),
+        recentVisitors: recentVisitors.map((v) => ({
+          id: v._id,
+          path: v.path,
+          pageTitle: v.pageTitle || v.path,
+          pageType: v.pageType,
+          collegeName: v.collegeName,
+          device: v.device,
+          browser: v.browser,
+          os: v.os,
+          referrer: v.referrer,
+          ip: v.ip,
+          timestamp: v.timestamp,
+        })),
+        deviceBreakdown,
+      },
+    });
+  } catch (error) {
+    console.error("getTrafficAnalytics error:", error);
+    return res.status(500).json({ success: false, message: "Failed to fetch traffic analytics." });
   }
 };
 

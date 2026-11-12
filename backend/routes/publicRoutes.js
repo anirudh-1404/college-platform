@@ -11,6 +11,7 @@ import {
   getPublicLiveIntel,
   getPublicBlogs,
   getPublicBlogDetail,
+  trackPublicView,
 } from "../controllers/publicController.js";
 
 const router = express.Router();
@@ -30,5 +31,8 @@ router.get("/blogs/:slugOrId", getPublicBlogDetail);
 // Student Lead / Counseling Request Capture
 router.post("/counseling", createPublicInquiry);
 router.post("/inquiries", createPublicInquiry);
+
+// Public Traffic & Page View Tracking
+router.post("/track-view", trackPublicView);
 
 export default router;
