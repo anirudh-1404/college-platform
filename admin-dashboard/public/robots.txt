@@ -1,2 +1,3 @@
+# Allow crawlers to fetch the page so they can read the 'noindex' meta tag and purge it from search index
 User-agent: *
-Disallow: /
+Allow: /

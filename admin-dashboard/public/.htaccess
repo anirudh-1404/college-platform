@@ -9,6 +9,11 @@
 
 Options -Indexes
 
+# Send HTTP X-Robots-Tag to immediately instruct search engine bots not to index this portal
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow, noarchive"
+</IfModule>
+
 <IfModule mod_headers.c>
   <FilesMatch "\.(html|htm)$">
     Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
