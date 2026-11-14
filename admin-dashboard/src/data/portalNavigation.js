@@ -6,12 +6,29 @@ import { useState, useEffect } from 'react'
  * and environment variable overrides for production deployments.
  */
 export function usePortalUrls() {
+  const isLive =
+    import.meta.env.PROD ||
+    (typeof window !== 'undefined' && window.location.hostname.includes('vidyascope.com'))
+
   const [urls, setUrls] = useState({
-    publicWebsiteUrl: import.meta.env.VITE_PUBLIC_WEBSITE_URL || (import.meta.env.PROD ? 'https://vidyascope.com' : 'http://localhost:5174'),
-    collegePortalUrl: import.meta.env.VITE_COLLEGE_PORTAL_URL || (import.meta.env.PROD ? 'https://onair.vidyascope.com' : 'http://localhost:5173'),
+    publicWebsiteUrl:
+      import.meta.env.VITE_PUBLIC_WEBSITE_URL ||
+      (isLive ? 'https://vidyascope.com' : 'http://localhost:5174'),
+    collegePortalUrl:
+      import.meta.env.VITE_COLLEGE_PORTAL_URL ||
+      (isLive ? 'https://onair.vidyascope.com' : 'http://localhost:5173'),
   })
 
   useEffect(() => {
+    // If in production or on live domain, lock to live URLs
+    if (isLive) {
+      setUrls({
+        publicWebsiteUrl: 'https://vidyascope.com',
+        collegePortalUrl: 'https://onair.vidyascope.com',
+      })
+      return
+    }
+
     // If explicit env vars are configured, use them
     if (import.meta.env.VITE_PUBLIC_WEBSITE_URL && import.meta.env.VITE_COLLEGE_PORTAL_URL) {
       setUrls({

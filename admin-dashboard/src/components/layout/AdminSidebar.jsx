@@ -244,7 +244,7 @@ const AdminSidebar = ({
         {/* Bottom Section: External Platform Navigation */}
         <div className="p-3 border-t border-slate-100 space-y-1">
           <a
-            href={publicWebsiteUrl}
+            href={publicWebsiteUrl || 'https://vidyascope.com'}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-[#033C8D] hover:bg-slate-50 transition-colors cursor-pointer group"
@@ -257,7 +257,7 @@ const AdminSidebar = ({
           </a>
 
           <a
-            href={collegePortalUrl}
+            href={collegePortalUrl || 'https://onair.vidyascope.com'}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium text-slate-600 hover:text-purple-700 hover:bg-slate-50 transition-colors cursor-pointer group"
