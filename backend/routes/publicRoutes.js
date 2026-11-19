@@ -12,9 +12,13 @@ import {
   getPublicBlogs,
   getPublicBlogDetail,
   trackPublicView,
+  getDynamicSitemap,
 } from "../controllers/publicController.js";
 
 const router = express.Router();
+
+// Real-Time Dynamic XML Sitemap for SEO
+router.get("/sitemap.xml", getDynamicSitemap);
 
 // Publicly Accessible Endpoints (No Auth Needed)
 router.get("/colleges", getPublicColleges);

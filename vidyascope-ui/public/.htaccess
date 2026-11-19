@@ -1,6 +1,14 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # 1. Real-time dynamic XML sitemap (routes to sitemap.php)
+  RewriteRule ^sitemap\.xml$ sitemap.php [L]
+
+  # 2. robots.txt direct access
+  RewriteRule ^robots\.txt$ - [L]
+
+  # 3. Standard Vite SPA routing
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -10,11 +18,18 @@
 # Disable directory listing
 Options -Indexes
 
-# Cache-Control headers
+# XML MIME type & Cache-Control headers
+<IfModule mod_mime.c>
+  AddType application/xml .xml
+</IfModule>
+
 <IfModule mod_headers.c>
   <FilesMatch "\.(html|htm)$">
     Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
     Header set Pragma "no-cache"
+  </FilesMatch>
+  <FilesMatch "\.(xml|txt)$">
+    Header set Cache-Control "max-age=1800, public, must-revalidate"
   </FilesMatch>
   <FilesMatch "\.(js|css|png|jpg|jpeg|gif|svg|ico|woff|woff2|ttf|eot)$">
     Header set Cache-Control "max-age=31536000, public, immutable"

@@ -10,6 +10,7 @@ import collegeRoutes from "./routes/collegeRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import publicRoutes from "./routes/publicRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import { getDynamicSitemap } from "./controllers/publicController.js";
 
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -69,6 +70,12 @@ app.use("/api/college", collegeRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/public", publicRoutes);
 app.use("/api/upload", uploadRoutes);
+
+// Dynamic SEO XML Sitemap & robots.txt
+app.get("/sitemap.xml", getDynamicSitemap);
+app.get("/robots.txt", (req, res) => {
+  res.type("text/plain").send("User-agent: *\nAllow: /\n\nSitemap: https://vidyascope.com/sitemap.xml\n");
+});
 
 // Health Check
 app.get("/api/health", (req, res) => {

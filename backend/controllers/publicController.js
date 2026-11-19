@@ -739,3 +739,105 @@ export const trackPublicView = async (req, res) => {
   }
 };
 
+// 12. DYNAMIC REAL-TIME SEO SITEMAP GENERATOR
+export const getDynamicSitemap = async (req, res) => {
+  try {
+    const baseUrl = "https://vidyascope.com";
+    const today = new Date().toISOString().split("T")[0];
+
+    const escapeXml = (unsafe) => {
+      if (!unsafe) return "";
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&apos;");
+    };
+
+    const formatDate = (date) => {
+      try {
+        if (!date) return today;
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return today;
+        return d.toISOString().split("T")[0];
+      } catch {
+        return today;
+      }
+    };
+
+    // Core static platform pages
+    const staticPages = [
+      { loc: `${baseUrl}/`, priority: "1.0", changefreq: "daily", lastmod: today },
+      { loc: `${baseUrl}/colleges`, priority: "0.9", changefreq: "daily", lastmod: today },
+      { loc: `${baseUrl}/categories`, priority: "0.8", changefreq: "weekly", lastmod: today },
+      { loc: `${baseUrl}/courses`, priority: "0.8", changefreq: "weekly", lastmod: today },
+      { loc: `${baseUrl}/exams`, priority: "0.8", changefreq: "weekly", lastmod: today },
+      { loc: `${baseUrl}/career-guide`, priority: "0.8", changefreq: "weekly", lastmod: today },
+      { loc: `${baseUrl}/blogs`, priority: "0.8", changefreq: "daily", lastmod: today },
+      { loc: `${baseUrl}/compare`, priority: "0.7", changefreq: "weekly", lastmod: today },
+      { loc: `${baseUrl}/counseling`, priority: "0.7", changefreq: "weekly", lastmod: today },
+    ];
+
+    // 1. Fetch all published colleges dynamically
+    const publishedColleges = await College.find(
+      { profileStatus: "published" },
+      { slug: 1, updatedAt: 1, createdAt: 1 }
+    ).lean();
+
+    const collegePages = (publishedColleges || [])
+      .filter((c) => c && c.slug)
+      .map((c) => ({
+        loc: `${baseUrl}/colleges/${encodeURIComponent(c.slug)}`,
+        priority: "0.9",
+        changefreq: "weekly",
+        lastmod: formatDate(c.updatedAt || c.createdAt),
+      }));
+
+    // 2. Fetch all published blogs dynamically
+    const publishedBlogs = await Blog.find(
+      { status: "published" },
+      { slug: 1, updatedAt: 1, publishedAt: 1, createdAt: 1 }
+    ).lean();
+
+    const blogPages = (publishedBlogs || [])
+      .filter((b) => b && b.slug)
+      .map((b) => ({
+        loc: `${baseUrl}/blogs/${encodeURIComponent(b.slug)}`,
+        priority: "0.8",
+        changefreq: "weekly",
+        lastmod: formatDate(b.updatedAt || b.publishedAt || b.createdAt),
+      }));
+
+    // Combine all URLs
+    const allUrls = [...staticPages, ...collegePages, ...blogPages];
+
+    const xmlUrls = allUrls
+      .map(
+        (page) => `  <url>
+    <loc>${escapeXml(page.loc)}</loc>
+    <lastmod>${page.lastmod}</lastmod>
+    <changefreq>${page.changefreq}</changefreq>
+    <priority>${page.priority}</priority>
+  </url>`
+      )
+      .join("\n");
+
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${xmlUrls}
+</urlset>`;
+
+    res.header("Content-Type", "application/xml; charset=utf-8");
+    res.header("Cache-Control", "public, max-age=1800, s-maxage=3600");
+    return res.status(200).send(xml);
+  } catch (error) {
+    console.error("getDynamicSitemap error:", error);
+    res.header("Content-Type", "application/xml; charset=utf-8");
+    return res.status(500).send(
+      `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://vidyascope.com/</loc></url></urlset>`
+    );
+  }
+};
+
+
