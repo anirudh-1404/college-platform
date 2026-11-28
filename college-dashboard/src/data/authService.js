@@ -137,7 +137,39 @@ export const authService = {
     }
   },
 
-  // Login via Live Backend (Step 1: Check password & trigger OTP)
+  // Shared helper to process login / OTP-verified session response
+  _finalizeLogin(data) {
+    if (data.user?.accountStatus === 'pending_verification') {
+      this.saveAuthState({ isAuthenticated: false, user: data.user })
+      return {
+        success: false,
+        status: 'pending_verification',
+        user: data.user,
+        message: 'Your college account is pending verification by VidyaScope Admin.',
+      }
+    }
+
+    if (data.user?.accountStatus === 'rejected') {
+      this.saveAuthState({ isAuthenticated: false, user: data.user })
+      return {
+        success: false,
+        status: 'rejected',
+        user: data.user,
+        message: data.user.rejectionReason || 'Your registration was rejected by Admin.',
+      }
+    }
+
+    if (data.token) {
+      this.setToken(data.token)
+    }
+
+    localStorage.removeItem('vidyascope_college_data')
+
+    this.saveAuthState({ isAuthenticated: true, user: data.user })
+    return { success: true, user: data.user }
+  },
+
+  // Login via Live Backend (Direct login for college_admin)
   async login({ email, password }) {
     try {
       const res = await fetch(`${API_BASE_URL}/login`, {
@@ -151,7 +183,6 @@ export const authService = {
         throw new Error(data.message || 'Invalid credentials')
       }
 
-      // Backend requires OTP verification
       if (data.requireOtp) {
         return {
           requireOtp: true,
@@ -161,7 +192,7 @@ export const authService = {
         }
       }
 
-      return { success: true, user: data.user }
+      return this._finalizeLogin(data)
     } catch (error) {
       console.error('login error:', error)
       throw error
@@ -182,48 +213,7 @@ export const authService = {
         throw new Error(data.message || 'Invalid verification code')
       }
 
-      if (data.user?.accountStatus === 'pending_verification') {
-        const state = {
-          isAuthenticated: false,
-          user: data.user,
-        }
-        this.saveAuthState(state)
-        return {
-          success: false,
-          status: 'pending_verification',
-          user: data.user,
-          message: 'Your college account is pending verification by VidyaScope Admin.',
-        }
-      }
-
-      if (data.user?.accountStatus === 'rejected') {
-        const state = {
-          isAuthenticated: false,
-          user: data.user,
-        }
-        this.saveAuthState(state)
-        return {
-          success: false,
-          status: 'rejected',
-          user: data.user,
-          message: data.user.rejectionReason || 'Your registration was rejected by Admin.',
-        }
-      }
-
-      // Successful verified login
-      if (data.token) {
-        this.setToken(data.token)
-      }
-
-      localStorage.removeItem('vidyascope_college_data')
-
-      const state = {
-        isAuthenticated: true,
-        user: data.user,
-      }
-      this.saveAuthState(state)
-
-      return { success: true, user: data.user }
+      return this._finalizeLogin(data)
     } catch (error) {
       console.error('verifyLoginOtp error:', error)
       throw error

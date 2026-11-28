@@ -288,9 +288,74 @@ export const login = async (req, res) => {
       return res.status(403).json({ success: false, message: "Your account has been suspended by administration." });
     }
 
-    // Generate secure random 6-Digit OTP Code
+    // College Portal Login: Skip OTP for college_admin
+    if (user.role === "college_admin") {
+      if (user.status === "pending") {
+        return res.status(200).json({
+          success: true,
+          message: "Account verification pending.",
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            accountStatus: "pending_verification",
+            collegeId: user.collegeId,
+            collegeName: user.collegeName,
+          },
+        });
+      }
+
+      if (user.status === "rejected") {
+        return res.status(200).json({
+          success: true,
+          message: "Registration rejected.",
+          user: {
+            id: user._id,
+            name: user.name,
+            email: user.email,
+            role: user.role,
+            accountStatus: "rejected",
+            rejectionReason: user.rejectionReason || "Verification rejected by Admin.",
+            collegeId: user.collegeId,
+            collegeName: user.collegeName,
+          },
+        });
+      }
+
+      user.lastLogin = new Date();
+      await user.save();
+
+      const token = generateToken(res, user._id, user.role);
+
+      await AuditLog.create({
+        adminUser: user.name,
+        action: "College User Logged In",
+        target: user.email,
+        details: `${user.role} signed in directly without OTP.`,
+        type: "auth",
+      });
+
+      return res.status(200).json({
+        success: true,
+        message: "Login successful.",
+        token,
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          accountStatus: "approved",
+          collegeId: user.collegeId,
+          collegeName: user.collegeName,
+          designation: user.designation,
+        },
+      });
+    }
+
+    // Admin Login: Generate secure random 6-Digit OTP Code
     const otpCode = generateOtp();
-    const purpose = user.role === "college_admin" ? "login" : "admin_login";
+    const purpose = "admin_login";
 
     await Otp.deleteMany({ email: cleanEmail, purpose });
     await Otp.create({

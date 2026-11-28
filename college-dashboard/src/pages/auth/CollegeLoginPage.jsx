@@ -4,7 +4,6 @@ import { Mail, Lock, ArrowRight, AlertCircle } from 'lucide-react'
 import logoImg from '../../assets/logo.png'
 import { FormField, TextInput } from '../../components/common/FormControls'
 import { authService } from '../../data/authService'
-import OtpVerificationScreen from './OtpVerificationScreen'
 
 const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect }) => {
   const [formData, setFormData] = useState({
@@ -12,8 +11,6 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
     password: '',
   })
 
-  const [step, setStep] = useState('credentials') // 'credentials' | 'otp'
-  const [pendingEmail, setPendingEmail] = useState('')
   const [errors, setErrors] = useState({})
   const [errorMessage, setErrorMessage] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -33,17 +30,12 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
     setIsSubmitting(true)
     try {
       const res = await authService.login(formData)
-      if (res.requireOtp) {
-        setPendingEmail(res.email || formData.email)
-        setStep('otp')
-      } else if (res.success) {
+      if (res.success) {
         onLoginSuccess(res.user)
+      } else if (res.status === 'pending_verification' || res.status === 'rejected') {
+        onStatusRedirect(res.status, res.user)
       } else {
-        if (res.status === 'pending_verification' || res.status === 'rejected') {
-          onStatusRedirect(res.status, res.user)
-        } else {
-          setErrorMessage(res.message || 'Invalid email or password. Please check your credentials.')
-        }
+        setErrorMessage(res.message || 'Invalid email or password. Please check your credentials.')
       }
     } catch (err) {
       console.error('Login error:', err)
@@ -55,31 +47,6 @@ const CollegeLoginPage = ({ onNavigateRegister, onLoginSuccess, onStatusRedirect
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleVerifyOtp = async (code) => {
-    const res = await authService.verifyLoginOtp({
-      email: pendingEmail || formData.email,
-      otp: code,
-    })
-
-    if (res.success) {
-      onLoginSuccess(res.user)
-    } else if (res.status === 'pending_verification' || res.status === 'rejected') {
-      onStatusRedirect(res.status, res.user)
-    }
-  }
-
-  if (step === 'otp') {
-    return (
-      <OtpVerificationScreen
-        email={pendingEmail || formData.email}
-        purpose="login"
-        onVerifySuccess={handleVerifyOtp}
-        onBack={() => setStep('credentials')}
-        resendHandler={(email, purpose) => authService.resendOtp({ email, purpose })}
-      />
-    )
   }
 
   return (

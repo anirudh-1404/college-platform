@@ -81,6 +81,7 @@ export const getPublicColleges = async (req, res) => {
       prosAndCons: c.prosAndCons,
       similarColleges: c.similarColleges,
       snapshot: c.snapshot,
+      showOnHome: Boolean(c.showOnHome),
     }));
 
     return res.status(200).json({

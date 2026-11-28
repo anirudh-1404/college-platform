@@ -294,7 +294,11 @@ const Hero = ({
               <div className="absolute -inset-4 bg-gradient-to-r from-blue-200/25 via-indigo-200/20 to-sky-200/25 blur-3xl -z-10 pointer-events-none rounded-3xl" />
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {colleges.slice(0, 4).map((college) => {
+                {(() => {
+                  const pinned = colleges.filter((c) => c.showOnHome)
+                  const rest = colleges.filter((c) => !c.showOnHome)
+                  return (pinned.length >= 4 ? pinned : [...pinned, ...rest]).slice(0, 4)
+                })().map((college) => {
                   const collegeId = college.id || college.slug || college._id
                   const highestSalary =
                     college.highestPackage || college.placements?.highestDomestic || '₹1.50 Cr PA'

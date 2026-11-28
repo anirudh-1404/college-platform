@@ -252,6 +252,7 @@ const collegeSchema = new mongoose.Schema(
       enum: ["draft", "under_review", "changes_requested", "published"],
       default: "draft",
     },
+    showOnHome: { type: Boolean, default: false },
     submittedAt: { type: String, default: null },
     publishedAt: { type: String, default: null },
     adminFeedback: [feedbackSchema],

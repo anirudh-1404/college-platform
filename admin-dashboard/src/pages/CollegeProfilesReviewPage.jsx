@@ -48,6 +48,41 @@ const CollegeProfilesReviewPage = ({
   const [approvePublishModalOpen, setApprovePublishModalOpen] = useState(false)
   const [unpublishModalOpen, setUnpublishModalOpen] = useState(false)
   const [isProcessing, setIsProcessing] = useState(false)
+  const [togglingHomeId, setTogglingHomeId] = useState(null)
+  const [homeToggleNotice, setHomeToggleNotice] = useState('')
+
+  const homeFeaturedCount = useMemo(
+    () => profiles.filter((p) => p.showOnHome).length,
+    [profiles]
+  )
+
+  const handleToggleShowOnHome = async (profile) => {
+    const collegeId = profile.id || profile.slug || profile._id
+    if (!collegeId) return
+
+    const nextValue = !profile.showOnHome
+    if (nextValue && profile.profileStatus !== 'published') {
+      setHomeToggleNotice('Only published colleges can be pinned to the homepage.')
+      setTimeout(() => setHomeToggleNotice(''), 3000)
+      return
+    }
+    if (nextValue && homeFeaturedCount >= 4) {
+      setHomeToggleNotice('Maximum 4 colleges can be shown below the homepage search bar. Untick one first.')
+      setTimeout(() => setHomeToggleNotice(''), 3500)
+      return
+    }
+
+    try {
+      setTogglingHomeId(collegeId)
+      setHomeToggleNotice('')
+      await handleSaveCollegeEdits(collegeId, { showOnHome: nextValue })
+    } catch (err) {
+      setHomeToggleNotice(err.message || 'Failed to update homepage visibility.')
+      setTimeout(() => setHomeToggleNotice(''), 3000)
+    } finally {
+      setTogglingHomeId(null)
+    }
+  }
 
   // Save college edits handler
   const handleSaveCollegeEdits = async (collegeId, updates) => {
@@ -323,6 +358,14 @@ const CollegeProfilesReviewPage = ({
         ))}
       </div>
 
+      {/* Home Pinning Notice */}
+      {homeToggleNotice && (
+        <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs font-semibold text-amber-800">
+          <AlertTriangle className="h-4 w-4 shrink-0 text-amber-600" />
+          <span>{homeToggleNotice}</span>
+        </div>
+      )}
+
       {/* Main Review Queue Table */}
       <div className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-2xs">
         <div className="overflow-x-auto">
@@ -335,6 +378,9 @@ const CollegeProfilesReviewPage = ({
                 <th className="py-3.5 px-4 min-w-[120px]">Avg Package</th>
                 <th className="py-3.5 px-4 min-w-[90px]">Programs</th>
                 <th className="py-3.5 px-4 min-w-[100px]">Views</th>
+                <th className="py-3.5 px-4 min-w-[110px] text-center">
+                  Home ({homeFeaturedCount}/4)
+                </th>
                 <th className="py-3.5 px-4 min-w-[130px]">Status</th>
                 <th className="py-3.5 px-4 text-right min-w-[130px]">Action</th>
               </tr>
@@ -392,6 +438,42 @@ const CollegeProfilesReviewPage = ({
                       </span>
                     </td>
 
+                    <td className="py-3.5 px-4 text-center">
+                      {(() => {
+                        const cid = profile.id || profile.slug || profile._id
+                        const isPinned = Boolean(profile.showOnHome)
+                        const isPublished = profile.profileStatus === 'published'
+                        const isToggling = togglingHomeId === cid
+                        return (
+                          <button
+                            type="button"
+                            disabled={isToggling}
+                            onClick={() => handleToggleShowOnHome(profile)}
+                            title={
+                              !isPublished
+                                ? 'Publish college first to show on homepage'
+                                : isPinned
+                                ? 'Remove from homepage 4 cards'
+                                : 'Show in homepage 4 cards below search bar'
+                            }
+                            className={`inline-flex items-center justify-center h-6 w-6 rounded-md border transition-all cursor-pointer ${
+                              isPinned
+                                ? 'bg-[#033C8D] border-[#033C8D] text-white shadow-xs'
+                                : isPublished
+                                ? 'bg-white border-slate-300 text-transparent hover:border-[#033C8D]'
+                                : 'bg-slate-100 border-slate-200 text-transparent opacity-50 cursor-not-allowed'
+                            }`}
+                          >
+                            {isToggling ? (
+                              <RefreshCw className="h-3.5 w-3.5 animate-spin text-current" />
+                            ) : (
+                              <CheckCircle2 className={`h-4 w-4 ${isPinned ? 'text-white' : 'text-transparent'}`} />
+                            )}
+                          </button>
+                        )
+                      })()}
+                    </td>
+
                     <td className="py-3.5 px-4">
                       <AdminStatusBadge status={profile.profileStatus} />
                     </td>
@@ -424,7 +506,7 @@ const CollegeProfilesReviewPage = ({
 
               {filteredProfiles.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-xs text-slate-400 space-y-2">
+                  <td colSpan={9} className="py-12 text-center text-xs text-slate-400 space-y-2">
                     <FileCheck className="h-9 w-9 text-slate-300 mx-auto" />
                     <p className="font-bold text-slate-800 text-sm">No Institutional Profiles in this Filter</p>
                     <p className="text-slate-500 max-w-sm mx-auto">
