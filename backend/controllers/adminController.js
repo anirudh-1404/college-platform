@@ -9,6 +9,7 @@ import { Inquiry } from "../models/Inquiry.js";
 import { LiveIntel } from "../models/LiveIntel.js";
 import { Blog } from "../models/Blog.js";
 import { TrafficLog } from "../models/TrafficLog.js";
+import { updateCollegeAccountEmail } from "../utils/collegeEmailHelper.js";
 
 // 1. ANALYTICS METRICS
 export const getAdminAnalytics = async (req, res) => {
@@ -235,9 +236,24 @@ export const getAllProfiles = async (req, res) => {
   try {
     const { status } = req.query;
     const query = status && status !== "all" ? { profileStatus: status } : {};
-    const colleges = await College.find(query).sort({ updatedAt: -1 });
+    const colleges = await College.find(query).sort({ updatedAt: -1 }).lean();
 
-    return res.status(200).json({ success: true, profiles: colleges });
+    const collegeUsers = await User.find({ role: "college_admin" })
+      .select("email collegeId collegeName")
+      .lean();
+    const emailByCollegeId = new Map();
+    const emailByCollegeName = new Map();
+    collegeUsers.forEach((u) => {
+      if (u.collegeId) emailByCollegeId.set(u.collegeId, u.email);
+      if (u.collegeName) emailByCollegeName.set(u.collegeName, u.email);
+    });
+
+    const enriched = colleges.map((c) => ({
+      ...c,
+      loginEmail: emailByCollegeId.get(c.slug) || emailByCollegeName.get(c.name) || "",
+    }));
+
+    return res.status(200).json({ success: true, profiles: enriched });
   } catch (error) {
     return res.status(500).json({ success: false, message: "Failed to fetch college profiles." });
   }
@@ -536,6 +552,59 @@ export const updateCollegeByAdmin = async (req, res) => {
   } catch (error) {
     console.error("updateCollegeByAdmin error:", error);
     return res.status(500).json({ success: false, message: error.message || "Failed to update college." });
+  }
+};
+
+// UPDATE COLLEGE LOGIN EMAIL BY ADMIN
+export const updateCollegeLoginEmailByAdmin = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const cleanId = decodeURIComponent(id || "").trim();
+    const { newEmail } = req.body;
+
+    let college = null;
+    if (mongoose.Types.ObjectId.isValid(cleanId)) {
+      college = await College.findById(cleanId);
+    }
+    if (!college) {
+      college = await College.findOne({ slug: cleanId.toLowerCase() });
+    }
+    if (!college) {
+      college = await College.findOne({ name: cleanId });
+    }
+    if (!college) {
+      return res.status(404).json({ success: false, message: "College profile not found." });
+    }
+
+    const user = await User.findOne({
+      role: "college_admin",
+      $or: [{ collegeId: college.slug }, { collegeName: college.name }],
+    });
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "No login account found for this college.",
+      });
+    }
+
+    const result = await updateCollegeAccountEmail({
+      user,
+      newEmail,
+      actorName: req.user.name,
+      source: "admin_portal",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "College login email updated successfully.",
+      loginEmail: result.newEmail,
+    });
+  } catch (error) {
+    console.error("updateCollegeLoginEmailByAdmin error:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to update college login email.",
+    });
   }
 };
 

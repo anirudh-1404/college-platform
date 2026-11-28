@@ -221,6 +221,29 @@ export const adminService = {
     }
   },
 
+  async updateCollegeLoginEmail(collegeId, newEmail) {
+    try {
+      let res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/login-email`, {
+        method: 'PUT',
+        headers: this.getHeaders(),
+        body: JSON.stringify({ newEmail }),
+      })
+      if (res.status === 404 || res.status === 405) {
+        res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/login-email`, {
+          method: 'POST',
+          headers: this.getHeaders(),
+          body: JSON.stringify({ newEmail }),
+        })
+      }
+      const data = await parseJsonResponse(res, 'Failed to update college login email')
+      window.dispatchEvent(new CustomEvent('vidyascope_admin_data_change'))
+      return data
+    } catch (error) {
+      console.error('updateCollegeLoginEmail error:', error)
+      throw error
+    }
+  },
+
   async approveAndPublish(collegeId) {
     try {
       const res = await fetch(`${API_BASE_URL}/profiles/${encodeURIComponent(collegeId)}/publish`, {

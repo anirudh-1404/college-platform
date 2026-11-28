@@ -14,6 +14,7 @@ import {
   RefreshCw,
   Sparkles,
   Edit3,
+  Mail,
 } from 'lucide-react'
 import AdminStatusBadge from '../components/common/AdminStatusBadge'
 import { AdminModal } from '../components/common/AdminModal'
@@ -50,6 +51,37 @@ const CollegeProfilesReviewPage = ({
   const [isProcessing, setIsProcessing] = useState(false)
   const [togglingHomeId, setTogglingHomeId] = useState(null)
   const [homeToggleNotice, setHomeToggleNotice] = useState('')
+  const [emailModalCollege, setEmailModalCollege] = useState(null)
+  const [newLoginEmail, setNewLoginEmail] = useState('')
+  const [emailUpdateError, setEmailUpdateError] = useState('')
+  const [isUpdatingEmail, setIsUpdatingEmail] = useState(false)
+
+  const handleOpenEmailModal = (profile) => {
+    setEmailModalCollege(profile)
+    setNewLoginEmail(profile.loginEmail || profile.locationContact?.admissionEmail || '')
+    setEmailUpdateError('')
+  }
+
+  const handleSaveLoginEmail = async (e) => {
+    e.preventDefault()
+    if (!emailModalCollege) return
+    const trimmed = newLoginEmail.trim()
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) {
+      setEmailUpdateError('Please enter a valid email address.')
+      return
+    }
+    const collegeId = emailModalCollege.id || emailModalCollege.slug || emailModalCollege._id
+    try {
+      setIsUpdatingEmail(true)
+      setEmailUpdateError('')
+      await adminService.updateCollegeLoginEmail(collegeId, trimmed)
+      setEmailModalCollege(null)
+    } catch (err) {
+      setEmailUpdateError(err.message || 'Failed to update college login email.')
+    } finally {
+      setIsUpdatingEmail(false)
+    }
+  }
 
   const homeFeaturedCount = useMemo(
     () => profiles.filter((p) => p.showOnHome).length,
@@ -482,6 +514,16 @@ const CollegeProfilesReviewPage = ({
                       <div className="flex items-center justify-end gap-2">
                         <button
                           type="button"
+                          onClick={() => handleOpenEmailModal(profile)}
+                          className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#033C8D] hover:border-[#033C8D]/40 text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5 transition-all"
+                          title={`Change Login Email (${profile.loginEmail || 'Not set'})`}
+                        >
+                          <Mail className="h-3.5 w-3.5 text-[#033C8D]" />
+                          <span>Email</span>
+                        </button>
+
+                        <button
+                          type="button"
                           onClick={() => setEditingCollege(profile)}
                           className="px-2.5 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 hover:text-[#033C8D] hover:border-[#033C8D]/40 text-xs font-bold cursor-pointer shadow-2xs inline-flex items-center gap-1.5 transition-all"
                           title="Edit Institutional Details"
@@ -610,6 +652,45 @@ const CollegeProfilesReviewPage = ({
         onClose={() => setEditingCollege(null)}
         onSave={handleSaveCollegeEdits}
       />
+
+      {/* 5. Change College Login Email Modal */}
+      <AdminModal
+        isOpen={!!emailModalCollege}
+        onClose={() => setEmailModalCollege(null)}
+        onConfirm={handleSaveLoginEmail}
+        title="Change College Login Email"
+        description={`Update the portal login email for ${emailModalCollege?.name || ''}.`}
+        confirmText="Save New Email"
+        type="primary"
+        isLoading={isUpdatingEmail}
+      >
+        <div className="space-y-3">
+          {emailModalCollege?.loginEmail && (
+            <p className="text-xs text-slate-500">
+              Current login email:{' '}
+              <strong className="text-slate-800">{emailModalCollege.loginEmail}</strong>
+            </p>
+          )}
+          <div>
+            <label className="block text-xs font-bold text-slate-800 mb-1.5">
+              New Login Email Address
+            </label>
+            <input
+              type="email"
+              value={newLoginEmail}
+              onChange={(e) => setNewLoginEmail(e.target.value)}
+              placeholder="registrar@institution.edu.in"
+              className="w-full text-xs font-medium text-slate-900 border border-slate-300 rounded-xl p-3 focus:outline-none focus:ring-1 focus:ring-[#033C8D] shadow-2xs"
+            />
+          </div>
+          {emailUpdateError && (
+            <p className="text-xs font-semibold text-rose-600">{emailUpdateError}</p>
+          )}
+          <p className="text-[11px] text-slate-500">
+            After saving, the college representative must log in using this new email address.
+          </p>
+        </div>
+      </AdminModal>
 
     </div>
   )

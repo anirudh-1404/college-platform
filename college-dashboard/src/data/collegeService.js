@@ -512,4 +512,31 @@ export const collegeService = {
     if (!res.ok) throw new Error(data.message || 'Image upload failed')
     return data.url
   },
+
+  // Update college login email
+  async updateLoginEmail(newEmail) {
+    const token = authService.getToken()
+    const res = await fetch(`${API_BASE_URL}/email`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: JSON.stringify({ newEmail }),
+    })
+
+    const data = await res.json()
+    if (!res.ok) {
+      throw new Error(data.message || 'Failed to update login email')
+    }
+
+    if (data.user) {
+      authService.saveAuthState({
+        isAuthenticated: true,
+        user: data.user,
+      })
+    }
+
+    return data
+  },
 }

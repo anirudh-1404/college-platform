@@ -1,7 +1,9 @@
 import mongoose from "mongoose";
 import { College } from "../models/College.js";
+import { User } from "../models/User.js";
 import { AuditLog } from "../models/AuditLog.js";
 import { Inquiry } from "../models/Inquiry.js";
+import { updateCollegeAccountEmail } from "../utils/collegeEmailHelper.js";
 
 // 1. GET COLLEGE PROFILE (For Authenticated College Representative)
 export const getMyCollegeProfile = async (req, res) => {
@@ -171,5 +173,44 @@ export const getCollegeLeads = async (req, res) => {
   } catch (error) {
     console.error("getCollegeLeads error:", error);
     return res.status(500).json({ success: false, message: "Failed to fetch student leads." });
+  }
+};
+
+// 5. UPDATE COLLEGE LOGIN EMAIL (For Authenticated College Representative)
+export const updateMyEmail = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User account not found." });
+    }
+
+    const { newEmail } = req.body;
+    await updateCollegeAccountEmail({
+      user,
+      newEmail,
+      actorName: user.name,
+      source: "college_portal",
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Login email updated successfully. Please use your new email for future logins.",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        accountStatus: user.status === "approved" ? "approved" : user.status,
+        collegeId: user.collegeId,
+        collegeName: user.collegeName,
+        designation: user.designation,
+      },
+    });
+  } catch (error) {
+    console.error("updateMyEmail error:", error);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to update login email.",
+    });
   }
 };
