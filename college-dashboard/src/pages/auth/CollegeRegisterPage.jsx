@@ -5,7 +5,6 @@ import logoImg from '../../assets/logo.png'
 import { FormField, TextInput } from '../../components/common/FormControls'
 import { DocumentUploader } from '../../components/common/FileUpload'
 import { authService } from '../../data/authService'
-import OtpVerificationScreen from './OtpVerificationScreen'
 
 const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
   const [formData, setFormData] = useState({
@@ -19,8 +18,6 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
     proofFile: null,
   })
 
-  const [step, setStep] = useState('form') // 'form' | 'otp'
-  const [pendingEmail, setPendingEmail] = useState('')
   const [submitError, setSubmitError] = useState('')
   const [errors, setErrors] = useState({})
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -63,10 +60,7 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
     setIsSubmitting(true)
     try {
       const res = await authService.registerCollege(formData)
-      if (res.requireOtp) {
-        setPendingEmail(res.email || formData.email)
-        setStep('otp')
-      } else if (res.success) {
+      if (res.success) {
         onRegistrationSuccess(res.user)
       }
     } catch (err) {
@@ -75,28 +69,6 @@ const CollegeRegisterPage = ({ onNavigateLogin, onRegistrationSuccess }) => {
     } finally {
       setIsSubmitting(false)
     }
-  }
-
-  const handleVerifyOtp = async (code) => {
-    const res = await authService.verifyRegisterOtp({
-      email: pendingEmail || formData.email,
-      otp: code,
-    })
-    if (res.success) {
-      onRegistrationSuccess(res.user)
-    }
-  }
-
-  if (step === 'otp') {
-    return (
-      <OtpVerificationScreen
-        email={pendingEmail || formData.email}
-        purpose="register"
-        onVerifySuccess={handleVerifyOtp}
-        onBack={() => setStep('form')}
-        resendHandler={(email, purpose) => authService.resendOtp({ email, purpose })}
-      />
-    )
   }
 
   return (

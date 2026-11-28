@@ -21,7 +21,69 @@ const createSlug = (name) => {
     .replace(/^-+|-+$/g, "");
 };
 
-// 1. REGISTER COLLEGE REPRESENTATIVE (Step 1: Validate Details & Dispatch Verification OTP)
+// Helper to create college, user, registration, and audit log
+const createCollegeRegistration = async (data) => {
+  let slug = createSlug(data.collegeName);
+  const existingCollege = await College.findOne({ slug });
+  if (existingCollege) {
+    slug = `${slug}-${Date.now().toString().slice(-4)}`;
+  }
+
+  const newCollege = await College.create({
+    slug,
+    name: data.collegeName,
+    shortName: data.collegeName.split(" ").map(w => w[0]).join("").slice(0, 10).toUpperCase() || data.collegeName,
+    stream: data.stream || "engineering",
+    profileStatus: "draft",
+    locationContact: {
+      city: data.location?.split(",")[0]?.trim() || "",
+      state: data.location?.split(",")[1]?.trim() || "",
+      admissionEmail: data.email,
+      helplineNumber: data.phone,
+    },
+  });
+
+  const newUser = await User.create({
+    name: data.contactPerson,
+    email: data.email,
+    password: data.password,
+    role: "college_admin",
+    status: "pending",
+    collegeId: slug,
+    collegeName: data.collegeName,
+    designation: data.designation || "Authorized Representative",
+    phone: data.phone || "",
+  });
+
+  await Registration.create({
+    collegeName: data.collegeName,
+    collegeId: slug,
+    email: data.email,
+    contactPerson: data.contactPerson,
+    designation: data.designation || "Authorized Representative",
+    phone: data.phone || "",
+    stream: data.stream || "engineering",
+    location: data.location || "",
+    status: "pending",
+    proofDocument: data.proofDocument || {
+      name: "Official_Recognition_Order.pdf",
+      size: "2.4 MB",
+      type: "application/pdf",
+      verified: false,
+    },
+  });
+
+  await AuditLog.create({
+    action: "New Registration Submitted",
+    target: data.collegeName,
+    details: `Representative ${data.contactPerson} registered ${data.collegeName}.`,
+    type: "review",
+  });
+
+  return { newCollege, newUser };
+};
+
+// 1. REGISTER COLLEGE REPRESENTATIVE (Direct Registration without OTP)
 export const registerCollege = async (req, res) => {
   try {
     const {
@@ -46,45 +108,35 @@ export const registerCollege = async (req, res) => {
       return res.status(400).json({ success: false, message: "An account with this email already exists." });
     }
 
-    // Generate secure random 6-Digit OTP Code
-    const otpCode = generateOtp();
-
-    // Store in Otp collection with pending registration metadata
-    await Otp.deleteMany({ email: cleanEmail, purpose: "register" });
-    await Otp.create({
+    const { newUser } = await createCollegeRegistration({
+      collegeName,
       email: cleanEmail,
-      otp: otpCode,
-      purpose: "register",
-      metadata: {
-        collegeName,
-        email: cleanEmail,
-        password,
-        contactPerson,
-        designation: designation || "Authorized Representative",
-        phone: phone || "",
-        stream,
-        location,
-        proofDocument,
-      },
+      password,
+      contactPerson,
+      designation: designation || "Authorized Representative",
+      phone: phone || "",
+      stream,
+      location,
+      proofDocument,
     });
 
-    // Send Verification Email
-    await sendOtpEmail({
-      email: cleanEmail,
-      otp: otpCode,
-      purpose: "register",
-      name: contactPerson,
-    });
-
-    return res.status(200).json({
+    return res.status(201).json({
       success: true,
-      requireOtp: true,
-      email: cleanEmail,
-      message: "A 6-digit verification code has been sent to your institutional email.",
+      message: "Registration submitted successfully. Awaiting compliance verification.",
+      user: {
+        id: newUser._id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        status: newUser.status,
+        accountStatus: "pending_verification",
+        collegeId: newUser.collegeId,
+        collegeName: newUser.collegeName,
+      },
     });
   } catch (error) {
     console.error("registerCollege error:", error);
-    return res.status(500).json({ success: false, message: error.message || "Failed to initiate registration." });
+    return res.status(500).json({ success: false, message: error.message || "Failed to register college." });
   }
 };
 
@@ -137,66 +189,7 @@ export const verifyRegisterOtp = async (req, res) => {
       return res.status(400).json({ success: false, message: "An account with this email already exists." });
     }
 
-    let slug = createSlug(data.collegeName);
-    const existingCollege = await College.findOne({ slug });
-    if (existingCollege) {
-      slug = `${slug}-${Date.now().toString().slice(-4)}`;
-    }
-
-    // Create Initial College Document
-    const newCollege = await College.create({
-      slug,
-      name: data.collegeName,
-      shortName: data.collegeName.split(" ").map(w => w[0]).join("").slice(0, 10).toUpperCase() || data.collegeName,
-      stream: data.stream || "engineering",
-      profileStatus: "draft",
-      locationContact: {
-        city: data.location?.split(",")[0]?.trim() || "",
-        state: data.location?.split(",")[1]?.trim() || "",
-        admissionEmail: data.email,
-        helplineNumber: data.phone,
-      },
-    });
-
-    // Create User Document (Pending Verification)
-    const newUser = await User.create({
-      name: data.contactPerson,
-      email: data.email,
-      password: data.password,
-      role: "college_admin",
-      status: "pending",
-      collegeId: slug,
-      collegeName: data.collegeName,
-      designation: data.designation || "Authorized Representative",
-      phone: data.phone || "",
-    });
-
-    // Create Registration Record in Admin Queue
-    const newRegistration = await Registration.create({
-      collegeName: data.collegeName,
-      collegeId: slug,
-      email: data.email,
-      contactPerson: data.contactPerson,
-      designation: data.designation || "Authorized Representative",
-      phone: data.phone || "",
-      stream: data.stream || "engineering",
-      location: data.location || "",
-      status: "pending",
-      proofDocument: data.proofDocument || {
-        name: "Official_Recognition_Order.pdf",
-        size: "2.4 MB",
-        type: "application/pdf",
-        verified: false,
-      },
-    });
-
-    // Audit Log
-    await AuditLog.create({
-      action: "New Registration Verified & Submitted",
-      target: data.collegeName,
-      details: `Representative ${data.contactPerson} verified email and registered ${data.collegeName}.`,
-      type: "review",
-    });
+    const { newUser } = await createCollegeRegistration(data);
 
     // Delete used OTP
     await Otp.deleteOne({ _id: otpRecord._id });
